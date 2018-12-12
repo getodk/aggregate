@@ -17,9 +17,7 @@
 
 package org.opendatakit.aggregate.submission;
 
-import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -65,23 +63,17 @@ import org.opendatakit.common.web.constants.BasicConsts;
 /**
  * Groups a set of submission values together so they can be stored in a
  * databstore entity
+ * <p>
+ * Submission set fields may be split across multiple backing tables due to
+ * limitations in the storage capacities of the underlying persistence layer.
+ * These manifest as phantom tables and subordinate structures in the data
+ * model. Abstract that all away at this level.
  *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
  */
 public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionElement {
 
-  /**
-   * Submission set fields may be split across multiple backing tables due to
-   * limitations in the storage capacities of the underlying persistence layer.
-   * These manifest as phantom tables and subordinate structures in the data
-   * model. Abstract that all away at this level.
-   */
-
-  /**
-   * Identifier for this submission set (all other entries in dbEntities are
-   * under this set)
-   */
   protected final FormElementModel group;
   /**
    * dbEntities holds the map of all backing objects used to store this
@@ -91,24 +83,9 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
    * this map, and that would be the same for all records held in a given table.
    */
   private final Map<DDRelationName, DynamicCommonFieldsBase> dbEntities = new HashMap<DDRelationName, DynamicCommonFieldsBase>();
-  /**
-   * set in which this set is contained.
-   */
-
   private final SubmissionSet enclosingSet;
-  /**
-   * key that uniquely identifies the submission
-   */
   private final EntityKey key;
-  /**
-   * The definition of this form (for access to lst).
-   */
   private final IForm form;
-  /**
-   * Identifier for the parent for persistence co-location.
-   * <p>
-   * TODO: does this have special treatment if a repeat group?
-   */
   private final EntityKey topLevelTableKey;
 
   /**
@@ -118,19 +95,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
    */
   private final Map<FormElementModel, SubmissionValue> elementsToValues = new HashMap<FormElementModel, SubmissionValue>();
 
-  /**
-   * Construct an empty repeating group.
-   *
-   * @param enclosingSet
-   * @param ordinalNumber
-   * @param group
-   * @param formDefinition
-   * @param topLevelTableKey
-   * @param cc               - the CallingContext for this request
-   * @throws ODKDatastoreException
-   */
-  public SubmissionSet(SubmissionSet enclosingSet, Long ordinalNumber, FormElementModel group,
-                       IForm form, EntityKey topLevelTableKey, CallingContext cc) throws ODKDatastoreException {
+  public SubmissionSet(SubmissionSet enclosingSet, Long ordinalNumber, FormElementModel group, IForm form, EntityKey topLevelTableKey, CallingContext cc) throws ODKDatastoreException {
     this.form = form;
     this.group = group;
     this.enclosingSet = enclosingSet;
@@ -150,13 +115,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
     buildSubmissionFields(group, cc);
   }
 
-  public SubmissionSet(Long modelVersion, Long uiVersion, IForm form, CallingContext cc)
-      throws ODKDatastoreException {
-    this(modelVersion, uiVersion, null, form, cc);
-  }
-
-  public SubmissionSet(Long modelVersion, Long uiVersion, String uriTopLevelGroup, IForm form,
-                       CallingContext cc) throws ODKDatastoreException {
+  public SubmissionSet(Long modelVersion, Long uiVersion, String uriTopLevelGroup, IForm form, CallingContext cc) throws ODKDatastoreException {
     this.form = form;
     this.group = form.getTopLevelGroupElement();
     this.enclosingSet = null;
@@ -178,18 +137,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
     buildSubmissionFields(group, cc);
   }
 
-  /**
-   * Construct a submission set from the datastore.
-   *
-   * @param enclosingSet   - the enclosing submission set.
-   * @param row            - the base record for this submission set.
-   * @param group          - the form group mapped to the base record.
-   * @param formDefinition - the definition of the form.
-   * @param cc             - the CallingContext of this request.
-   * @throws ODKDatastoreException
-   */
-  public SubmissionSet(SubmissionSet enclosingSet, DynamicCommonFieldsBase row,
-                       FormElementModel group, IForm form, CallingContext cc) throws ODKDatastoreException {
+  public SubmissionSet(SubmissionSet enclosingSet, DynamicCommonFieldsBase row, FormElementModel group, IForm form, CallingContext cc) throws ODKDatastoreException {
     this.form = form;
     this.group = group;
     this.enclosingSet = enclosingSet;
@@ -217,23 +165,13 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
     buildSubmissionFields(group, cc);
   }
 
-  /**
-   * Submission sets may be split over multiple database records by either
-   * inserting a nested phantom table, moving a geopoint to a different table,
-   * or moving an entire non-repeating group to a different table.
-   *
-   * @param m
-   * @return true if this element may identify a new table or if its children
-   *     may have a new table within them.
-   */
   private boolean isPhantomOfSubmissionSet(FormDataModel m) {
     return (m.getPersistAsColumn() == null)
         && ((m.getElementType() == ElementType.PHANTOM)
         || (m.getElementType() == ElementType.GEOPOINT) || (m.getElementType() == ElementType.GROUP));
   }
 
-  private void recursivelyCreateEntities(FormDataModel groupDataModel, Datastore datastore,
-                                         User user) {
+  private void recursivelyCreateEntities(FormDataModel groupDataModel, Datastore datastore, User user) {
     DynamicCommonFieldsBase groupRelation = (DynamicCommonFieldsBase) groupDataModel
         .getBackingObjectPrototype();
     for (FormDataModel m : groupDataModel.getChildren()) {
@@ -266,8 +204,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
     }
   }
 
-  private void recursivelyGetEntities(String uriTopLevel, String uriParent,
-                                      FormDataModel groupDataModel, Datastore datastore, User user) throws ODKDatastoreException {
+  private void recursivelyGetEntities(String uriTopLevel, String uriParent, FormDataModel groupDataModel, Datastore datastore, User user) throws ODKDatastoreException {
     DynamicCommonFieldsBase groupRelation = (DynamicCommonFieldsBase) groupDataModel
         .getBackingObjectPrototype();
     for (FormDataModel m : groupDataModel.getChildren()) {
@@ -328,15 +265,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
     }
   }
 
-  /**
-   * Recursively use form definition to recreate the submission
-   *
-   * @param form    persistence manager used to retrieve form elements
-   * @param element current element to recreate
-   * @throws ODKDatastoreException
-   */
-  private void buildSubmissionFields(FormElementModel group, CallingContext cc)
-      throws ODKDatastoreException {
+  private void buildSubmissionFields(FormElementModel group, CallingContext cc) throws ODKDatastoreException {
     DynamicCommonFieldsBase groupRowGroup = getGroupBackingObject();
     for (FormElementModel m : group.getChildren()) {
       SubmissionField<?> submissionField;
@@ -527,15 +456,6 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
     return b.toString();
   }
 
-  /**
-   * Keys are of the form
-   * <code>formId/topLevelGroupName[@key=PK]/repeatGroupA/.../thisGroup[@key=PK]/element</code>
-   *
-   * @param element may be null; must be in this SubmissionSet
-   * @return submissionKey specifying the key to the top-level submission, the
-   *     key for this submissionSet, and the name of the element (if not
-   *     null)
-   */
   public SubmissionKey constructSubmissionKey(FormElementModel element) {
     return new SubmissionKey(getFullyQualifiedElementName(element));
   }
@@ -650,19 +570,13 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
     throw new IllegalStateException("unexpected exit in recursive search");
   }
 
-  /**
-   * Construct value list in the order in which the values should appear.
-   *
-   * @return list of populated submission values
-   */
   public List<SubmissionValue> getSubmissionValues() {
     List<SubmissionValue> valueList = new ArrayList<SubmissionValue>();
     recursivelyGetSubmissionValues(group, valueList);
     return valueList;
   }
 
-  private void recursivelyGetSubmissionValues(FormElementModel group,
-                                              List<SubmissionValue> valueList) {
+  private void recursivelyGetSubmissionValues(FormElementModel group, List<SubmissionValue> valueList) {
     for (FormElementModel m : group.getChildren()) {
       if (m.isMetadata()) {
         SubmissionValue v = elementsToValues.get(m);
@@ -707,20 +621,10 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
     }
   }
 
-  /**
-   * Get a map of the submission values with the field/element name as the key
-   *
-   * @return map of submission values
-   */
   public Map<FormElementModel, SubmissionValue> getSubmissionValuesMap() {
     return elementsToValues;
   }
 
-  /**
-   * Get the datastore key that uniquely identifies the submission
-   *
-   * @return datastore key
-   */
   public EntityKey getKey() {
     return key;
   }
@@ -737,32 +641,14 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
     return getGroupBackingObject(group);
   }
 
-  public Date getCreationDate() {
-    return getGroupBackingObject().getCreationDate();
-  }
-
-  public Date getLastUpdateDate() {
-    return getGroupBackingObject().getLastUpdateDate();
-  }
-
-  public String getCreatorUriUser() {
-    return getGroupBackingObject().getCreatorUriUser();
-  }
-
-  public String getLastUpdateUriUser() {
-    return getGroupBackingObject().getLastUpdateUriUser();
-  }
-
-  protected void populateFormattedValueInRow(Row row, FormElementModel propertyName,
-                                             ElementFormatter elemFormatter, CallingContext cc) throws ODKDatastoreException {
+  protected void populateFormattedValueInRow(Row row, FormElementModel propertyName, ElementFormatter elemFormatter, CallingContext cc) throws ODKDatastoreException {
     SubmissionValue value = elementsToValues.get(propertyName);
     if (value != null) {
       value.formatValue(elemFormatter, row, getOrdinalNumAsStr(), cc);
     }
   }
 
-  protected void populateFormattedValuesInRow(Row row, List<FormElementModel> propertyNames,
-                                              ElementFormatter elemFormatter, CallingContext cc) throws ODKDatastoreException {
+  protected void populateFormattedValuesInRow(Row row, List<FormElementModel> propertyNames, ElementFormatter elemFormatter, CallingContext cc) throws ODKDatastoreException {
     if (propertyNames == null) {
       List<SubmissionValue> values = getSubmissionValues();
       for (SubmissionValue value : values) {
@@ -775,19 +661,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
     }
   }
 
-  /**
-   * Format this submission's properties into a Row object.
-   *
-   * @param propertyNames    - if null, all properties are emitted. Otherwise, a list of those
-   *                         to emit.
-   * @param elemFormatter
-   * @param includeParentUid - true if the parentUid should be included
-   * @return
-   * @throws ODKDatastoreException
-   */
-  public Row getFormattedValuesAsRow(List<FormElementModel> propertyNames,
-                                     ElementFormatter elemFormatter, boolean includeParentUid, CallingContext cc)
-      throws ODKDatastoreException {
+  public Row getFormattedValuesAsRow(List<FormElementModel> propertyNames, ElementFormatter elemFormatter, boolean includeParentUid, CallingContext cc) throws ODKDatastoreException {
     Row row = new Row(constructSubmissionKey(null));
     if (includeParentUid && !(this instanceof Submission)) {
       elemFormatter.formatUid(enclosingSet.getKey().getKey(), enclosingSet.getPropertyName(), row);
@@ -800,16 +674,7 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
     return enclosingSet;
   }
 
-  public void printSubmission(PrintWriter out) {
-
-    List<SubmissionValue> values = getSubmissionValues();
-    for (SubmissionValue value : values) {
-      out.println(value.toString());
-    }
-  }
-
-  public void recursivelyAddEntityKeysForDeletion(List<EntityKey> keyList, CallingContext cc)
-      throws ODKOverQuotaException, ODKDatastoreException {
+  public void recursivelyAddEntityKeysForDeletion(List<EntityKey> keyList, CallingContext cc) throws ODKDatastoreException {
     // The keyList will be deleted in reverse order of insertion.
 
     // Add the primary record for this submission set first
@@ -844,12 +709,6 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
     return false;
   }
 
-  /**
-   * Remove the element from the submission. Only implemented for binary
-   * attachments at this time. For use when manually marking a form as complete.
-   *
-   * @param m
-   */
   public void removeElementValue(FormElementModel m) {
     if (m.isMetadata()) {
       throw new IllegalStateException("cannot remove metadata");
@@ -913,9 +772,6 @@ public class SubmissionSet implements Comparable<SubmissionSet>, SubmissionEleme
     return key.compareTo(obj.key);
   }
 
-  /**
-   * @see java.lang.Object#toString()
-   */
   @Override
   public String toString() {
     StringBuilder b = new StringBuilder();

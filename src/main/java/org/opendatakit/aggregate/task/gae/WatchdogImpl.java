@@ -88,88 +88,44 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
     b.enqueue(TaskOptionsBuilder.FRONTEND_QUEUE);
   }
 
-  public Datastore getDatastore() {
-    return datastore;
-  }
-
   public void setDatastore(Datastore datastore) {
     this.datastore = datastore;
-  }
-
-  public UserService getUserService() {
-    return userService;
   }
 
   public void setUserService(UserService userService) {
     this.userService = userService;
   }
 
-  public UploadSubmissions getUploadSubmissions() {
-    return uploadSubmissions;
-  }
-
   public void setUploadSubmissions(UploadSubmissions uploadSubmissions) {
     this.uploadSubmissions = uploadSubmissions;
-  }
-
-  public CsvGenerator getCsvGenerator() {
-    return csvGenerator;
   }
 
   public void setCsvGenerator(CsvGenerator csvGenerator) {
     this.csvGenerator = csvGenerator;
   }
 
-  public KmlGenerator getKmlGenerator() {
-    return kmlGenerator;
-  }
-
   public void setKmlGenerator(KmlGenerator kmlGenerator) {
     this.kmlGenerator = kmlGenerator;
-  }
-
-  public JsonFileGenerator getJsonFileGenerator() {
-    return jsonFileGenerator;
   }
 
   public void setJsonFileGenerator(JsonFileGenerator jsonFileGenerator) {
     this.jsonFileGenerator = jsonFileGenerator;
   }
 
-  public FormDelete getFormDelete() {
-    return formDelete;
-  }
-
   public void setFormDelete(FormDelete formDelete) {
     this.formDelete = formDelete;
-  }
-
-  public PurgeOlderSubmissions getPurgeSubmissions() {
-    return purgeSubmissions;
   }
 
   public void setPurgeSubmissions(PurgeOlderSubmissions purgeSubmissions) {
     this.purgeSubmissions = purgeSubmissions;
   }
 
-  public WorksheetCreator getWorksheetCreator() {
-    return worksheetCreator;
-  }
-
   public void setWorksheetCreator(WorksheetCreator worksheetCreator) {
     this.worksheetCreator = worksheetCreator;
   }
 
-  public HttpClientFactory HttpClientFactory() {
-    return httpClientFactory;
-  }
-
   public void setHttpClientFactory(HttpClientFactory httpClientFactory) {
     this.httpClientFactory = httpClientFactory;
-  }
-
-  public ImageUtil getImageUtil() {
-    return imageUtil;
   }
 
   public void setImageUtil(ImageUtil imageUtil) {
@@ -177,7 +133,7 @@ public class WatchdogImpl implements Watchdog, InitializingBean {
   }
 
   @Override
-  public void afterPropertiesSet() throws Exception {
+  public void afterPropertiesSet() {
     System.out.println("afterPropertiesSet WATCHDOG TASK IN GAE");
     if (datastore == null) throw new IllegalStateException("no datastore specified");
     if (userService == null) throw new IllegalStateException("no user service specified");

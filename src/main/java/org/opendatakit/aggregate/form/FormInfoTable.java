@@ -33,11 +33,6 @@ public class FormInfoTable extends TopLevelDynamicBase {
   static final String TABLE_NAME = "_form_info";
   private static FormInfoTable relation = null;
 
-  /**
-   * Construct a relation prototype.
-   *
-   * @param databaseSchema
-   */
   private FormInfoTable(String databaseSchema) {
     super(databaseSchema, TABLE_NAME);
     fieldList.add(FORM_ID);
@@ -46,12 +41,6 @@ public class FormInfoTable extends TopLevelDynamicBase {
     fieldValueMap.put(FORM_ID, FormInfo.FORM_ID);
   }
 
-  /**
-   * Construct an empty entity.
-   *
-   * @param ref
-   * @param user
-   */
   private FormInfoTable(FormInfoTable ref, User user) {
     super(ref, user);
   }

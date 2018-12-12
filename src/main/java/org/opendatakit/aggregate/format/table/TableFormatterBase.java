@@ -57,7 +57,7 @@ public abstract class TableFormatterBase implements SubmissionFormatter {
   }
 
   @Override
-  public final void beforeProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
+  public final void beforeProcessSubmissions(CallingContext cc) {
     beforeProcessSubmissionSet(form.getTopLevelGroupElement(), cc);
   }
 
@@ -68,16 +68,16 @@ public abstract class TableFormatterBase implements SubmissionFormatter {
   }
 
   @Override
-  public final void afterProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
+  public final void afterProcessSubmissions(CallingContext cc) {
     afterProcessSubmissionSet(form.getTopLevelGroupElement(), cc);
   }
 
-  protected abstract void beforeProcessSubmissionSet(FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException;
+  protected abstract void beforeProcessSubmissionSet(FormElementModel rootGroup, CallingContext cc);
 
   protected abstract void processSubmissionSetSegment(Collection<? extends SubmissionSet> submissions,
                                                       FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException;
 
-  protected abstract void afterProcessSubmissionSet(FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException;
+  protected abstract void afterProcessSubmissionSet(FormElementModel rootGroup, CallingContext cc);
 
   public final void processSubmissionSet(Collection<? extends SubmissionSet> submissions,
                                          FormElementModel rootGroup, CallingContext cc) throws ODKDatastoreException {

@@ -16,7 +16,6 @@
 package org.opendatakit.aggregate.task.tomcat;
 
 import org.opendatakit.aggregate.constants.BeanDefs;
-import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.task.UploadSubmissions;
 import org.opendatakit.aggregate.task.UploadSubmissionsWorkerImpl;
@@ -33,8 +32,7 @@ import org.opendatakit.common.web.CallingContext;
 public class UploadSubmissionsImpl implements UploadSubmissions {
 
   @Override
-  public void createFormUploadTask(FormServiceCursor fsc, boolean onBackground, CallingContext cc)
-      throws ODKExternalServiceException {
+  public void createFormUploadTask(FormServiceCursor fsc, boolean onBackground, CallingContext cc) {
     WatchdogImpl wd = (WatchdogImpl) cc.getBean(BeanDefs.WATCHDOG);
     // use watchdog's calling context in runner...
     UploadSubmissionsRunner ur = new UploadSubmissionsRunner(fsc, wd.getFasterWatchdogCycleEnabled(), wd.getCallingContext());

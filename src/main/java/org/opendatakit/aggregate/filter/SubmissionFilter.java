@@ -33,7 +33,6 @@ import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.Query;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
@@ -48,33 +47,18 @@ public class SubmissionFilter extends CommonFieldsBase {
 
   private static final String TABLE_NAME = "_filter";
 
-  private static final DataField URI_FILTER_GROUP_PROPERTY = new DataField("URI_FILTER_GROUP",
-      DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
-  private static final DataField VISIBILITY_PROPERTY = new DataField("VISIBILITY",
-      DataField.DataType.STRING, true, 80L);
-  private static final DataField ROWORCOL_PROPERTY = new DataField("ROWORCOL",
-      DataField.DataType.STRING, true, 80L);
-  private static final DataField COL_TITLE_PROPERTY = new DataField("COL_TITLE", DataField.DataType.STRING,
-      true, 80L); // TODO: determine length
-  private static final DataField COL_ENCODING_PROPERTY = new DataField("COL_ENCODING", DataField.DataType.STRING,
-      true, 1000L); // TODO: determine length
-  private static final DataField OPERATION_PROPERTY = new DataField("OPERATION",
-      DataField.DataType.STRING, true, 80L);
-  private static final DataField CLAUSE_PROPERTY = new DataField("INPUT_CLAUSE",
-      DataField.DataType.STRING, true, 4096L);
-  private static final DataField ORDINAL_PROPERTY = new DataField("ORDINAL",
-      DataField.DataType.INTEGER, true);
-  private static final DataField COL_GPS_ORD_PROPERTY = new DataField("GPS_ORD", DataField.DataType.INTEGER,
-      true);
+  private static final DataField URI_FILTER_GROUP_PROPERTY = new DataField("URI_FILTER_GROUP", DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
+  private static final DataField VISIBILITY_PROPERTY = new DataField("VISIBILITY", DataField.DataType.STRING, true, 80L);
+  private static final DataField ROWORCOL_PROPERTY = new DataField("ROWORCOL", DataField.DataType.STRING, true, 80L);
+  private static final DataField COL_TITLE_PROPERTY = new DataField("COL_TITLE", DataField.DataType.STRING, true, 80L); // TODO: determine length
+  private static final DataField COL_ENCODING_PROPERTY = new DataField("COL_ENCODING", DataField.DataType.STRING, true, 1000L); // TODO: determine length
+  private static final DataField OPERATION_PROPERTY = new DataField("OPERATION", DataField.DataType.STRING, true, 80L);
+  private static final DataField CLAUSE_PROPERTY = new DataField("INPUT_CLAUSE", DataField.DataType.STRING, true, 4096L);
+  private static final DataField ORDINAL_PROPERTY = new DataField("ORDINAL", DataField.DataType.INTEGER, true);
+  private static final DataField COL_GPS_ORD_PROPERTY = new DataField("GPS_ORD", DataField.DataType.INTEGER, true);
   private static SubmissionFilter relation = null;
   private List<SubmissionColumnFilter> colFilters;
 
-  /**
-   * Construct a relation prototype.
-   *
-   * @param databaseSchema
-   * @param tableName
-   */
   private SubmissionFilter(String schemaName) {
     super(schemaName, TABLE_NAME);
     fieldList.add(URI_FILTER_GROUP_PROPERTY);
@@ -88,18 +72,11 @@ public class SubmissionFilter extends CommonFieldsBase {
     fieldList.add(COL_GPS_ORD_PROPERTY);
   }
 
-  /**
-   * Construct an empty entity. Only called via {@link #getEmptyRow(User)}
-   *
-   * @param ref
-   * @param user
-   */
   private SubmissionFilter(SubmissionFilter ref, User user) {
     super(ref, user);
   }
 
-  private static synchronized final SubmissionFilter assertRelation(CallingContext cc)
-      throws ODKDatastoreException {
+  private static synchronized final SubmissionFilter assertRelation(CallingContext cc) throws ODKDatastoreException {
     if (relation == null) {
       SubmissionFilter relationPrototype;
       Datastore ds = cc.getDatastore();
@@ -112,8 +89,7 @@ public class SubmissionFilter extends CommonFieldsBase {
     return relation;
   }
 
-  static final SubmissionFilter transform(Filter filter, SubmissionFilterGroup filterGroup,
-                                          CallingContext cc) throws ODKOverQuotaException, ODKEntityNotFoundException, ODKDatastoreException {
+  static final SubmissionFilter transform(Filter filter, SubmissionFilterGroup filterGroup, CallingContext cc) throws ODKDatastoreException {
 
     SubmissionFilter relation = assertRelation(cc);
     String uri = filter.getUri();
@@ -152,8 +128,7 @@ public class SubmissionFilter extends CommonFieldsBase {
     return subFilter;
   }
 
-  static final List<SubmissionFilter> getFilterList(String uriFilterGroup, CallingContext cc)
-      throws ODKDatastoreException {
+  static final List<SubmissionFilter> getFilterList(String uriFilterGroup, CallingContext cc) throws ODKDatastoreException {
     SubmissionFilter relation = assertRelation(cc);
     Query query = cc.getDatastore().createQuery(relation, "SubmissionFilter.getFilterList", cc.getCurrentUser());
     query.addFilter(SubmissionFilter.URI_FILTER_GROUP_PROPERTY,
@@ -175,10 +150,6 @@ public class SubmissionFilter extends CommonFieldsBase {
   @Override
   public SubmissionFilter getEmptyRow(User user) {
     return new SubmissionFilter(this, user);
-  }
-
-  public String getFilterGroup() {
-    return getStringField(URI_FILTER_GROUP_PROPERTY);
   }
 
   public void setFilterGroup(String groupUri) {

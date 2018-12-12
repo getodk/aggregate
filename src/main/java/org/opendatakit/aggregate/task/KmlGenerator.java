@@ -15,7 +15,6 @@
  */
 package org.opendatakit.aggregate.task;
 
-import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -33,5 +32,5 @@ public interface KmlGenerator {
   public static final String KML_SELECTIONS_DELIMITER = "###";
 
   public void createKmlTask(IForm form, PersistentResults persistentResult,
-                            long attemptCount, CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException;
+                            long attemptCount, CallingContext cc) throws ODKDatastoreException;
 }

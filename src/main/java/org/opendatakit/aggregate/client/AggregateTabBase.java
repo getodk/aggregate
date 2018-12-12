@@ -50,20 +50,8 @@ public class AggregateTabBase extends TabPanel {
     subTabMap.put(subTab, panel);
   }
 
-  protected void hideSubTab(AggregateSubTabBase panel) {
-    remove(panel);
-  }
-
-  protected void showSubTab(AggregateSubTabBase panel, SubTabs subTab) {
-    int insertIndex = findSubTabIndex(subTab);
-    insert(panel, subTab.getTabLabel(), insertIndex);
-  }
-
   /**
    * register handler to manage tab selection change (and selecting our tab)
-   *
-   * @param tab
-   * @param baseUI
    */
   protected void registerClickHandlers(Tabs tab, AggregateUI baseUI) {
     baseUI.setSubMenuSelectionHandler(this, tab, subTabPosition.toArray(new SubTabs[subTabPosition.size()]));
@@ -83,17 +71,6 @@ public class AggregateTabBase extends TabPanel {
         subTabMap.get(subTabPosition.get(i)).update();
       }
     }
-  }
-
-  public SubTabInterface getActiveSubTabInterface() {
-    for (int i = 0; i < subTabPosition.size(); ++i) {
-      boolean isVisible = this.isVisible();
-      boolean isSelectedTab = this.getTabBar().getSelectedTab() == i;
-      if (isVisible && isSelectedTab) {
-        return subTabMap.get(subTabPosition.get(i));
-      }
-    }
-    return null;
   }
 
   public int findSubTabIndex(SubTabs subTab) {

@@ -77,7 +77,6 @@ public class PreferencesSubTab extends AggregateSubTabBase {
 
   private Label enketoApiUrl;
   private Label enketoApiToken;
-  private Label appName;
   private DisableFasterBackgroundActionsCheckbox disableFasterBackgroundActions;
   private SkipMalformedSubmissionsCheckbox skipMalformedSubmissions;
 
@@ -87,7 +86,6 @@ public class PreferencesSubTab extends AggregateSubTabBase {
       setCredentialValues();
       disableFasterBackgroundActions.updateValue(Preferences.getFasterBackgroundActionsDisabled());
       skipMalformedSubmissions.updateValue(Preferences.getSkipMalformedSubmissions());
-      appName.setText("default");
     }
 
     @Override

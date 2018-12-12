@@ -181,16 +181,7 @@ public class FormAdminServiceImpl extends XsrfProtectedServiceServlet implements
     }
     CallingContext ccDaemon = getCallingContext(this, req);
     ccDaemon.setAsDaemon(true);
-    try {
-      pos.createPurgeOlderSubmissionsTask(form, m.getSubmissionKey(), 1L, ccDaemon);
-    } catch (ODKOverQuotaException e) {
-      e.printStackTrace();
-      throw new RequestFailureException(QUOTA_EXCEEDED);
-    } catch (ODKDatastoreException | ODKFormNotFoundException e) {
-      e.printStackTrace();
-      throw new RequestFailureException(
-          "Unable to establish task to purge submitted data for form " + fsc.getFormId());
-    }
+    pos.createPurgeOlderSubmissionsTask(form, m.getSubmissionKey(), 1L, ccDaemon);
     return earliest;
   }
 
@@ -452,16 +443,7 @@ public class FormAdminServiceImpl extends XsrfProtectedServiceServlet implements
     }
     CallingContext ccDaemon = getCallingContext(this, req);
     ccDaemon.setAsDaemon(true);
-    try {
-      pos.createPurgeOlderSubmissionsTask(form, m.getSubmissionKey(), 1L, ccDaemon);
-    } catch (ODKOverQuotaException e) {
-      e.printStackTrace();
-      throw new RequestFailureException(QUOTA_EXCEEDED);
-    } catch (ODKDatastoreException | ODKFormNotFoundException e) {
-      e.printStackTrace();
-      throw new RequestFailureException(
-          "Unable to establish task to purge submitted data for form " + formId);
-    }
+    pos.createPurgeOlderSubmissionsTask(form, m.getSubmissionKey(), 1L, ccDaemon);
     return value;
   }
 

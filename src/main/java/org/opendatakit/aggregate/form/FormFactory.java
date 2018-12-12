@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import org.opendatakit.aggregate.exception.ODKConversionException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.parser.FormParserForJavaRosa;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
@@ -56,22 +55,13 @@ public class FormFactory {
   private FormFactory() {
   }
 
-  ;
-
   /**
    * Return the list of forms in the database.
    * If topLevelAuri is null, return all forms. Otherwise, return the form with the matching URI.
    * This is the main interface to the cache of form objects.  The cache is refreshed as a whole
    * every PersistConsts.MAX_SETTLE_MILLISECONDS.
-   *
-   * @param topLevelAuri
-   * @param cc
-   * @return
-   * @throws ODKOverQuotaException
-   * @throws ODKDatastoreException
    */
-  private static synchronized final List<IForm> internalGetForms(String topLevelAuri, CallingContext cc)
-      throws ODKOverQuotaException, ODKDatastoreException {
+  private static synchronized final List<IForm> internalGetForms(String topLevelAuri, CallingContext cc) throws ODKDatastoreException {
 
     List<IForm> forms = new ArrayList<IForm>();
     if (cacheTimestamp + PersistConsts.MAX_SETTLE_MILLISECONDS > System.currentTimeMillis()) {
@@ -167,16 +157,8 @@ public class FormFactory {
    * This provides a cache of the form data.  If known, the top-level object's
    * row object is passed in.  This is a database access optimization (minimize
    * GAE billing).
-   *
-   * @param topLevelAuri
-   * @param cc
-   * @return
-   * @throws ODKOverQuotaException
-   * @throws ODKEntityNotFoundException
-   * @throws ODKDatastoreException
    */
-  private static IForm getForm(String topLevelAuri, CallingContext cc)
-      throws ODKOverQuotaException, ODKEntityNotFoundException, ODKDatastoreException {
+  private static IForm getForm(String topLevelAuri, CallingContext cc) throws ODKDatastoreException {
     List<IForm> forms = internalGetForms(topLevelAuri, cc);
 
     if (forms.isEmpty())
@@ -186,30 +168,12 @@ public class FormFactory {
     return f;
   }
 
-  public static final List<IForm> getForms(boolean checkAuthorization, CallingContext cc)
-      throws ODKOverQuotaException, ODKDatastoreException {
+  public static final List<IForm> getForms(boolean checkAuthorization, CallingContext cc) throws ODKDatastoreException {
     List<IForm> forms = internalGetForms(null, cc);
     // TODO: check authorization
     return forms;
   }
 
-  /**
-   * Called during the startup action to load the Form table and eventually
-   * handle migrations of forms from older table formats to newer ones.
-   *
-   * @param cc
-   * @throws ODKDatastoreException
-   */
-  public static final void initialize(CallingContext cc) throws ODKDatastoreException {
-    internalGetForms(null, cc);
-  }
-
-  /**
-   * Clean up the incoming string to extract just the formId from it.
-   *
-   * @param submissionKey
-   * @return
-   */
   public static final String extractWellFormedFormId(String submissionKey) {
     int firstSlash = submissionKey.indexOf('/');
     String formId = submissionKey;
@@ -220,19 +184,7 @@ public class FormFactory {
     return formId;
   }
 
-  /**
-   * Static function to retrieve a form with the specified ODK id from the
-   * datastore
-   *
-   * @param formId The ODK identifier that identifies the form
-   * @return The ODK aggregate form definition/conversion object
-   * @throws ODKOverQuotaException
-   * @throws ODKDatastoreException
-   * @throws ODKFormNotFoundException Thrown when a form was not able to be found with the
-   *                                  corresponding ODK ID
-   */
-  public static IForm retrieveFormByFormId(String formId, CallingContext cc)
-      throws ODKFormNotFoundException, ODKOverQuotaException, ODKDatastoreException {
+  public static IForm retrieveFormByFormId(String formId, CallingContext cc) throws ODKFormNotFoundException, ODKDatastoreException {
 
     if (formId == null) {
       return null;
@@ -256,19 +208,7 @@ public class FormFactory {
     }
   }
 
-  /**
-   * Static function to retrieve a form with the specified ODK id from the
-   * datastore
-   *
-   * @param formId The ODK identifier that identifies the form
-   * @return The ODK aggregate form definition/conversion object
-   * @throws ODKOverQuotaException
-   * @throws ODKDatastoreException
-   * @throws ODKFormNotFoundException Thrown when a form was not able to be found with the
-   *                                  corresponding ODK ID
-   */
-  public static IForm retrieveForm(List<SubmissionKeyPart> parts, CallingContext cc)
-      throws ODKOverQuotaException, ODKDatastoreException, ODKFormNotFoundException {
+  public static IForm retrieveForm(List<SubmissionKeyPart> parts, CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
 
     if (!FormInfo.validFormKey(parts)) {
       return null;
@@ -289,23 +229,7 @@ public class FormFactory {
     }
   }
 
-  /**
-   * Called only from FormParserForJavaRosa.  The form should not already exist.
-   * Returns the new form.
-   *
-   * @param incomingFormXml
-   * @param rootElementDefn
-   * @param isEncryptedForm
-   * @param isDownloadEnabled
-   * @param title
-   * @param cc
-   * @return
-   * @throws ODKDatastoreException
-   * @throws ODKConversionException
-   */
-  public static IForm createFormId(String incomingFormXml, XFormParameters rootElementDefn,
-                                   boolean isEncryptedForm, boolean isDownloadEnabled, String title, CallingContext cc)
-      throws ODKDatastoreException {
+  public static IForm createFormId(String incomingFormXml, XFormParameters rootElementDefn, boolean isEncryptedForm, boolean isDownloadEnabled, String title, CallingContext cc) throws ODKDatastoreException {
     IForm thisForm = null;
 
     String formUri = CommonFieldsBase.newMD5HashUri(rootElementDefn.formId);

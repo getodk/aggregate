@@ -88,16 +88,6 @@ public class UrlHash {
   }
 
   /*
-   * Removes the given hash parameter. Should use the constants declared with
-   * UrlHash.
-   */
-  public void remove(int i) {
-    if (i < 0 || i >= parameters.length)
-      return;
-    parameters[i] = "";
-  }
-
-  /*
    * Clears all values from hash.
    */
   public void clear() {

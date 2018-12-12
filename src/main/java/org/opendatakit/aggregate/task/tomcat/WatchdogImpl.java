@@ -255,10 +255,6 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
     this.worksheetCreator = worksheetCreator;
   }
 
-  public HttpClientFactory HttpClientFactory() {
-    return httpClientFactory;
-  }
-
   public void setHttpClientFactory(HttpClientFactory httpClientFactory) {
     this.httpClientFactory = httpClientFactory;
   }
@@ -272,7 +268,7 @@ public class WatchdogImpl implements Watchdog, SmartLifecycle, InitializingBean,
   }
 
   @Override
-  public void afterPropertiesSet() throws Exception {
+  public void afterPropertiesSet() {
     logger.trace("afterPropertiesSet()");
     if (taskScheduler == null)
       throw new IllegalStateException("no task scheduler specified");

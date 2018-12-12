@@ -41,10 +41,6 @@ public enum FormActionStatus implements Serializable {
     displayText = display;
   }
 
-  public String getDisplayText() {
-    return displayText;
-  }
-
   /**
    * @return true if this request is considered 'active'
    */

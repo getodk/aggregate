@@ -103,9 +103,6 @@ public class FormServiceImpl extends RemoteServiceServlet implements
           summary.setMostRecentDeletionRequestStatus(t);
         }
         t = submissionPurgeStatuses.get(form.getFormId());
-        if (t != null && t.getTimestamp().after(formLoadDate)) {
-          summary.setMostRecentPurgeSubmissionsRequestStatus(t);
-        }
       }
       Collections.sort(formSummaries, new Comparator<FormSummary>() {
 
@@ -146,9 +143,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 
         summary.setUri(export.getUri());
         summary.setFileType(export.getResultType());
-        summary.setTimeRequested(export.getRequestDate());
         summary.setStatus(export.getStatus());
-        summary.setTimeLastAction(export.getLastRetryDate());
         summary.setTimeCompleted(export.getCompletionDate());
 
         // get info about the downloadable file.
@@ -167,9 +162,6 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 
       return exports;
 
-    } catch (ODKFormNotFoundException e) {
-      e.printStackTrace();
-      throw new FormNotAvailableException(e);
     } catch (ODKOverQuotaException e) {
       e.printStackTrace();
       throw new RequestFailureException(ErrorConsts.QUOTA_EXCEEDED);

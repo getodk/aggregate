@@ -20,7 +20,6 @@ import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.CsvGenerator;
 import org.opendatakit.aggregate.task.CsvWorkerImpl;
-import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -35,8 +34,7 @@ public class CsvGeneratorImpl implements CsvGenerator {
 
   @Override
   public void createCsvTask(IForm form, SubmissionKey persistentResultsKey,
-                            long attemptCount, CallingContext cc)
-      throws ODKDatastoreException {
+                            long attemptCount, CallingContext cc) {
     WatchdogImpl wd = (WatchdogImpl) cc.getBean(BeanDefs.WATCHDOG);
     // use watchdog's calling context in runner...
     CsvRunner runner = new CsvRunner(form, persistentResultsKey, attemptCount, wd.getCallingContext());

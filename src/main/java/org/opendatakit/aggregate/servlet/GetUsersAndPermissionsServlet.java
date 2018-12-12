@@ -20,7 +20,6 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.TreeSet;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.CharEncoding;
@@ -32,7 +31,6 @@ import org.opendatakit.common.persistence.client.exception.DatastoreFailureExcep
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
-import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.security.common.EmailParser;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.opendatakit.common.security.server.SecurityServiceUtil;
@@ -61,7 +59,7 @@ public class GetUsersAndPermissionsServlet extends ServletUtilBase {
   private static final Logger logger = LoggerFactory.getLogger(GetUsersAndPermissionsServlet.class);
 
   @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws
       IOException {
     if (req.getScheme().equals("http")) {
       logger.warn("Retrieving users and capabilities over http");
@@ -77,12 +75,6 @@ public class GetUsersAndPermissionsServlet extends ServletUtilBase {
       e.printStackTrace();
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
           ErrorConsts.PERSISTENCE_LAYER_PROBLEM + "\n" + e.toString());
-      return;
-    } catch (AccessDeniedException e) {
-      logger.error("Retrieving users and capabilities .csv access denied error: " + e.toString());
-      e.printStackTrace();
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-          e.toString());
       return;
     }
 

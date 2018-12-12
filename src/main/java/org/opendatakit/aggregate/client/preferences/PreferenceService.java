@@ -20,8 +20,6 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.server.rpc.XsrfProtect;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
-import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
-import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 /**
  * These actions require the ROLE_USER privilege, which is the least capable
@@ -31,12 +29,12 @@ import org.opendatakit.common.security.client.exception.AccessDeniedException;
  */
 @RemoteServiceRelativePath("preferenceservice")
 public interface PreferenceService extends RemoteService {
-  PreferenceSummary getPreferences() throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+  PreferenceSummary getPreferences() throws RequestFailureException;
 
   @XsrfProtect
-  void setSkipMalformedSubmissions(Boolean skipMalformedSubmissions) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+  void setSkipMalformedSubmissions(Boolean skipMalformedSubmissions) throws RequestFailureException;
 
   @XsrfProtect
-  void setFasterBackgroundActionsDisabled(Boolean disabled) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+  void setFasterBackgroundActionsDisabled(Boolean disabled) throws RequestFailureException;
 
 }

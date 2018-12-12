@@ -25,7 +25,6 @@ import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.aggregate.client.submission.SubmissionUISummary;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
-import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 /**
  * These are the APIs available to users with the ROLE_DATA_OWNER privilege.
@@ -39,27 +38,27 @@ import org.opendatakit.common.security.client.exception.AccessDeniedException;
 public interface FormAdminService extends RemoteService {
 
   @XsrfProtect
-  void setFormDownloadable(String formId, Boolean downloadable) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+  void setFormDownloadable(String formId, Boolean downloadable) throws RequestFailureException, DatastoreFailureException;
 
   @XsrfProtect
-  void setFormAcceptSubmissions(String formId, Boolean acceptSubmissions) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+  void setFormAcceptSubmissions(String formId, Boolean acceptSubmissions) throws RequestFailureException, DatastoreFailureException;
 
   @XsrfProtect
-  Date purgePublishedData(String uriExternalService, Date earliest) throws AccessDeniedException, DatastoreFailureException, RequestFailureException;
+  Date purgePublishedData(String uriExternalService, Date earliest) throws DatastoreFailureException, RequestFailureException;
 
   @XsrfProtect
-  void deleteForm(String formId) throws AccessDeniedException, DatastoreFailureException, RequestFailureException;
+  void deleteForm(String formId) throws DatastoreFailureException, RequestFailureException;
 
   @XsrfProtect
-  void deleteSubmission(String submissionKeyAsString) throws AccessDeniedException, DatastoreFailureException, RequestFailureException;
+  void deleteSubmission(String submissionKeyAsString) throws DatastoreFailureException, RequestFailureException;
 
-  SubmissionUISummary getIncompleteSubmissions(FilterGroup filter) throws AccessDeniedException, DatastoreFailureException, RequestFailureException;
-
-  @XsrfProtect
-  void markSubmissionAsComplete(String submissionKeyAsString) throws AccessDeniedException, DatastoreFailureException, RequestFailureException;
-
-  ArrayList<MediaFileSummary> getFormMediaFileList(String formId) throws AccessDeniedException, DatastoreFailureException, RequestFailureException;
+  SubmissionUISummary getIncompleteSubmissions(FilterGroup filter) throws DatastoreFailureException, RequestFailureException;
 
   @XsrfProtect
-  Date purgeSubmissionsData(String formId, Date value) throws AccessDeniedException, DatastoreFailureException, RequestFailureException;
+  void markSubmissionAsComplete(String submissionKeyAsString) throws DatastoreFailureException, RequestFailureException;
+
+  ArrayList<MediaFileSummary> getFormMediaFileList(String formId) throws DatastoreFailureException, RequestFailureException;
+
+  @XsrfProtect
+  Date purgeSubmissionsData(String formId, Date value) throws DatastoreFailureException, RequestFailureException;
 }

@@ -36,12 +36,9 @@ public class FusionTableHeaderFormatter extends AbstractHeaderFormatter implemen
    * Iterates the forms and creates the headers and types based off the passed
    * in FormElementModel
    *
-   * @param formDefinition the xform that is being used to create the header
-   * @param rootGroup      the group of the xform that contains several values that will be
-   *                       used to generate the headers. The node should correspond to a
-   *                       SubmissionSet, not a SubmissionValue.
-   * @param propertyNames  list of properties to include in headers, if null is passed will
-   *                       return all properties for the SubmissionSet
+   * @param rootGroup the group of the xform that contains several values that will be
+   *                  used to generate the headers. The node should correspond to a
+   *                  SubmissionSet, not a SubmissionValue.
    */
   public List<String> generateHeaders(IForm form, FormElementModel rootGroup,
                                       List<FormElementModel> propertyNamesArg) {

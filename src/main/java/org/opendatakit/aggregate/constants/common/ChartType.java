@@ -36,10 +36,6 @@ public enum ChartType implements Serializable {
     buttonText = buttonTxt;
   }
 
-  public String getDisplayText() {
-    return displayText;
-  }
-
   public String getButtonText() {
     return buttonText;
   }

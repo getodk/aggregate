@@ -20,7 +20,6 @@ import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
-import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.submission.SubmissionKey;
@@ -41,7 +40,7 @@ public class WorksheetCreatorImpl implements WorksheetCreator {
 
   @Override
   public final void createWorksheetTask(IForm form, MiscTasks miscTasks, long attemptCount,
-                                        CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
+                                        CallingContext cc) throws ODKDatastoreException {
     Map<String, String> params = miscTasks.getRequestParameters();
     String esTypeString = params.get(ServletConsts.EXTERNAL_SERVICE_TYPE);
     if (esTypeString == null) {

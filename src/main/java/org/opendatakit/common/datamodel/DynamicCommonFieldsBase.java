@@ -48,32 +48,14 @@ public abstract class DynamicCommonFieldsBase extends CommonFieldsBase {
         }
       };
 
-  /**
-   * Construct a relation prototype.
-   *
-   * @param databaseSchema
-   * @param tableName
-   * @param type
-   */
   protected DynamicCommonFieldsBase(String databaseSchema, String tableName) {
     super(databaseSchema, tableName);
   }
 
-  /**
-   * Construct an empty entity.
-   *
-   * @param ref
-   * @param user
-   */
   protected DynamicCommonFieldsBase(CommonFieldsBase ref, User user) {
     super(ref, user);
   }
 
-  /**
-   * Add a field to the field list.  Needed for dynamic form construction.
-   *
-   * @param d
-   */
   public void addDataField(DataField d) {
     fieldList.add(d);
   }

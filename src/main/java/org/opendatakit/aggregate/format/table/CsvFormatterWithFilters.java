@@ -67,7 +67,7 @@ public class CsvFormatterWithFilters implements SubmissionFormatter {
   }
 
   @Override
-  public final void beforeProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
+  public final void beforeProcessSubmissions(CallingContext cc) {
     // format headers
     appendCsvRow(headers.iterator());
   }
@@ -83,7 +83,7 @@ public class CsvFormatterWithFilters implements SubmissionFormatter {
   }
 
   @Override
-  public final void afterProcessSubmissions(CallingContext cc) throws ODKDatastoreException {
+  public final void afterProcessSubmissions(CallingContext cc) {
   }
 
   @Override

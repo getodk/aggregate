@@ -18,18 +18,5 @@ package org.opendatakit.common.utils;
 import org.opendatakit.common.web.CallingContext;
 
 public interface WebStartup {
-  /**
-   * Guaranteed to be called by one webserver at a time during the
-   * initialization of that webserver container.  The CallingContext
-   * does not support getBean(), just getDatastore() and getCurrentUser().
-   * Implementors must have all beans they need assigned during their
-   * bean initialization.
-   * <p>
-   * There may be other webservers already running -- this does not
-   * guarantee any first-to-run behavior.
-   *
-   * @param bootstrapCc
-   */
-  public void doStartupAction(CallingContext bootstrapCc);
-
+  void doStartupAction(CallingContext bootstrapCc);
 }

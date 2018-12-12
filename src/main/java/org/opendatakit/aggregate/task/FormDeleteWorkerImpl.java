@@ -103,14 +103,10 @@ public class FormDeleteWorkerImpl {
     TaskLock formIdTaskLock = ds.createTaskLock(user);
 
     boolean locked = false;
-    try {
-      if (formIdTaskLock.obtainLock(pFormIdLockId, lockedResourceName, TaskLockType.FORM_DELETION)) {
-        locked = true;
-      }
-      formIdTaskLock = null;
-    } catch (ODKTaskLockException e) {
-      e.printStackTrace();
+    if (formIdTaskLock.obtainLock(pFormIdLockId, lockedResourceName, TaskLockType.FORM_DELETION)) {
+      locked = true;
     }
+    formIdTaskLock = null;
 
     if (!locked) {
       logger.warn("Unable to acquire lock");
@@ -155,13 +151,6 @@ public class FormDeleteWorkerImpl {
 
   }
 
-  /**
-   * Delete any miscellaneous tasks for this form.
-   *
-   * @param self
-   * @return
-   * @throws ODKDatastoreException
-   */
   private boolean deleteMiscTasks(MiscTasks self) throws ODKDatastoreException {
     // first, delete all the tasks for this form.
     Datastore ds = cc.getDatastore();
@@ -202,8 +191,6 @@ public class FormDeleteWorkerImpl {
             task.delete(cc);
             deleted = true;
           }
-        } catch (ODKTaskLockException e1) {
-          e1.printStackTrace();
         } finally {
           if (!deleted) {
             outcome = false;
@@ -233,13 +220,6 @@ public class FormDeleteWorkerImpl {
     return outcome;
   }
 
-  /**
-   * Delete any persistent result tasks (and results files) for this form.
-   *
-   * @param self
-   * @return
-   * @throws ODKDatastoreException
-   */
   private boolean deletePersistentResultTasks() throws ODKDatastoreException {
     // first, delete all the tasks for this form.
     List<PersistentResults> tasks = PersistentResults.getAllTasksForForm(form, cc);
@@ -258,12 +238,6 @@ public class FormDeleteWorkerImpl {
     return true;
   }
 
-  /**
-   * Delete any external service tasks for this form.
-   *
-   * @return
-   * @throws ODKDatastoreException
-   */
   private boolean deleteExternalServiceTasks() throws ODKDatastoreException {
     List<ExternalService> services = FormServiceCursor.getExternalServicesForForm(form, cc);
 
@@ -301,17 +275,7 @@ public class FormDeleteWorkerImpl {
     t.persist(cc);
   }
 
-  /**
-   * we have gained a lock on the form. Now go through and try to delete all
-   * other MTs and external services related to this form.
-   *
-   * @return true if form is fully deleted...
-   * @throws ODKDatastoreException
-   * @throws ODKTaskLockException
-   * @throws ODKOverQuotaException
-   * @throws ODKFormNotFoundException
-   */
-  private boolean doDeletion(MiscTasks t) throws ODKOverQuotaException, ODKFormNotFoundException, ODKDatastoreException, ODKTaskLockException {
+  private boolean doDeletion(MiscTasks t) throws ODKFormNotFoundException, ODKDatastoreException {
 
     if (!deleteMiscTasks(t))
       return false;

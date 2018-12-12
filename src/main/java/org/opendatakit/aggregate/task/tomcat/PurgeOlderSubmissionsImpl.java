@@ -16,12 +16,10 @@
 package org.opendatakit.aggregate.task.tomcat;
 
 import org.opendatakit.aggregate.constants.BeanDefs;
-import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.PurgeOlderSubmissions;
 import org.opendatakit.aggregate.task.PurgeOlderSubmissionsWorkerImpl;
-import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -36,7 +34,7 @@ public class PurgeOlderSubmissionsImpl implements PurgeOlderSubmissions {
 
   @Override
   public final void createPurgeOlderSubmissionsTask(IForm form, SubmissionKey miscTasksKey,
-                                                    long attemptCount, CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
+                                                    long attemptCount, CallingContext cc) {
     WatchdogImpl wd = (WatchdogImpl) cc.getBean(BeanDefs.WATCHDOG);
     // use watchdog's calling context in runner...
     PurgeOlderSubmissionsRunner dr = new PurgeOlderSubmissionsRunner(form, miscTasksKey, attemptCount, wd.getCallingContext());

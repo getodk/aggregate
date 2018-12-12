@@ -48,16 +48,6 @@ public class UIEnabledValidatingTextInputCell<T> extends
 
   public UIEnabledValidatingTextInputCell(
       StringValidationPredicate<T> validation,
-      UIEnabledPredicate<T> isEnabledPredicate) {
-    this(validation, null, isEnabledPredicate);
-  }
-  public UIEnabledValidatingTextInputCell(
-      StringValidationPredicate<T> validation,
-      UIVisiblePredicate<T> isVisiblePredicate) {
-    this(validation, isVisiblePredicate, null);
-  }
-  public UIEnabledValidatingTextInputCell(
-      StringValidationPredicate<T> validation,
       UIVisiblePredicate<T> isVisiblePredicate,
       UIEnabledPredicate<T> isEnabledPredicate) {
     super("change", "keyup");

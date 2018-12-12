@@ -15,7 +15,6 @@
  */
 package org.opendatakit.common.datamodel;
 
-import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.security.User;
@@ -26,9 +25,6 @@ import org.opendatakit.common.security.User;
  */
 public abstract class DynamicDocumentBase extends DynamicCommonFieldsBase {
 
-  /* dynamic and dynamic association tables */
-  public static final int ADDITIONAL_COLUMN_COUNT = 1 + CommonFieldsBase.AUDIT_COLUMN_COUNT;
-
   /**
    * key into the top level dynamic table that is our ancestor
    */
@@ -36,30 +32,14 @@ public abstract class DynamicDocumentBase extends DynamicCommonFieldsBase {
 
   public final DataField topLevelAuri;
 
-  /**
-   * Construct a relation prototype.
-   *
-   * @param databaseSchema
-   * @param tableName
-   */
   protected DynamicDocumentBase(String databaseSchema, String tableName) {
     super(databaseSchema, tableName);
     fieldList.add(topLevelAuri = new DataField(TOP_LEVEL_AURI));
   }
 
-  /**
-   * Construct an empty entity.
-   *
-   * @param ref
-   * @param user
-   */
   protected DynamicDocumentBase(DynamicDocumentBase ref, User user) {
     super(ref, user);
     topLevelAuri = ref.topLevelAuri;
-  }
-
-  public final String getTopLevelAuri() {
-    return getStringField(topLevelAuri);
   }
 
   public final void setTopLevelAuri(String value) {

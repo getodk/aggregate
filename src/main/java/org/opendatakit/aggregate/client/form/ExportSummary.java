@@ -29,9 +29,7 @@ public final class ExportSummary implements Serializable {
 
   private String uri;
   private ExportType fileType;
-  private Date timeRequested;
   private ExportStatus status;
-  private Date timeLastAction;
   private Date timeCompleted;
   private String resultFile;
 
@@ -51,28 +49,12 @@ public final class ExportSummary implements Serializable {
     this.fileType = fileType;
   }
 
-  public Date getTimeRequested() {
-    return timeRequested;
-  }
-
-  public void setTimeRequested(Date timeRequested) {
-    this.timeRequested = timeRequested;
-  }
-
   public ExportStatus getStatus() {
     return status;
   }
 
   public void setStatus(ExportStatus status) {
     this.status = status;
-  }
-
-  public Date getTimeLastAction() {
-    return timeLastAction;
-  }
-
-  public void setTimeLastAction(Date timeLastAction) {
-    this.timeLastAction = timeLastAction;
   }
 
   public Date getTimeCompleted() {

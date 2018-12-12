@@ -17,7 +17,6 @@ package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.opendatakit.aggregate.ContextFactory;
@@ -74,7 +73,7 @@ public class UserManagePasswordsServlet extends ServletUtilBase {
    * </ul>
    */
   @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws
       IOException {
     if (req.getScheme().equals("http")) {
       LoggerFactory.getLogger(UserManagePasswordsServlet.class).warn("Setting user passwords over http");

@@ -18,7 +18,6 @@ package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.opendatakit.common.web.constants.HtmlConsts;
@@ -42,7 +41,7 @@ public class LocalLoginPageServlet extends ServletUtilBase {
   private static final long serialVersionUID = 629046684126101849L;
 
   @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws
       IOException {
 
     String redirectParamString = getRedirectUrl(req, AggregateHtmlServlet.ADDR);

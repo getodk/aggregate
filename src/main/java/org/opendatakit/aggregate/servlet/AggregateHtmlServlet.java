@@ -19,7 +19,6 @@ package org.opendatakit.aggregate.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.opendatakit.aggregate.ContextFactory;
@@ -88,7 +87,7 @@ public class AggregateHtmlServlet extends ServletUtilBase {
   private static final long serialVersionUID = 5811797423869654357L;
 
   @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws
       IOException {
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     User user = cc.getCurrentUser();

@@ -60,6 +60,7 @@ public enum GrantedAuthorityName implements Serializable {
   private GrantedAuthorityName() {
     // GWT
   }
+
   GrantedAuthorityName(String displayText) {
     this.displayText = displayText;
   }

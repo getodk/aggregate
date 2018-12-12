@@ -22,7 +22,6 @@ import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
-import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 public class DateTimeMetadataType extends MetadataBaseType<Date> {
@@ -39,8 +38,7 @@ public class DateTimeMetadataType extends MetadataBaseType<Date> {
 
   @Override
   public void formatValue(ElementFormatter elemFormatter, Row row,
-                          String ordinalValue, CallingContext cc)
-      throws ODKDatastoreException {
+                          String ordinalValue, CallingContext cc) {
     elemFormatter.formatDateTime(getValue(), metadataType, ordinalValue, row);
   }
 }

@@ -33,12 +33,6 @@ public final class PropertyMapSerializer {
   private static final String K_XML_END_VALUE_END_PARAMETER = "</value></parameter>\n";
   private static final String K_XML_BEGIN_PARAMETERS = "<parameters>\n";
 
-  /**
-   * Deserialize the XML representation for a key-value map.
-   *
-   * @param parameterDocument
-   * @return parameter map as a Map<String,String> key-value map.
-   */
   public static Map<String, String> deserializeRequestParameters(String parameterDocument) {
     Map<String, String> parameters = new HashMap<String, String>();
     if (parameterDocument == null) return parameters;
@@ -79,12 +73,6 @@ public final class PropertyMapSerializer {
     return parameters;
   }
 
-  /**
-   * Serialize a key-value map into an XML-formatted document.
-   *
-   * @param value - a Map<String,String> of key-value pairs.
-   * @return the XML document representing the serialization of that key-value map.
-   */
   public static String serializeRequestParameters(Map<String, String> value) {
     if (value == null) {
       return null;

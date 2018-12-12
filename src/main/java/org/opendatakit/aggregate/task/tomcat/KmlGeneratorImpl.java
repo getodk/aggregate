@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import org.opendatakit.aggregate.client.form.KmlSelection;
 import org.opendatakit.aggregate.constants.BeanDefs;
-import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.PersistentResults;
 import org.opendatakit.aggregate.submission.SubmissionKey;
@@ -41,7 +40,7 @@ public class KmlGeneratorImpl implements KmlGenerator {
 
   @Override
   public void createKmlTask(IForm form, PersistentResults persistentResults, long attemptCount,
-                            CallingContext cc) throws ODKDatastoreException, ODKFormNotFoundException {
+                            CallingContext cc) throws ODKDatastoreException {
 
     List<KmlSelection> kmlElementsToInclude = new ArrayList<KmlSelection>();
 

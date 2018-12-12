@@ -16,9 +16,7 @@
 package org.opendatakit.aggregate.datamodel;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.common.web.CallingContext;
 
@@ -29,22 +27,19 @@ import org.opendatakit.common.web.CallingContext;
  * @author wbrunette@gmail.com
  */
 public final class FormElementModel {
-
   private static final String K_SL = "/";
-
-  ;
   private static final String K_COLON = ":";
-
-  ;
   private final Metadata type;
   private final FormDataModel fdm;
   private final List<FormElementModel> children = new ArrayList<FormElementModel>();
   private final FormElementModel parent;
+
   FormElementModel(FormElementModel parent, Metadata type) {
     fdm = null;
     this.parent = parent;
     this.type = type;
   }
+
   FormElementModel(final FormDataModel fdm, final FormElementModel parent) {
     this.fdm = fdm;
     this.parent = parent;
@@ -86,15 +81,6 @@ public final class FormElementModel {
     }
   }
 
-  /**
-   * Given a form definition and a FormElementKey, retrieves the
-   * FormElementModel corresponding to the key.
-   *
-   * @param form
-   * @param key
-   * @return the form element model corresponding to the key.
-   * @throws IllegalArgumentException
-   */
   public static final FormElementModel retrieveFormElementModel(IForm form, FormElementKey key) {
     String[] slashParts = key.toString().split(K_SL);
     int slashPosition = 0;
@@ -181,48 +167,6 @@ public final class FormElementModel {
     return ((fdm == null) ? (ref.fdm == null) : ((ref.fdm != null) && fdm.equals(ref.fdm)))
         && ((parent == null) ? (ref.parent == null) : ((ref.parent != null) && parent
         .equals(ref.parent))) && (type == ref.type);
-  }
-
-  /**
-   * Returns the list of children that are in the specified form element
-   * namespaces.
-   *
-   * @param namespaces -- collection of form element namespaces to filter against.
-   * @return list of children contained in the collection of namespaces.
-   */
-  public final List<FormElementModel> getChildren(Collection<FormElementNamespace> namespaces) {
-    List<FormElementModel> subset = new ArrayList<FormElementModel>();
-    boolean hasMetadata = false;
-    boolean hasValues = false;
-
-    if (namespaces == null) {
-      // no restriction -- return everything
-      return children;
-    }
-
-    for (FormElementNamespace ns : namespaces) {
-      hasMetadata = hasMetadata || (ns == FormElementNamespace.METADATA);
-      hasValues = hasValues || (ns == FormElementNamespace.VALUES);
-    }
-
-    if (hasValues && hasMetadata) {
-      // want both -- return everything
-      return children;
-    }
-
-    if (!hasValues && !hasMetadata) {
-      return subset; // empty subset...
-    }
-
-    // do the hard work...
-    for (FormElementModel child : children) {
-      if (child.isMetadata() && hasMetadata) {
-        subset.add(child);
-      } else if (!child.isMetadata() && hasValues) {
-        subset.add(child);
-      }
-    }
-    return subset;
   }
 
   public final List<FormElementModel> getChildren() {
@@ -383,9 +327,6 @@ public final class FormElementModel {
    * the collapsed entity sets of the SubmissionSet for its construction (i.e.,
    * they are different construction methodologies, so there is a risk of
    * divergence).
-   *
-   * @param form
-   * @return string representation of this FormElementModel
    */
   private final String getFullyQualifiedElementName(IForm form) {
 
@@ -408,24 +349,10 @@ public final class FormElementModel {
     return b.toString();
   }
 
-  /**
-   * Construct the FormElementKey that holds the abstract XPath expression
-   * defining this FormElementModel.
-   *
-   * @param form the form containing this FormElementModel
-   * @return the FormElementKey describing the FormElementModel
-   */
   public final FormElementKey constructFormElementKey(IForm form) {
     return new FormElementKey(getFullyQualifiedElementName(form));
   }
 
-  /**
-   * Search the children of this element and return the one that has the name
-   * that matches.
-   *
-   * @param elementName - name to match
-   * @return the element or null if not found.
-   */
   public final FormElementModel findElementByName(String elementName) {
     if (elementName == null) {
       throw new IllegalArgumentException("null elementName passed in!");
@@ -439,11 +366,6 @@ public final class FormElementModel {
     return null;
   }
 
-  // //////////////////////////////////////////////////////////////////////////////
-  // Static methods
-  // //////////////////////////////////////////////////////////////////////////////
-
-  /* xform element types */
   public static enum ElementType {
     // xform tag types
     STRING, JRDATETIME, JRDATE, JRTIME, INTEGER, DECIMAL, GEOPOINT, GEOTRACE, GEOSHAPE,

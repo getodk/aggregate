@@ -28,49 +28,26 @@ import org.opendatakit.common.web.CallingContext;
  */
 public interface UserService {
 
-  public String createLoginURL();
+  String createLogoutURL();
 
-  public String createLogoutURL();
+  Realm getCurrentRealm();
 
-  public Realm getCurrentRealm();
+  User getCurrentUser();
 
-  public User getCurrentUser();
+  User getDaemonAccountUser();
 
-  public User getDaemonAccountUser();
+  boolean isAccessManagementConfigured();
 
-  /**
-   * Determine if the access management system has been configured.
-   *
-   * @return true if access management has been configured or if database unavailable
-   */
-  public boolean isAccessManagementConfigured();
+  void reloadPermissions();
 
-  public void reloadPermissions();
+  boolean isUserLoggedIn();
 
-  public boolean isUserLoggedIn();
+  String getSuperUserEmail();
 
-  /**
-   * @return the configured super user email address.
-   */
-  public String getSuperUserEmail();
+  String getSuperUserUsername();
 
-  /**
-   * @return the configured ODK Aggregate super-user username.
-   */
-  public String getSuperUserUsername();
+  boolean isSuperUser(CallingContext cc) throws ODKDatastoreException;
 
-  /**
-   * @return true if this user is a superUser
-   * @throws ODKDatastoreException
-   */
-  public boolean isSuperUser(CallingContext cc) throws ODKDatastoreException;
-
-  /**
-   * If the superUsername is defined, returns true if the
-   * password for that account is something other than 'aggregate'
-   *
-   * @return true if superUsername account password is not 'aggregate'
-   */
-  public boolean isSuperUsernamePasswordSet(CallingContext cc) throws ODKDatastoreException;
+  boolean isSuperUsernamePasswordSet(CallingContext cc) throws ODKDatastoreException;
 
 }

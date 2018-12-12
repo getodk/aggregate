@@ -34,13 +34,6 @@ public class ODKEnumeratedElementException extends ODKDatastoreException {
   private static final long serialVersionUID = 1208668052898763165L;
 
   /**
-   * Default constructor
-   */
-  public ODKEnumeratedElementException() {
-    super();
-  }
-
-  /**
    * Construct exception with the error message
    *
    * @param message exception message
@@ -48,24 +41,4 @@ public class ODKEnumeratedElementException extends ODKDatastoreException {
   public ODKEnumeratedElementException(String message) {
     super(message);
   }
-
-  /**
-   * Construction exception with error message and throwable cause
-   *
-   * @param message exception message
-   * @param cause   throwable cause
-   */
-  public ODKEnumeratedElementException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
-  /**
-   * Construction exception with throwable cause
-   *
-   * @param cause throwable cause
-   */
-  public ODKEnumeratedElementException(Throwable cause) {
-    super(cause);
-  }
-
 }

@@ -112,35 +112,15 @@ public class BackendActionsTable extends CommonFieldsBase {
   private static long lastWatchdogSchedulingTime = 0L;
   private static BackendActionsTable relation = null;
 
-  /**
-   * Construct a relation prototype. Only called via
-   * {@link #assertRelation(Datastore, User)}
-   *
-   * @param schemaName
-   */
   protected BackendActionsTable(String schemaName) {
     super(schemaName, TABLE_NAME);
     fieldList.add(LAST_REVISION_DATE);
   }
 
-  /**
-   * Construct an empty entity. Only called via {@link #getEmptyRow(User)}
-   *
-   * @param ref
-   * @param user
-   */
   protected BackendActionsTable(BackendActionsTable ref, User user) {
     super(ref, user);
   }
 
-  /**
-   * This is private because this table implements a singleton pattern.
-   *
-   * @param datastore
-   * @param user
-   * @return
-   * @throws ODKDatastoreException
-   */
   private static synchronized final BackendActionsTable assertRelation(Datastore datastore,
                                                                        User user) throws ODKDatastoreException {
     if (relation == null) {
@@ -152,15 +132,6 @@ public class BackendActionsTable extends CommonFieldsBase {
     return relation;
   }
 
-  /**
-   * This retrieves the singleton record.
-   *
-   * @param uri
-   * @param datastore
-   * @param user
-   * @return
-   * @throws ODKDatastoreException
-   */
   private static final BackendActionsTable getSingletonRecord(String uri, Datastore datastore,
                                                               User user) throws ODKDatastoreException {
     BackendActionsTable prototype = assertRelation(datastore, user);
@@ -254,9 +225,6 @@ public class BackendActionsTable extends CommonFieldsBase {
   /**
    * Updates the time the watchdog last ran. Called only from within the
    * WatchdogWorkerImpl class.
-   *
-   * @param cc
-   * @return true if the watchdog should be culled (not rescheduled)
    */
   public static final synchronized boolean updateWatchdogStart(Watchdog wd, CallingContext cc) {
     boolean wasDaemon = cc.getAsDeamon();
@@ -336,10 +304,6 @@ public class BackendActionsTable extends CommonFieldsBase {
    * <p>
    * Schedule a watchdog to run the specified number of milliseconds into the
    * future (zero is OK).
-   *
-   * @param watchdog
-   * @param futureMilliseconds
-   * @param cc
    */
   private static final synchronized void scheduleFutureWatchdog(Watchdog wd,
                                                                 long futureMilliseconds, CallingContext cc) {
@@ -458,8 +422,6 @@ public class BackendActionsTable extends CommonFieldsBase {
    * IDLING_WATCHDOG_RETRY_INTERVAL_MILLISECONDS. Note that if the Watchdog
    * determines that there is work pending, it will schedule a watchdog every
    * FAST_PUBLISHING_RETRY_MILLISECONDS.
-   *
-   * @param cc
    */
   public static final synchronized void triggerWatchdog(CallingContext cc) {
 
@@ -489,10 +451,6 @@ public class BackendActionsTable extends CommonFieldsBase {
    * have fast publishing enabled, the publishing does not take immediate
    * effect, but is a suggested next start time, and only if the website is
    * active will it be honored.
-   *
-   * @param hasActiveTasks   -- whether active tasks were detected
-   * @param cullThisWatchdog -- whether this watchdog should be rescheduled
-   * @param cc
    */
   public static final synchronized void rescheduleWatchdog(boolean hasActiveTasks,
                                                            boolean cullThisWatchdog, CallingContext cc) {

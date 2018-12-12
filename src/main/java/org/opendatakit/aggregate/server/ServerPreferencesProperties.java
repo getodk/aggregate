@@ -16,7 +16,6 @@
 
 package org.opendatakit.aggregate.server;
 
-import java.util.Date;
 import java.util.List;
 import org.opendatakit.aggregate.client.preferences.PreferenceSummary;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -28,9 +27,9 @@ import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
-import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 
+@SuppressWarnings("unused")
 public class ServerPreferencesProperties extends CommonFieldsBase {
 
   // these values are set in the ServiceAccountPrivateKeyUploadServlet
@@ -42,14 +41,9 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
   public static final String OAUTH2_ACCESS_TOKEN_POSTFIX = "_OAUTH2_ACCESS_TOKEN";
   public static final String OAUTH2_REFRESH_TOKEN_POSTFIX = "_OAUTH2_REFRESH_TOKEN";
   public static final String OAUTH2_EXPIRATION_TIME_POSTFIX = "_OAUTH2_EXPIRATION_TIME";
-  // to
-  // Google
-  // Maps
-  // only
   private static final String TABLE_NAME = "_server_preferences_properties";
   private static final DataField KEY = new DataField("KEY", DataField.DataType.STRING, true, 128L);
-  private static final DataField VALUE = new DataField("VALUE", DataField.DataType.STRING, true,
-      20480L);
+  private static final DataField VALUE = new DataField("VALUE", DataField.DataType.STRING, true, 20480L);
   private static final String GOOGLE_SIMPLE_API_KEY = "GOOG_SIMPLE_API_KEY"; // supplied
   private static final String ENKETO_API_URL = "ENKETO_API_URL";
   private static final String ENKETO_API_TOKEN = "ENKETO_API_TOKEN";
@@ -62,33 +56,22 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
 
   private static ServerPreferencesProperties relation = null;
 
-  /**
-   * Construct a relation prototype.
-   */
   private ServerPreferencesProperties(String schemaName) {
     super(schemaName, TABLE_NAME);
     fieldList.add(KEY);
     fieldList.add(VALUE);
   }
 
-  /**
-   * Construct an empty entity. Only called via {@link #getEmptyRow(User)}
-   *
-   * @param ref
-   * @param user
-   */
   private ServerPreferencesProperties(ServerPreferencesProperties ref, User user) {
     super(ref, user);
   }
 
-  public static PreferenceSummary getPreferenceSummary(CallingContext cc)
-      throws ODKEntityNotFoundException, ODKOverQuotaException {
+  public static PreferenceSummary getPreferenceSummary(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
     return new PreferenceSummary(getGoogleSimpleApiKey(cc), getGoogleApiClientId(cc),
         getEnketoApiUrl(cc), getEnketoApiToken(cc), getFasterBackgroundActionsDisabled(cc), getSkipMalformedSubmissions(cc));
   }
 
-  public static String getSiteKey(CallingContext cc) throws ODKEntityNotFoundException,
-      ODKOverQuotaException {
+  public static String getSiteKey(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
     String value = getServerPreferencesProperty(cc, SITE_KEY);
     if (value == null) {
       // synthesize a new one...
@@ -98,63 +81,52 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
     return value;
   }
 
-  public static void setSiteKey(CallingContext cc, String siteKey)
-      throws ODKEntityNotFoundException, ODKOverQuotaException {
+  public static void setSiteKey(CallingContext cc, String siteKey) throws ODKEntityNotFoundException, ODKOverQuotaException {
     setServerPreferencesProperty(cc, SITE_KEY, siteKey);
   }
 
-  public static String getLastKnownRealmString(CallingContext cc) throws ODKEntityNotFoundException,
-      ODKOverQuotaException {
+  public static String getLastKnownRealmString(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
     String value = getServerPreferencesProperty(cc, LAST_KNOWN_REALM_STRING);
     return value;
   }
 
-  public static void setLastKnownRealmString(CallingContext cc, String lastKnownRealmString)
-      throws ODKEntityNotFoundException, ODKOverQuotaException {
+  public static void setLastKnownRealmString(CallingContext cc, String lastKnownRealmString) throws ODKEntityNotFoundException, ODKOverQuotaException {
     setServerPreferencesProperty(cc, LAST_KNOWN_REALM_STRING, lastKnownRealmString);
   }
 
-  public static String getGoogleSimpleApiKey(CallingContext cc) throws ODKEntityNotFoundException,
-      ODKOverQuotaException {
+  public static String getGoogleSimpleApiKey(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
     String value = getServerPreferencesProperty(cc, GOOGLE_SIMPLE_API_KEY);
     return value;
   }
 
-  public static void setGoogleSimpleApiKey(CallingContext cc, String googleSimpleApiKey)
-      throws ODKEntityNotFoundException, ODKOverQuotaException {
+  public static void setGoogleSimpleApiKey(CallingContext cc, String googleSimpleApiKey) throws ODKEntityNotFoundException, ODKOverQuotaException {
     setServerPreferencesProperty(cc, GOOGLE_SIMPLE_API_KEY, googleSimpleApiKey);
   }
 
-  public static String getGoogleApiClientId(CallingContext cc) throws ODKEntityNotFoundException,
-      ODKOverQuotaException {
+  public static String getGoogleApiClientId(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
     String value = getServerPreferencesProperty(cc, GOOGLE_API_CLIENT_ID);
     return value;
   }
 
-  public static String getEnketoApiUrl(CallingContext cc) throws ODKEntityNotFoundException,
-      ODKOverQuotaException {
+  public static String getEnketoApiUrl(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
     String value = getServerPreferencesProperty(cc, ENKETO_API_URL);
     return value;
   }
 
-  public static void setEnketoApiUrl(CallingContext cc, String enketoApiUrl)
-      throws ODKEntityNotFoundException, ODKOverQuotaException {
+  public static void setEnketoApiUrl(CallingContext cc, String enketoApiUrl) throws ODKEntityNotFoundException, ODKOverQuotaException {
     setServerPreferencesProperty(cc, ENKETO_API_URL, enketoApiUrl);
   }
 
-  public static String getEnketoApiToken(CallingContext cc) throws ODKEntityNotFoundException,
-      ODKOverQuotaException {
+  public static String getEnketoApiToken(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
     String value = getServerPreferencesProperty(cc, ENKETO_API_TOKEN);
     return value;
   }
 
-  public static void setEnketoApiToken(CallingContext cc, String enketoApiToken)
-      throws ODKEntityNotFoundException, ODKOverQuotaException {
+  public static void setEnketoApiToken(CallingContext cc, String enketoApiToken) throws ODKEntityNotFoundException, ODKOverQuotaException {
     setServerPreferencesProperty(cc, ENKETO_API_TOKEN, enketoApiToken);
   }
 
-  public static Boolean getFasterWatchdogCycleEnabled(CallingContext cc)
-      throws ODKEntityNotFoundException, ODKOverQuotaException {
+  public static Boolean getFasterWatchdogCycleEnabled(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
     String value = getServerPreferencesProperty(cc, FASTER_WATCHDOG_CYCLE_ENABLED);
     if (value != null) {
       return Boolean.valueOf(value);
@@ -163,13 +135,11 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
     return false;
   }
 
-  public static void setFasterWatchdogCycleEnabled(CallingContext cc, Boolean enabled)
-      throws ODKEntityNotFoundException, ODKOverQuotaException {
+  public static void setFasterWatchdogCycleEnabled(CallingContext cc, Boolean enabled) throws ODKEntityNotFoundException, ODKOverQuotaException {
     setServerPreferencesProperty(cc, FASTER_WATCHDOG_CYCLE_ENABLED, enabled.toString());
   }
 
-  public static Boolean getFasterBackgroundActionsDisabled(CallingContext cc)
-      throws ODKEntityNotFoundException, ODKOverQuotaException {
+  public static Boolean getFasterBackgroundActionsDisabled(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
     String value = getServerPreferencesProperty(cc, FASTER_BACKGROUND_ACTIONS_DISABLED);
     if (value != null) {
       return Boolean.valueOf(value);
@@ -178,13 +148,11 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
     return false;
   }
 
-  public static void setFasterBackgroundActionsDisabled(CallingContext cc, Boolean disabled)
-      throws ODKEntityNotFoundException, ODKOverQuotaException {
+  public static void setFasterBackgroundActionsDisabled(CallingContext cc, Boolean disabled) throws ODKEntityNotFoundException, ODKOverQuotaException {
     setServerPreferencesProperty(cc, FASTER_BACKGROUND_ACTIONS_DISABLED, disabled.toString());
   }
 
-  public static Boolean getSkipMalformedSubmissions(CallingContext cc)
-      throws ODKEntityNotFoundException, ODKOverQuotaException {
+  public static Boolean getSkipMalformedSubmissions(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
     String value = getServerPreferencesProperty(cc, SKIP_MALFORMED_SUBMISSIONS);
     if (value != null) {
       return Boolean.valueOf(value);
@@ -193,13 +161,11 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
     return false;
   }
 
-  public static void setSkipMalformedSubmissions(CallingContext cc, Boolean skipMalformedSubmissions)
-      throws ODKEntityNotFoundException, ODKOverQuotaException {
+  public static void setSkipMalformedSubmissions(CallingContext cc, Boolean skipMalformedSubmissions) throws ODKEntityNotFoundException, ODKOverQuotaException {
     setServerPreferencesProperty(cc, SKIP_MALFORMED_SUBMISSIONS, skipMalformedSubmissions.toString());
   }
 
-  public static synchronized final ServerPreferencesProperties assertRelation(CallingContext cc)
-      throws ODKDatastoreException {
+  public static synchronized final ServerPreferencesProperties assertRelation(CallingContext cc) throws ODKDatastoreException {
     if (relation == null) {
       ServerPreferencesProperties relationPrototype;
       Datastore ds = cc.getDatastore();
@@ -212,8 +178,7 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
     return relation;
   }
 
-  public static final String getServerPreferencesProperty(CallingContext cc, String keyName)
-      throws ODKEntityNotFoundException, ODKOverQuotaException {
+  public static final String getServerPreferencesProperty(CallingContext cc, String keyName) throws ODKEntityNotFoundException, ODKOverQuotaException {
     try {
       ServerPreferencesProperties relation = assertRelation(cc);
       Query query = cc.getDatastore().createQuery(relation,
@@ -237,8 +202,7 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
     }
   }
 
-  public static final void setServerPreferencesProperty(CallingContext cc, String keyName,
-                                                        String value) throws ODKEntityNotFoundException, ODKOverQuotaException {
+  public static final void setServerPreferencesProperty(CallingContext cc, String keyName, String value) throws ODKEntityNotFoundException, ODKOverQuotaException {
     try {
       ServerPreferencesProperties relation = assertRelation(cc);
       Query query = cc.getDatastore().createQuery(relation,

@@ -36,46 +36,11 @@ import org.opendatakit.common.web.CallingContext;
  */
 public interface SubmissionValue extends SubmissionElement {
 
-  /**
-   * Get submission field value from database entity
-   *
-   * @param datastore datastore to obtain value
-   * @param user      user requesting data
-   * @throws ODKDatastoreException
-   */
-  public void getValueFromEntity(CallingContext cc)
-      throws ODKDatastoreException;
+  void getValueFromEntity(CallingContext cc) throws ODKDatastoreException;
 
-  /**
-   * Gather the entity keys for this and all subordinate elements.
-   * Used when assembling the deletion list when deleting a submission.
-   * <p>
-   * When using this value, you should reverse the keyList and delete
-   * the entries in the reverse order in which they were added.
-   *
-   * @param keyList
-   * @throws ODKDatastoreException
-   * @throws ODKOverQuotaException
-   */
-  public void recursivelyAddEntityKeysForDeletion(List<EntityKey> keyList, CallingContext cc) throws ODKOverQuotaException, ODKDatastoreException;
+  void recursivelyAddEntityKeysForDeletion(List<EntityKey> keyList, CallingContext cc) throws ODKDatastoreException;
 
-  /**
-   * Recursively persist this submission to the datastore.
-   *
-   * @param callingContext
-   * @throws ODKEntityPersistException
-   * @throws ODKOverQuotaException
-   */
-  public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException;
+  void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException;
 
-  /**
-   * Format value for output
-   *
-   * @param elemFormatter the element formatter that will convert the value to the proper
-   *                      format for output
-   * @param row           container to put the formated value in
-   * @param ordinalValue  expected either a blank string if top-level element(submission), or the ordinal value of the repeat
-   * @throws ODKDatastoreException thrown if something goes wrong with the data store
-   */
-  public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc) throws ODKDatastoreException;
+  void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc) throws ODKDatastoreException;
 }

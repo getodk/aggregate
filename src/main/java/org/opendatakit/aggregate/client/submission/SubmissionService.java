@@ -22,14 +22,13 @@ import org.opendatakit.aggregate.client.exception.FormNotAvailableException;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
-import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 @RemoteServiceRelativePath("submissionservice")
 public interface SubmissionService extends RemoteService {
 
-  SubmissionUISummary getSubmissions(FilterGroup filter) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
+  SubmissionUISummary getSubmissions(FilterGroup filter) throws FormNotAvailableException, RequestFailureException, DatastoreFailureException;
 
-  SubmissionUISummary getRepeatSubmissions(String keyString) throws AccessDeniedException, FormNotAvailableException, RequestFailureException, DatastoreFailureException;
+  SubmissionUISummary getRepeatSubmissions(String keyString) throws FormNotAvailableException, RequestFailureException, DatastoreFailureException;
 
-  String getSubmissionAuditCSV(String keyString) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+  String getSubmissionAuditCSV(String keyString) throws RequestFailureException;
 }

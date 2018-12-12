@@ -21,7 +21,6 @@ import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
-import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 
@@ -34,8 +33,6 @@ import org.opendatakit.common.web.CallingContext;
 public class BooleanSubmissionType extends SubmissionSingleValueBase<Boolean> {
   /**
    * Constructor
-   *
-   * @param propertyName Name of submission element
    */
   public BooleanSubmissionType(DynamicCommonFieldsBase backingObject,
                                FormElementModel element) {
@@ -64,10 +61,6 @@ public class BooleanSubmissionType extends SubmissionSingleValueBase<Boolean> {
     setValue(b);
   }
 
-  public void setBooleanValue(Boolean value) {
-    setValue(value);
-  }
-
   @Override
   public void getValueFromEntity(CallingContext cc) {
     Boolean value = backingObject.getBooleanField(element.getFormDataModel().getBackingKey());
@@ -81,8 +74,7 @@ public class BooleanSubmissionType extends SubmissionSingleValueBase<Boolean> {
    *                      proper format for output
    */
   @Override
-  public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
-      throws ODKDatastoreException {
+  public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc) {
     elemFormatter.formatBoolean(getValue(), element, ordinalValue, row);
   }
 

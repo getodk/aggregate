@@ -44,11 +44,6 @@ import org.opendatakit.common.web.constants.BasicConsts;
 public class XmlMediaAttachmentFormatter implements ElementFormatter {
   XmlAttachmentFormatter xmlAttachmentFormatter;
 
-  /**
-   * Construct a XML Media Attachment Formatter
-   *
-   * @param xmlAttachmentFormatter
-   */
   public XmlMediaAttachmentFormatter(XmlAttachmentFormatter xmlAttachmentFormatter) {
     this.xmlAttachmentFormatter = xmlAttachmentFormatter;
   }
@@ -58,8 +53,7 @@ public class XmlMediaAttachmentFormatter implements ElementFormatter {
   }
 
   @Override
-  public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue,
-                           Row row, CallingContext cc) throws ODKDatastoreException {
+  public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue, Row row, CallingContext cc) throws ODKDatastoreException {
 
     if (blobSubmission == null ||
         (blobSubmission.getAttachmentCount(cc) == 0) ||
@@ -119,8 +113,7 @@ public class XmlMediaAttachmentFormatter implements ElementFormatter {
   }
 
   @Override
-  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row,
-                            CallingContext cc) throws ODKDatastoreException {
+  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row, CallingContext cc) throws ODKDatastoreException {
     xmlAttachmentFormatter.processRepeatedSubmssionSetsIntoRow(repeat.getSubmissionSets(), repeatElement, row, cc);
   }
 

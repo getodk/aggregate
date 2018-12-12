@@ -92,7 +92,7 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
   }
 
   @Override
-  public void afterPropertiesSet() throws Exception {
+  public void afterPropertiesSet() {
     if (realm == null) {
       throw new IllegalStateException("realm must be configured");
     }
@@ -211,11 +211,6 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
   }
 
   @Override
-  public String createLoginURL() {
-    return "login.html";
-  }
-
-  @Override
   public String createLogoutURL() {
     return "j_spring_security_logout";
   }
@@ -235,10 +230,10 @@ public class UserServiceImpl implements org.opendatakit.common.security.UserServ
   @Override
   public boolean isAccessManagementConfigured() {
     try {
-      /**
-       * Any configuration in the GrantedAuthorityHierarchy table indicates that
-       * we have configured access management with at least a default
-       * configuration.
+      /*
+        Any configuration in the GrantedAuthorityHierarchy table indicates that
+        we have configured access management with at least a default
+        configuration.
        */
       GrantedAuthorityHierarchyTable relation = GrantedAuthorityHierarchyTable.assertRelation(
           datastore, getDaemonAccountUser());

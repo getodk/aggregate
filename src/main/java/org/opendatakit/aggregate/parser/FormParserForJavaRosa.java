@@ -57,7 +57,6 @@ import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.TaskLock;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
@@ -85,23 +84,6 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
   private int elementCount = 0;
   private int phantomCount = 0;
 
-  /**
-   * Constructor that parses and xform from the input stream supplied and
-   * creates the proper ODK Aggregate Form definition.
-   *
-   * @param formName
-   * @param formXmlData
-   * @param inputXml
-   * @param fileName
-   * @param uploadedFormItems
-   * @param warnings          -- the builder that will hold all the non-fatal form-creation
-   *                          warnings
-   * @param cc
-   * @throws ODKFormAlreadyExistsException
-   * @throws ODKIncompleteSubmissionData
-   * @throws ODKDatastoreException
-   * @throws ODKParseException
-   */
   public FormParserForJavaRosa(String formName, MultiPartFormItem formXmlData, String inputXml,
                                String fileName, MultiPartFormData uploadedFormItems, StringBuilder warnings,
                                CallingContext cc) throws ODKFormAlreadyExistsException, ODKIncompleteSubmissionData,
@@ -150,8 +132,6 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
     // update the uiVersion and the form definition file...
     thisForm.setFormXml(thisForm.getFormFilename(cc), revisedXml, modelVersion, cc);
   }
-
-  ;
 
   private String generatePhantomKey(String uriSubmissionFormModel) {
     return String.format("elem+%1$s(%2$08d-phantom:%3$08d)", uriSubmissionFormModel, elementCount,
@@ -220,16 +200,12 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
           // we remain in the loop even if we get kicked out.
         }
       }
-      try {
-        TaskLock formCreationTaskLock = ds.createTaskLock(user);
-        if (formCreationTaskLock.obtainLock(creationLockId, lockedResourceName,
-            TaskLockType.CREATE_FORM)) {
-          locked = true;
-        }
-        formCreationTaskLock = null;
-      } catch (ODKTaskLockException e) {
-        e.printStackTrace();
+      TaskLock formCreationTaskLock = ds.createTaskLock(user);
+      if (formCreationTaskLock.obtainLock(creationLockId, lockedResourceName,
+          TaskLockType.CREATE_FORM)) {
+        locked = true;
       }
+      formCreationTaskLock = null;
     }
 
     // we hold the lock while we create the form here...
@@ -264,9 +240,6 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
    * This is the schema name concatenated with the table name. Used during table
    * creation to track the mapping from datastore tables to CommonFieldsBase
    * objects.
-   *
-   * @param tbl
-   * @return
    */
   private String tableKey(CommonFieldsBase tbl) {
     return tbl.getSchemaName() + "." + tbl.getTableName();
@@ -775,11 +748,6 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
   /**
    * The creation of the tbl relation has failed. We need to split it into
    * multiple sub-tables and try again.
-   *
-   * @param fdmList
-   * @param fdmRelation
-   * @param tbl
-   * @param newPhantomTableName
    */
   private void orderlyDivideTable(List<FormDataModel> fdmList, FormDataModel fdmRelation,
                                   CommonFieldsBase tbl, NamingSet opaque, CallingContext cc) {
@@ -1162,19 +1130,11 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
   /**
    * Used to recursively process the xform definition tree to create the form
    * data model.
-   *
-   * @param treeElement java rosa tree element
-   * @param parentKey   key from the parent form for proper entity group usage in gae
-   * @param parent      parent form element
-   * @throws ODKEntityPersistException
-   * @throws ODKParseException
    */
-
   private void constructDataModel(final NamingSet opaque, final EntityKey k,
                                   final List<FormDataModel> dmList, final FormDataModel fdm, String parent, int ordinal,
                                   String tablePrefix, String nrGroupPrefix, String tableName, TreeElement treeElement,
-                                  StringBuilder warnings, CallingContext cc) throws ODKEntityPersistException,
-      ODKParseException {
+                                  StringBuilder warnings, CallingContext cc) {
 
     // for debugging: printTreeElementInfo(treeElement);
 
@@ -1188,45 +1148,45 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
 
     switch (treeElement.getDataType()) {
       case org.javarosa.core.model.Constants.DATATYPE_TEXT:
-        /**
-         * Text question type.
+        /*
+          Text question type.
          */
         et = FormDataModel.ElementType.STRING;
         break;
       case org.javarosa.core.model.Constants.DATATYPE_INTEGER:
-        /**
-         * Numeric question type. These are numbers without decimal points
+        /*
+          Numeric question type. These are numbers without decimal points
          */
         et = FormDataModel.ElementType.INTEGER;
         break;
       case org.javarosa.core.model.Constants.DATATYPE_DECIMAL:
-        /**
-         * Decimal question type. These are numbers with decimals
+        /*
+          Decimal question type. These are numbers with decimals
          */
         et = FormDataModel.ElementType.DECIMAL;
         break;
       case org.javarosa.core.model.Constants.DATATYPE_DATE:
-        /**
-         * Date question type. This has only date component without time.
+        /*
+          Date question type. This has only date component without time.
          */
         et = FormDataModel.ElementType.JRDATE;
         break;
       case org.javarosa.core.model.Constants.DATATYPE_TIME:
-        /**
-         * Time question type. This has only time element without date
+        /*
+          Time question type. This has only time element without date
          */
         et = FormDataModel.ElementType.JRTIME;
         break;
       case org.javarosa.core.model.Constants.DATATYPE_DATE_TIME:
-        /**
-         * Date and Time question type. This has both the date and time components
+        /*
+          Date and Time question type. This has both the date and time components
          */
         et = FormDataModel.ElementType.JRDATETIME;
         break;
       case org.javarosa.core.model.Constants.DATATYPE_CHOICE:
-        /**
-         * This is a question with alist of options where not more than one option
-         * can be selected at a time.
+        /*
+          This is a question with alist of options where not more than one option
+          can be selected at a time.
          */
         et = FormDataModel.ElementType.STRING;
         // et = FormDataModel.ElementType.SELECT1;
@@ -1235,9 +1195,9 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
         // tablePrefix, nrGroupPrefix, treeElement.getName());
         break;
       case org.javarosa.core.model.Constants.DATATYPE_CHOICE_LIST:
-        /**
-         * This is a question with alist of options where more than one option can
-         * be selected at a time.
+        /*
+          This is a question with alist of options where more than one option can
+          be selected at a time.
          */
         et = FormDataModel.ElementType.SELECTN;
         opaque.removeColumnName(persistAsTable, persistAsColumn);
@@ -1246,40 +1206,40 @@ public class FormParserForJavaRosa extends BaseFormParserForJavaRosa {
             treeElement.getName());
         break;
       case org.javarosa.core.model.Constants.DATATYPE_BOOLEAN:
-        /**
-         * Question with true and false answers.
+        /*
+          Question with true and false answers.
          */
         et = FormDataModel.ElementType.BOOLEAN;
         break;
       case org.javarosa.core.model.Constants.DATATYPE_GEOPOINT:
-        /**
-         * Question with location answer.
+        /*
+          Question with location answer.
          */
         et = FormDataModel.ElementType.GEOPOINT;
         opaque.removeColumnName(persistAsTable, persistAsColumn);
         persistAsColumn = null; // structured field
         break;
       case org.javarosa.core.model.Constants.DATATYPE_GEOTRACE:
-        /**
-         * Question with location trace.
+        /*
+          Question with location trace.
          */
         et = FormDataModel.ElementType.GEOTRACE;
         break;
       case org.javarosa.core.model.Constants.DATATYPE_GEOSHAPE:
-        /**
-         * Question with location trace.
+        /*
+          Question with location trace.
          */
         et = FormDataModel.ElementType.GEOSHAPE;
         break;
       case org.javarosa.core.model.Constants.DATATYPE_BARCODE:
-        /**
-         * Question with barcode string answer.
+        /*
+          Question with barcode string answer.
          */
         et = FormDataModel.ElementType.STRING;
         break;
       case org.javarosa.core.model.Constants.DATATYPE_BINARY:
-        /**
-         * Question with external binary answer.
+        /*
+          Question with external binary answer.
          */
         et = FormDataModel.ElementType.BINARY;
         opaque.removeColumnName(persistAsTable, persistAsColumn);

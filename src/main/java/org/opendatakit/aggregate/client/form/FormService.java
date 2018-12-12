@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import org.opendatakit.aggregate.client.exception.RequestFailureException;
 import org.opendatakit.aggregate.client.filter.FilterGroup;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
-import org.opendatakit.common.security.client.exception.AccessDeniedException;
 
 /**
  * These are the APIs available to users with the ROLE_DATA_VIEWER privilege.
@@ -35,23 +34,23 @@ import org.opendatakit.common.security.client.exception.AccessDeniedException;
 @RemoteServiceRelativePath("formservice")
 public interface FormService extends RemoteService {
 
-  ArrayList<FormSummary> getForms() throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+  ArrayList<FormSummary> getForms() throws RequestFailureException, DatastoreFailureException;
 
-  ArrayList<ExportSummary> getExports() throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
-
-  @XsrfProtect
-  Boolean createCsvFromFilter(FilterGroup group) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+  ArrayList<ExportSummary> getExports() throws RequestFailureException, DatastoreFailureException;
 
   @XsrfProtect
-  Boolean createJsonFileFromFilter(FilterGroup group) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
-
-  KmlOptionsSummary getPossibleKmlSettings(String formId) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+  Boolean createCsvFromFilter(FilterGroup group) throws RequestFailureException, DatastoreFailureException;
 
   @XsrfProtect
-  Boolean createKmlFromFilter(FilterGroup group, ArrayList<KmlSelection> kmlElementsToInclude) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+  Boolean createJsonFileFromFilter(FilterGroup group) throws RequestFailureException, DatastoreFailureException;
 
-  GeopointElementList getGpsCoordnates(String formId) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+  KmlOptionsSummary getPossibleKmlSettings(String formId) throws RequestFailureException, DatastoreFailureException;
 
   @XsrfProtect
-  void deleteExport(String uri) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+  Boolean createKmlFromFilter(FilterGroup group, ArrayList<KmlSelection> kmlElementsToInclude) throws RequestFailureException, DatastoreFailureException;
+
+  GeopointElementList getGpsCoordnates(String formId) throws RequestFailureException, DatastoreFailureException;
+
+  @XsrfProtect
+  void deleteExport(String uri) throws RequestFailureException, DatastoreFailureException;
 }

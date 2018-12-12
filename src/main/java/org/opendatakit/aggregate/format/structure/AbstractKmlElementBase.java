@@ -46,22 +46,6 @@ abstract class AbstractKmlElementBase {
     }
   }
 
-  boolean verifyFieldsAreInList(List<FormElementModel> elements) {
-    if (elements == null) {
-      return false;
-    }
-
-    // check base class elements
-    if (geoElement != null && !elements.contains(geoElement)) {
-      return false;
-    }
-
-    // check child class elements
-    return childVerifyFieldsArePresent(elements);
-  }
-
-  abstract boolean childVerifyFieldsArePresent(List<FormElementModel> elements);
-
   abstract String generatePlacemarkSubmission(Submission sub, List<FormElementModel> propertyNames,
                                               CallingContext cc) throws ODKDatastoreException;
 

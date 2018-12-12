@@ -48,11 +48,6 @@ public class XmlElementFormatter implements ElementFormatter {
 
   String prefix = "";
 
-  /**
-   * Construct a XML Element Formatter
-   *
-   * @param xmlFormatter
-   */
   public XmlElementFormatter(XmlFormatter xmlFormatter) {
     this.xmlFormatter = xmlFormatter;
   }
@@ -67,8 +62,7 @@ public class XmlElementFormatter implements ElementFormatter {
   }
 
   @Override
-  public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue,
-                           Row row, CallingContext cc) throws ODKDatastoreException {
+  public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue, Row row, CallingContext cc) throws ODKDatastoreException {
     if (blobSubmission == null ||
         (blobSubmission.getAttachmentCount(cc) == 0) ||
         (blobSubmission.getContentHash(1, cc) == null)) {
@@ -153,8 +147,7 @@ public class XmlElementFormatter implements ElementFormatter {
   }
 
   @Override
-  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row,
-                            CallingContext cc) throws ODKDatastoreException {
+  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row, CallingContext cc) {
   }
 
   @Override

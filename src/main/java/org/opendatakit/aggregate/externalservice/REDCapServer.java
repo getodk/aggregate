@@ -19,7 +19,6 @@ package org.opendatakit.aggregate.externalservice;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -209,17 +208,17 @@ public class REDCapServer extends AbstractExternalService implements ExternalSer
   }
 
   public void submitFile(String recordID, String fileField, BlobSubmissionType blob_value,
-                         CallingContext cc) throws MalformedURLException, IOException,
+                         CallingContext cc) throws
       ODKDatastoreException {
 
     String contentType = blob_value.getContentType(1, cc);
     String filename = blob_value.getUnrootedFilename(1, cc);
     filename = fileField + filename.substring(filename.lastIndexOf('.'));
 
-    /**
-     * REDCap server appears to be highly irregular in the structure of the
-     * form-data submission it will accept from the client. The following should
-     * work, but either resets the socket or returns a 403 error.
+    /*
+      REDCap server appears to be highly irregular in the structure of the
+      form-data submission it will accept from the client. The following should
+      work, but either resets the socket or returns a 403 error.
      */
     ContentType utf8Text = ContentType.create(ContentType.TEXT_PLAIN.getMimeType(), UTF_CHARSET);
     MultipartEntityBuilder builder = MultipartEntityBuilder.create();

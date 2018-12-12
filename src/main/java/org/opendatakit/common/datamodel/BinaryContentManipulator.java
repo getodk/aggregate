@@ -1,15 +1,15 @@
-/**
- * Copyright (C) 2010 University of Washington
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+/*
+  Copyright (C) 2010 University of Washington
+  <p>
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+  in compliance with the License. You may obtain a copy of the License at
+  <p>
+  http://www.apache.org/licenses/LICENSE-2.0
+  <p>
+  Unless required by applicable law or agreed to in writing, software distributed under the License
+  is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+  or implied. See the License for the specific language governing permissions and limitations under
+  the License.
  */
 package org.opendatakit.common.datamodel;
 
@@ -47,9 +47,7 @@ import org.opendatakit.common.web.CallingContext;
  * example, each binary form element gets its own set of 3 attachment relations.
  * <p>
  *
- *
  * @author mitchellsundt@gmail.com
- *
  */
 public class BinaryContentManipulator {
 
@@ -62,6 +60,7 @@ public class BinaryContentManipulator {
   private final Map<Long, BinaryContent> attachments = new HashMap<Long, BinaryContent>();
   // implement lazy access to the attachment fields
   private boolean refreshBeforeUse = true;
+
   public BinaryContentManipulator(String parentKey, String topLevelKey, BinaryContent ctntRelation,
                                   BinaryContentRefBlob vrefRelation, RefBlob blbRelation) {
     this.parentKey = parentKey;
@@ -84,10 +83,6 @@ public class BinaryContentManipulator {
     return internalGetAttachmentCount();
   }
 
-  /**
-   * @param ordinal
-   * @return the last update date of this attachment.
-   */
   public Date getLastUpdateDate(int ordinal, CallingContext cc) throws ODKDatastoreException {
     updateAttachments(cc);
     BinaryContent b = attachments.get(Long.valueOf(ordinal));
@@ -98,52 +93,6 @@ public class BinaryContentManipulator {
     return b.getLastUpdateDate();
   }
 
-  /**
-   * @param ordinal
-   * @return the uri User performing the last update of this attachment.
-   */
-  public String getLastUpdateUriUser(int ordinal, CallingContext cc) throws ODKDatastoreException {
-    updateAttachments(cc);
-    BinaryContent b = attachments.get(Long.valueOf(ordinal));
-    if (b == null) {
-      // we are somehow out of sync!
-      throw new IllegalStateException("missing attachment declaration");
-    }
-    return b.getLastUpdateUriUser();
-  }
-
-  /**
-   * @param ordinal
-   * @return the creation date of this attachment.
-   */
-  public Date getCreationDate(int ordinal, CallingContext cc) throws ODKDatastoreException {
-    updateAttachments(cc);
-    BinaryContent b = attachments.get(Long.valueOf(ordinal));
-    if (b == null) {
-      // we are somehow out of sync!
-      throw new IllegalStateException("missing attachment declaration");
-    }
-    return b.getCreationDate();
-  }
-
-  /**
-   * @param ordinal
-   * @return the uri User who created this attachment.
-   */
-  public String getCreatorUriUser(int ordinal, CallingContext cc) throws ODKDatastoreException {
-    updateAttachments(cc);
-    BinaryContent b = attachments.get(Long.valueOf(ordinal));
-    if (b == null) {
-      // we are somehow out of sync!
-      throw new IllegalStateException("missing attachment declaration");
-    }
-    return b.getCreatorUriUser();
-  }
-
-  /**
-   * @param ordinal
-   * @return the attachment's unrooted file path.
-   */
   public String getUnrootedFilename(int ordinal, CallingContext cc) throws ODKDatastoreException {
     updateAttachments(cc);
     BinaryContent b = attachments.get(Long.valueOf(ordinal));
@@ -154,10 +103,6 @@ public class BinaryContentManipulator {
     return b.getUnrootedFilePath();
   }
 
-  /**
-   * @param ordinal
-   * @return the content type or null if no content is attached.
-   */
   public String getContentType(int ordinal, CallingContext cc) throws ODKDatastoreException {
     updateAttachments(cc);
     BinaryContent b = attachments.get(Long.valueOf(ordinal));
@@ -203,11 +148,7 @@ public class BinaryContentManipulator {
    * Atomically rename the given source file path to the destination path.
    * Will fail if the destination path already exists.
    *
-   * @param unrootedFilePathSrc
-   * @param unrootedFilePathDest
-   * @param cc
    * @return true if unrootedFilePathSrc doesn't exist or if the rename succeeds
-   * @throws ODKDatastoreException
    */
   public boolean renameFilePath(String unrootedFilePathSrc, String unrootedFilePathDest, CallingContext cc) throws ODKDatastoreException {
 
@@ -257,14 +198,8 @@ public class BinaryContentManipulator {
    * Save the attachment to the database. This can be called in two ways.
    * Everything non-null or unrootedFilePath non-null and everything else null.
    *
-   * @param byteArray
-   * @param contentType
-   * @param unrootedFilePath
-   * @param overwriteOK -- if the file exists and is different, must be true to overwrite existing value.
-   * @param cc
    * @return COMPLETELY_NEW_FILE on successful save; FILE_UNCHANGED on hash
-   *         equivalence; NEW_FILE_VERSION on updating existing file (save not allowed unless overwriteOK).
-   * @throws ODKDatastoreException
+   *     equivalence; NEW_FILE_VERSION on updating existing file (save not allowed unless overwriteOK).
    */
   public BinaryContentManipulator.BlobSubmissionOutcome setValueFromByteArray(byte[] byteArray,
                                                                               String contentType, String unrootedFilePath, boolean overwriteOK, CallingContext cc)
@@ -455,13 +390,6 @@ public class BinaryContentManipulator {
     }
   }
 
-  /**
-   * Remove this binary content from the datastore.
-   *
-   * @param datastore
-   * @param user
-   * @throws ODKDatastoreException
-   */
   public synchronized void deleteAll(CallingContext cc) throws ODKDatastoreException {
 
     // don't care if there are problems with the attachments -- we are deleting everything.
@@ -487,9 +415,6 @@ public class BinaryContentManipulator {
     }
   }
 
-  /**
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
   @Override
   public boolean equals(Object obj) {
     if (!(obj instanceof BinaryContentManipulator)) {
@@ -509,10 +434,6 @@ public class BinaryContentManipulator {
    * Build up the list of entity keys for the attachments and their
    * references and blobs. This is done so that if we delete these in
    * reverse order, we don't get into a bad state.
-   *
-   * @param keyList
-   * @param cc
-   * @throws ODKDatastoreException
    */
   public void recursivelyAddEntityKeysForDeletion(List<EntityKey> keyList, CallingContext cc)
       throws ODKDatastoreException {
@@ -527,9 +448,6 @@ public class BinaryContentManipulator {
     }
   }
 
-  /**
-   * @see java.lang.Object#hashCode()
-   */
   @Override
   public int hashCode() {
     return super.hashCode() + parentKey.hashCode() + 3 * topLevelKey.hashCode();
@@ -539,12 +457,6 @@ public class BinaryContentManipulator {
     FILE_UNCHANGED, NEW_FILE_VERSION, COMPLETELY_NEW_FILE
   }
 
-  /**
-   * Manipulator class for handling an in-memory blob
-   *
-   * @author mitchellsundt@gmail.com
-   *
-   */
   public static class BlobManipulator {
 
     private List<BinaryContentRefBlob> dbBcbEntityList = new ArrayList<BinaryContentRefBlob>();
@@ -552,15 +464,6 @@ public class BinaryContentManipulator {
 
     /**
      * Construct an blob entity and persist it into the data store
-     *
-     * @param blob
-     * @param uriVersionedContent
-     * @param versionedBinaryContentRefBlobModel
-     * @param formDefinition
-     * @param colocationKey
-     * @param cc
-     *          - the CallingContext of this request
-     * @throws ODKDatastoreException
      */
     public BlobManipulator(byte[] blob, String uriVersionedContent, BinaryContentRefBlob bcbRef,
                            RefBlob ref, String topLevelKey, CallingContext cc) throws ODKDatastoreException {
@@ -626,22 +529,6 @@ public class BinaryContentManipulator {
       }
     }
 
-    public String getTopLevelAuri() {
-      if (dbBcbEntityList.size() == 0) {
-        // blob does not exist!
-        return null;
-      }
-      return dbBcbEntityList.get(0).getTopLevelAuri();
-    }
-
-    public String getVersionedContentKey() {
-      if (dbBcbEntityList.size() == 0) {
-        return null;
-      }
-      // by construction these should all have the same parent...
-      return dbBcbEntityList.get(0).getDomAuri();
-    }
-
     public byte[] getBlob() {
       ByteArrayOutputStream reconstructedBlob = new ByteArrayOutputStream();
       for (RefBlob partialBlob : dbRefBlobList) {
@@ -657,8 +544,6 @@ public class BinaryContentManipulator {
      * we reverse the resulting keyList, we can delete the
      * entities in order and not get into a bad database
      * state.
-     *
-     * @param keyList
      */
     public void recursivelyAddEntityKeysForDeletion(List<EntityKey> keyList) {
       HashMap<String, RefBlob> blobs = new HashMap<String, RefBlob>();
@@ -679,13 +564,6 @@ public class BinaryContentManipulator {
       for (RefBlob r : blobs.values()) {
         keyList.add(r.getEntityKey());
       }
-    }
-
-    public void persist(CallingContext cc) throws ODKEntityPersistException, ODKOverQuotaException {
-      List<CommonFieldsBase> rows = new ArrayList<CommonFieldsBase>();
-      rows.addAll(dbRefBlobList);
-      rows.addAll(dbBcbEntityList);
-      cc.getDatastore().putEntities(rows, cc.getCurrentUser());
     }
 
   }

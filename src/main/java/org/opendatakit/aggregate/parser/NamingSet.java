@@ -1,15 +1,15 @@
-/**
- * Copyright (C) 2010 University of Washington
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+/*
+  Copyright (C) 2010 University of Washington
+  <p>
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+  in compliance with the License. You may obtain a copy of the License at
+  <p>
+  http://www.apache.org/licenses/LICENSE-2.0
+  <p>
+  Unless required by applicable law or agreed to in writing, software distributed under the License
+  is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+  or implied. See the License for the specific language governing permissions and limitations under
+  the License.
  */
 package org.opendatakit.aggregate.parser;
 
@@ -41,7 +41,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
- *
  */
 final class NamingSet {
   private static final String DROP_CHARS = "AEIOUY";
@@ -161,15 +160,6 @@ final class NamingSet {
     }
   }
 
-  /**
-   * Record information about a table and obtain the placeholder string for it.
-   *
-   * @param schema
-   * @param prefix
-   * @param qualifier
-   * @param itemName
-   * @return placeholder string for this table.
-   */
   public final String getTableName(String schema, String prefix, String qualifier, String itemName) {
     String placeholder = genPlaceholder();
 
@@ -177,15 +167,6 @@ final class NamingSet {
     return placeholder;
   }
 
-  /**
-   * Record information about a column in a table and obtain a placeholder
-   * string for it.
-   *
-   * @param tablePlaceholder
-   * @param qualifier
-   * @param itemName
-   * @return placeholder string for this column.
-   */
   public final String getColumnName(String tablePlaceholder, String qualifier, String itemName) {
     String placeholder = genPlaceholder();
 
@@ -198,13 +179,6 @@ final class NamingSet {
     return placeholder;
   }
 
-  /**
-   * Called prior to resolving column names if a column placeholder was defined
-   * but actually doesn't exist (e.g., geopoint, binary or choice).
-   *
-   * @param tablePlaceholder
-   * @param columnPlaceholder
-   */
   public final void removeColumnName(String tablePlaceholder, String columnPlaceholder) {
     Map<String, Name> m = columnPlaceholders.get(tablePlaceholder);
     if (m != null) {
@@ -212,28 +186,12 @@ final class NamingSet {
     }
   }
 
-  /**
-   * Step two -- resolve the table and column names in the form.
-   *
-   * @param ds
-   * @param user
-   * @throws ODKDatastoreException
-   */
   public void resolveNames(Datastore ds, User user) throws ODKDatastoreException {
     resolveTableNames(ds, user);
     resolveColumnNames(ds.getMaxLenColumnName());
     dumpTables("resolve" + Integer.valueOf(++idxResolveNames), 0);
   }
 
-  /**
-   * Resolve the table names. This requires asking the persistence layer if the
-   * table already exists. We are creating tables for a new form, so it should
-   * not stomp on any existing tables.
-   *
-   * @param ds
-   * @param user
-   * @throws ODKDatastoreException
-   */
   private void resolveTableNames(Datastore ds, User user) throws ODKDatastoreException {
     int maxLenTableName = ds.getMaxLenTableName();
     // resolve the table names
@@ -362,12 +320,6 @@ final class NamingSet {
     // let's hope that the tables don't need to be split into phantoms...
   }
 
-  /**
-   * Strip off any trailing digits to recover the raw name of a table.
-   *
-   * @param originalTable
-   * @return
-   */
   private String getStrippedName(String originalTable) {
     int idxNonNumber = originalTable.length() - 1;
     while (idxNonNumber >= 0 && Character.isDigit(originalTable.charAt(idxNonNumber))) {
@@ -380,17 +332,6 @@ final class NamingSet {
     return strippedName;
   }
 
-  /**
-   * Called after the fact when a table needs to be split into the original
-   * table and a phantom.
-   *
-   * @param schema
-   * @param originalTable
-   * @param ds
-   * @param user
-   * @return
-   * @throws ODKDatastoreException
-   */
   public String generateUniqueTableName(String schema, String originalTable, CallingContext cc)
       throws ODKDatastoreException {
     Datastore ds = cc.getDatastore();
@@ -414,12 +355,6 @@ final class NamingSet {
     return originalTable;
   }
 
-  /**
-   * Resolve the column names in each table definition so they are unique within
-   * that table.
-   *
-   * @param maxLenColumnName
-   */
   private void resolveColumnNames(int maxLenColumnName) {
     try {
       // resolve the column names within a table
@@ -511,14 +446,6 @@ final class NamingSet {
     }
   }
 
-  /**
-   * Attempt to shorten a name in a somewhat sensible way.
-   *
-   * @param name
-   * @param len
-   *          goal length of returned string. Returned string may be shorter.
-   * @return shortened name
-   */
   public String trimName(String name, int len) {
 
     String originalName = name;
@@ -608,23 +535,10 @@ final class NamingSet {
     return name;
   }
 
-  /**
-   * Step Three -- retrieve the actual name for the table placeholder.
-   *
-   * @param tablePlaceholder
-   * @return table name
-   */
   public String resolveTablePlaceholder(String tablePlaceholder) {
     return tablePlaceholders.get(tablePlaceholder).resolvedName;
   }
 
-  /**
-   * Step Three -- retrieve the actual name for the column placeholder.
-   *
-   * @param tablePlaceholder
-   * @param columnPlaceholder
-   * @return column name
-   */
   public String resolveColumnPlaceholder(String tablePlaceholder, String columnPlaceholder) {
     if (columnPlaceholder == null) {
       return null;

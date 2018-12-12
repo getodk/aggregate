@@ -1,15 +1,15 @@
-/**
- * Copyright (C) 2010 University of Washington
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+/*
+  Copyright (C) 2010 University of Washington
+  <p>
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+  in compliance with the License. You may obtain a copy of the License at
+  <p>
+  http://www.apache.org/licenses/LICENSE-2.0
+  <p>
+  Unless required by applicable law or agreed to in writing, software distributed under the License
+  is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+  or implied. See the License for the specific language governing permissions and limitations under
+  the License.
  */
 package org.opendatakit.common.persistence.engine.gae;
 
@@ -45,10 +45,8 @@ import org.opendatakit.common.security.User;
 import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class DatastoreImpl implements Datastore {
 
@@ -72,7 +70,7 @@ public class DatastoreImpl implements Datastore {
 
   private DatastoreAccessMetrics dam = new DatastoreAccessMetrics();
 
-  public DatastoreImpl() throws Exception {
+  public DatastoreImpl() {
     ds = DatastoreServiceFactory.getDatastoreService();
     schemaName = "opendatakit";
 
@@ -90,10 +88,6 @@ public class DatastoreImpl implements Datastore {
 
   DatastoreService getDatastoreService() {
     return ds;
-  }
-
-  public DatastoreAccessMetrics getDam() {
-    return dam;
   }
 
   void recordQueryUsage(CommonFieldsBase relation, int recCount) {
@@ -171,12 +165,6 @@ public class DatastoreImpl implements Datastore {
     }
   }
 
-  /**
-   * Determine whether this relation already exists.
-   *
-   * @return false because we don't care about naming collisions.
-   * @throws ODKDatastoreException
-   */
   @Override
   public boolean hasRelation(String schema, String tableName, User user) throws ODKDatastoreException {
     List<com.google.appengine.api.datastore.Entity> gaeKeys = null;
@@ -424,12 +412,6 @@ public class DatastoreImpl implements Datastore {
     } catch (Exception ex) {
       throw new ODKEntityPersistException(ex);
     }
-  }
-
-  @Override
-  public void batchAlterData(List<? extends CommonFieldsBase> changes, User user)
-      throws ODKEntityPersistException, ODKOverQuotaException {
-    putEntities(changes, user);
   }
 
   @Override

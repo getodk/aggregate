@@ -49,10 +49,6 @@ public class OhmageJsonElementFormatter implements ElementFormatter {
     this.photos = new HashMap<UUID, ByteArrayBody>();
   }
 
-  public static String getBinaryContentTransferEncoding() {
-    return "base64";
-  }
-
   @Override
   public void formatUid(String uri, String propertyName, Row row) {
     // unneeded so unimplemented

@@ -15,8 +15,6 @@
  */
 package org.opendatakit.common.utils.gae;
 
-import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
-import com.google.api.client.http.HttpTransport;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.ConnectionConfig;
 import org.apache.http.config.SocketConfig;
@@ -41,10 +39,4 @@ public class GaeHttpClientFactoryImpl implements HttpClientFactory {
 
     return HttpClientBuilder.create().setConnectionManager(new GaeHttpClientConnectionManager(socketConfig, connectionConfig, requestConfig)).build();
   }
-
-  @Override
-  public HttpTransport getGoogleOAuth2Transport() {
-    return new UrlFetchTransport();
-  }
-
 }

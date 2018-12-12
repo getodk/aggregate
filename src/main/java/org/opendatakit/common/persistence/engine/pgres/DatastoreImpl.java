@@ -1,15 +1,15 @@
-/**
- * Copyright (C) 2010 University of Washington
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+/*
+  Copyright (C) 2010 University of Washington
+  <p>
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+  in compliance with the License. You may obtain a copy of the License at
+  <p>
+  http://www.apache.org/licenses/LICENSE-2.0
+  <p>
+  Unless required by applicable law or agreed to in writing, software distributed under the License
+  is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+  or implied. See the License for the specific language governing permissions and limitations under
+  the License.
  */
 package org.opendatakit.common.persistence.engine.pgres;
 
@@ -41,7 +41,6 @@ import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.security.User;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
@@ -51,10 +50,8 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class DatastoreImpl implements Datastore, InitializingBean {
 
@@ -104,7 +101,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
   private DataSourceTransactionManager tm = null;
   private String schemaName = null;
 
-  public DatastoreImpl() throws ODKDatastoreException {
+  public DatastoreImpl() {
   }
 
   static SqlParameterValue getBindValue(DataField f, Object value) {
@@ -222,7 +219,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
   }
 
   @Override
-  public void afterPropertiesSet() throws Exception {
+  public void afterPropertiesSet() {
     if (dataSource == null) {
       throw new IllegalStateException("dataSource property must be set!");
     }
@@ -345,9 +342,6 @@ public class DatastoreImpl implements Datastore, InitializingBean {
     }
   }
 
-  /**
-   * Relation manipulation APIs
-   */
   @Override
   public void assertRelation(CommonFieldsBase relation, User user) throws ODKDatastoreException {
     JdbcTemplate jc = getJdbcConnection();
@@ -509,9 +503,6 @@ public class DatastoreImpl implements Datastore, InitializingBean {
 
   /**
    * Construct a 3-character or more prefix for use in the index name.
-   *
-   * @param name
-   * @return
    */
   private String shortPrefix(String name) {
     StringBuilder b = new StringBuilder();
@@ -585,11 +576,6 @@ public class DatastoreImpl implements Datastore, InitializingBean {
       throw new ODKDatastoreException(e);
     }
   }
-
-  /***************************************************************************
-   * Entity manipulation APIs
-   *
-   */
 
   @SuppressWarnings("unchecked")
   @Override
@@ -745,168 +731,6 @@ public class DatastoreImpl implements Datastore, InitializingBean {
   }
 
   @Override
-  public void batchAlterData(List<? extends CommonFieldsBase> changes, User user)
-      throws ODKEntityPersistException {
-    if (changes.isEmpty()) {
-      return;
-    }
-
-    // we need to be careful -- SqlServer only allows a small number of
-    // bind parameters on a request. This severely limits the batch size
-    // that can be sent.
-    CommonFieldsBase firstEntity = changes.get(0);
-    int maxPerBatch = (MAX_BIND_PARAMS / firstEntity.getFieldList().size());
-    for (int idxStart = 0; idxStart < changes.size(); idxStart += maxPerBatch) {
-      int idxAfterEnd = idxStart + maxPerBatch;
-      if (idxAfterEnd > changes.size()) {
-        idxAfterEnd = changes.size();
-      }
-      partialBatchAlterData(changes, idxStart, idxAfterEnd, user);
-    }
-
-  }
-
-  private void partialBatchAlterData(List<? extends CommonFieldsBase> allChanges,
-                                     int idxStart, int idxAfterEnd, User user)
-      throws ODKEntityPersistException {
-    if (allChanges.isEmpty()) {
-      return;
-    }
-
-    boolean generateSQL = true;
-    String sql = null;
-    List<List<SqlParameterValue>> batchArgs = new ArrayList<List<SqlParameterValue>>();
-    StringBuilder b = new StringBuilder();
-
-    for (int idx = idxStart; idx < idxAfterEnd; ++idx) {
-      CommonFieldsBase entity = allChanges.get(idx);
-      dam.recordPutUsage(entity);
-
-      boolean first;
-      b.setLength(0);
-
-      ArrayList<SqlParameterValue> pv = new ArrayList<SqlParameterValue>();
-
-      if (entity.isFromDatabase()) {
-        // we need to do an update
-        entity.setDateField(entity.lastUpdateDate, new Date());
-        entity.setStringField(entity.lastUpdateUriUser, user.getUriUser());
-
-        if (generateSQL) {
-          b.append(K_UPDATE);
-          b.append(K_BQ);
-          b.append(entity.getSchemaName());
-          b.append(K_BQ);
-          b.append(".");
-          b.append(K_BQ);
-          b.append(entity.getTableName());
-          b.append(K_BQ);
-          b.append(K_SET);
-        }
-
-        first = true;
-        // fields...
-        for (DataField f : entity.getFieldList()) {
-          // primary key goes in the where clause...
-          if (f == entity.primaryKey)
-            continue;
-
-          if (generateSQL) {
-            if (!first) {
-              b.append(K_CS);
-            }
-            first = false;
-            b.append(K_BQ);
-            b.append(f.getName());
-            b.append(K_BQ);
-            b.append(K_EQ);
-            b.append(K_BIND_VALUE);
-          }
-
-          buildArgumentList(pv, entity, f);
-        }
-        if (generateSQL) {
-          b.append(K_WHERE);
-          b.append(K_BQ);
-          b.append(entity.primaryKey.getName());
-          b.append(K_BQ);
-          b.append(K_EQ);
-          b.append(K_BIND_VALUE);
-        }
-        buildArgumentList(pv, entity, entity.primaryKey);
-
-      } else {
-        if (generateSQL) {
-          // not yet in database -- insert
-          b.append(K_INSERT_INTO);
-          b.append(K_BQ);
-          b.append(entity.getSchemaName());
-          b.append(K_BQ);
-          b.append(".");
-          b.append(K_BQ);
-          b.append(entity.getTableName());
-          b.append(K_BQ);
-          first = true;
-          b.append(K_OPEN_PAREN);
-          // fields...
-          for (DataField f : entity.getFieldList()) {
-            if (!first) {
-              b.append(K_CS);
-            }
-            first = false;
-            b.append(K_BQ);
-            b.append(f.getName());
-            b.append(K_BQ);
-          }
-          b.append(K_CLOSE_PAREN);
-          b.append(K_VALUES);
-          b.append(K_OPEN_PAREN);
-        }
-
-        first = true;
-        // fields...
-        for (DataField f : entity.getFieldList()) {
-          if (generateSQL) {
-            if (!first) {
-              b.append(K_CS);
-            }
-            first = false;
-            b.append(K_BIND_VALUE);
-          }
-          buildArgumentList(pv, entity, f);
-        }
-
-        if (generateSQL) {
-          b.append(K_CLOSE_PAREN);
-        }
-      }
-
-      if (generateSQL) {
-        b.append(K_COLON);
-        sql = b.toString();
-      }
-      generateSQL = false;
-      batchArgs.add(pv);
-    }
-
-    try {
-      // update...
-      BatchStatementFieldSetter setter = new BatchStatementFieldSetter(sql, batchArgs);
-      getJdbcConnection().batchUpdate(sql, setter);
-
-      // if this was an insert, set the fromDatabase flag in the entities
-      if (!allChanges.get(0).isFromDatabase()) {
-        for (int idx = idxStart; idx < idxAfterEnd; ++idx) {
-          CommonFieldsBase entity = allChanges.get(idx);
-          entity.setFromDatabase(true);
-        }
-      }
-    } catch (Exception e) {
-      throw new ODKEntityPersistException(e);
-    }
-  }
-
-  @Override
   public void deleteEntity(EntityKey key, User user) throws ODKDatastoreException {
 
     dam.recordDeleteUsage(key);
@@ -996,6 +820,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
     private Integer numericPrecision = null;
     private boolean isDoublePrecision = false;
     private DataField.DataType dataType;
+
     TableDefinition(ResultSet rs) throws SQLException {
       columnName = rs.getString(COLUMN_NAME);
       String s = rs.getString(IS_NULLABLE);
@@ -1092,17 +917,7 @@ public class DatastoreImpl implements Datastore, InitializingBean {
     String sql = null;
     List<SqlParameterValue> argList = null;
 
-    ReusableStatementSetter() {
-    }
-
-    ;
-
     ReusableStatementSetter(String sql, List<SqlParameterValue> args) {
-      this.sql = sql;
-      this.argList = args;
-    }
-
-    public void setArgList(String sql, List<SqlParameterValue> args) {
       this.sql = sql;
       this.argList = args;
     }
@@ -1170,27 +985,4 @@ public class DatastoreImpl implements Datastore, InitializingBean {
     }
   }
 
-  private static final class BatchStatementFieldSetter implements BatchPreparedStatementSetter {
-
-    final String sql;
-    final List<List<SqlParameterValue>> batchArgs;
-    ReusableStatementSetter setter = new ReusableStatementSetter();
-
-    BatchStatementFieldSetter(String sql, List<List<SqlParameterValue>> batchArgs) {
-      this.sql = sql;
-      this.batchArgs = batchArgs;
-    }
-
-    @Override
-    public int getBatchSize() {
-      return batchArgs.size();
-    }
-
-    @Override
-    public void setValues(PreparedStatement ps, int idx) throws SQLException {
-      List<SqlParameterValue> argArray = batchArgs.get(idx);
-      setter.setArgList(sql, argArray);
-      setter.setValues(ps);
-    }
-  }
 }

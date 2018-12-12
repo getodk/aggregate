@@ -154,12 +154,11 @@ public class BaseFormParserForJavaRosa {
   private final Map<String, Integer> stringLengths = new HashMap<String, Integer>();
   // original bindings from parse-time for later comparison
   private final List<Element> bindElements = new ArrayList<Element>();
+
   /**
    * Alternate constructor for internally comparing whether two form definitions
    * share the same data elements and storage models. This just parses the
    * supplied xml and does nothing else.
-   *
-   * @throws ODKIncompleteSubmissionData
    */
   protected BaseFormParserForJavaRosa(String existingXml, String existingTitle, boolean allowLegacy)
       throws ODKIncompleteSubmissionData {
@@ -447,18 +446,6 @@ public class BaseFormParserForJavaRosa {
   }
 
   /**
-   * Determine whether or not a field is encrypted. Field-level encryption
-   * plumbing.
-   *
-   * @param element
-   * @return
-   */
-  public final static boolean isEncryptedField(TreeElement element) {
-    String v = getBindAttribute(element, "encrypted");
-    return (v != null && ("true".equalsIgnoreCase(v) || "true()".equalsIgnoreCase(v)));
-  }
-
-  /**
    * Field-level encryption requires an extended Javarosa library that expose an
    * "encrypted" bind attribute that identifies the fields that are to be
    * encrypted and a BASE64_RSA_PUBLIC_KEY bind attribute on the
@@ -467,10 +454,6 @@ public class BaseFormParserForJavaRosa {
    * Requires an experimental custom Javarosa library.
    * <p>
    * Not enabled in the main tree.
-   *
-   * @param element
-   * @param name
-   * @return
    */
   private final static String getBindAttribute(TreeElement element, String name) {
     return null;
@@ -546,7 +529,6 @@ public class BaseFormParserForJavaRosa {
    *     differ, but database structure remains unchanged; XFORMS_DIFFERENT
    *     when forms are different enough to affect database structure and/or
    *     encryption.
-   * @throws ODKIncompleteSubmissionData
    */
   public static DifferenceResult compareXml(BaseFormParserForJavaRosa incomingParser,
                                             String existingXml, String existingTitle, boolean isWithinUpdateWindow)
@@ -704,8 +686,6 @@ public class BaseFormParserForJavaRosa {
    * Compare two parsed TreeElements to assess their level of structural
    * difference (if any).
    *
-   * @param treeElement1
-   * @param treeElement2
    * @return XFORMS_SHARE_INSTANCE when bodies differ but instances and bindings
    *     are identical; XFORMS_SHARE_SCHEMA when bodies and/or bindings
    *     differ, but database structure remains unchanged; XFORMS_DIFFERENT
@@ -964,14 +944,6 @@ public class BaseFormParserForJavaRosa {
     return len;
   }
 
-  /**
-   * Extract the form id, version and uiVersion.
-   *
-   * @param rootElement        - the tree element that is the root submission.
-   * @param defaultFormIdValue - used if no "id" attribute found. This should already be
-   *                           slash-substituted.
-   * @return
-   */
   private XFormParameters extractFormParameters(TreeElement rootElement, String defaultFormIdValue) {
 
     String formIdValue = null;
@@ -992,14 +964,6 @@ public class BaseFormParserForJavaRosa {
         versionString);
   }
 
-  /**
-   * Traverse the submission looking for the first matching tag in depth-first
-   * order.
-   *
-   * @param parent
-   * @param name
-   * @return
-   */
   private TreeElement findDepthFirst(TreeElement parent, String name) {
     int len = parent.getNumChildren();
     for (int i = 0; i < len; ++i) {
@@ -1015,13 +979,6 @@ public class BaseFormParserForJavaRosa {
     return null;
   }
 
-  /**
-   * Field-level encryption support. Forms with field-level encryption must have
-   * a meta block with a BASE64_ENCRYPTED_FIELD_KEY entry.
-   *
-   * @return base64EncryptedFieldRsaPublicKey string if field encryption is
-   *     present.
-   */
   private String extractBase64FieldEncryptionKey(TreeElement submissionElement) {
     TreeElement meta = findDepthFirst(submissionElement, "meta");
     if (meta != null) {
@@ -1044,10 +1001,6 @@ public class BaseFormParserForJavaRosa {
     return null;
   }
 
-  /**
-   * Reads an optional <code>odk:length</code> attribute and saves it to be used
-   * to size the corresponding storage field.
-   */
   private void storeLengthOfBinding(Element binding) {
     Optional
         .ofNullable(binding.getAttributeValue(NAMESPACE_ODK, "length"))
@@ -1055,10 +1008,6 @@ public class BaseFormParserForJavaRosa {
         .ifPresent(length -> stringLengths.put(binding.getAttributeValue(null, "nodeset"), length));
   }
 
-  /**
-   * Gets a copy of the given {@link Element} and saves it to be used if
-   * we need to compute the diff between the parsed xml and another xml
-   */
   private void storeCopyOfBinding(Element binding) {
     Element copy = new Element();
     copy.createElement(binding.getNamespace(), binding.getName());
@@ -1067,21 +1016,6 @@ public class BaseFormParserForJavaRosa {
           binding.getAttributeValue(i));
     }
     bindElements.add(copy);
-  }
-
-  private String getNodeset(Element e) {
-    String nodeset = e.getName();
-    Object current = e.getParent();
-    while (current instanceof Element && ((Element) current).getName() != null) {
-      nodeset = ((Element) current).getName() + "/" + nodeset;
-      current = ((Element) current).getParent();
-    }
-    return "/" + nodeset;
-  }
-
-  private void printTreeElementInfo(TreeElement treeElement) {
-    System.out.println("processing te: " + treeElement.getName() + " type: " + treeElement.getDataType()
-        + " repeatable: " + treeElement.isRepeatable());
   }
 
   public String getTreeElementPath(AbstractTreeElement<?> e) {
@@ -1093,12 +1027,6 @@ public class BaseFormParserForJavaRosa {
     return s + "/" + e.getName();
   }
 
-  /**
-   * Get all recorded bindings for a given TreeElement
-   *
-   * @param treeElement
-   * @return
-   */
   private List<Element> getBindingsForTreeElement(TreeElement treeElement) {
     List<Element> l = new ArrayList<Element>();
     String nodeset = "/" + getTreeElementPath(treeElement);

@@ -25,14 +25,6 @@ public class AggregateCheckBox extends CheckBox implements ValueChangeHandler<Bo
 
   private final AggregateBaseHandlers handlers;
 
-  public AggregateCheckBox(String tooltipText) {
-    this(null, false, tooltipText, null);
-  }
-
-  public AggregateCheckBox(String label, String tooltipText) {
-    this(label, false, tooltipText, null);
-  }
-
   public AggregateCheckBox(String label, boolean labelIsHTML, String tooltipText, String helpBalloonText) {
     super();
 

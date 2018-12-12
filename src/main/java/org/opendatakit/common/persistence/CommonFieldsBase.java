@@ -1,15 +1,15 @@
-/**
- * Copyright (C) 2010 University of Washington
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+/*
+  Copyright (C) 2010 University of Washington
+  <p>
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+  in compliance with the License. You may obtain a copy of the License at
+  <p>
+  http://www.apache.org/licenses/LICENSE-2.0
+  <p>
+  Unless required by applicable law or agreed to in writing, software distributed under the License
+  is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+  or implied. See the License for the specific language governing permissions and limitations under
+  the License.
  */
 package org.opendatakit.common.persistence;
 
@@ -34,7 +34,6 @@ import org.opendatakit.common.security.User;
  *
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
- *
  */
 public abstract class CommonFieldsBase {
 
@@ -46,22 +45,32 @@ public abstract class CommonFieldsBase {
   public static final String CREATION_DATE_COLUMN_NAME = PersistConsts.CREATION_DATE_COLUMN_NAME;
   public static final String CREATOR_URI_USER_COLUMN_NAME = PersistConsts.CREATOR_URI_USER_COLUMN_NAME;
 
-  /** standard audit fields */
+  /* standard audit fields */
 
-  /** creator */
+  /**
+   * creator
+   */
   private static final DataField CREATOR_URI_USER = new DataField(CREATOR_URI_USER_COLUMN_NAME,
       DataField.DataType.URI, false, PersistConsts.URI_STRING_LEN);
-  /** creation date */
+  /**
+   * creation date
+   */
   private static final DataField CREATION_DATE = new DataField(CREATION_DATE_COLUMN_NAME,
       DataField.DataType.DATETIME, false);
-  /** last user to update record */
+  /**
+   * last user to update record
+   */
   private static final DataField LAST_UPDATE_URI_USER = new DataField(
       LAST_UPDATE_URI_USER_COLUMN_NAME, DataField.DataType.URI, true, PersistConsts.URI_STRING_LEN);
-  /** last update date */
+  /**
+   * last update date
+   */
   private static final DataField LAST_UPDATE_DATE = new DataField(LAST_UPDATE_DATE_COLUMN_NAME,
       DataField.DataType.DATETIME, false).setIndexable(IndexType.ORDERED);
 
-  /** primary key for all tables */
+  /**
+   * primary key for all tables
+   */
   private static final DataField URI = new DataField(URI_COLUMN_NAME, DataField.DataType.URI,
       false, PersistConsts.URI_STRING_LEN).setIndexable(IndexType.HASH);
   public final DataField primaryKey;
@@ -69,7 +78,9 @@ public abstract class CommonFieldsBase {
   public final DataField creationDate;
   public final DataField lastUpdateUriUser;
   public final DataField lastUpdateDate;
-  /** member variables */
+  /**
+   * member variables
+   */
   protected final String schemaName;
   protected final String tableName;
   protected final List<DataField> fieldList = new ArrayList<DataField>();
@@ -77,13 +88,6 @@ public abstract class CommonFieldsBase {
   private boolean fromDatabase = false;
   private Object opaquePersistenceData = null;
 
-  /**
-   * Construct a relation prototype.
-   *
-   * @param schemaName
-   * @param tableName
-   * @param tableType
-   */
   protected CommonFieldsBase(String schemaName, String tableName) {
     this.schemaName = schemaName;
     this.tableName = tableName;
@@ -97,12 +101,6 @@ public abstract class CommonFieldsBase {
     fieldList.add(lastUpdateDate = new DataField(LAST_UPDATE_DATE));
   }
 
-  /**
-   * Construct an empty entity.
-   *
-   * @param ref
-   * @param user
-   */
   protected CommonFieldsBase(CommonFieldsBase ref, User user) {
     schemaName = ref.schemaName;
     tableName = ref.tableName;
@@ -181,9 +179,6 @@ public abstract class CommonFieldsBase {
     return tableName;
   }
 
-  /**
-   * @return the primary key value for this row
-   */
   public final String getUri() {
     return getStringField(primaryKey);
   }
@@ -194,10 +189,6 @@ public abstract class CommonFieldsBase {
 
   public final Date getCreationDate() {
     return getDateField(creationDate);
-  }
-
-  public final String getLastUpdateUriUser() {
-    return getStringField(lastUpdateUriUser);
   }
 
   public final Date getLastUpdateDate() {
@@ -236,12 +227,6 @@ public abstract class CommonFieldsBase {
   /**
    * Set the given field to the given value. If the value is too long, the
    * prefix is stored and false is returned.
-   *
-   * @param f
-   *          field to set
-   * @param value
-   *          string value for field
-   * @return false if the value had to be truncated.
    */
   public final boolean setStringField(DataField f, String value) {
     if (f == null) {
@@ -469,28 +454,16 @@ public abstract class CommonFieldsBase {
     fieldValueMap.put(f, value);
   }
 
-  /**********************************************************************************
-   **********************************************************************************
-   **********************************************************************************
-   * APIs that should only be used by the persistence layer
-   **********************************************************************************
-   **********************************************************************************
-   **********************************************************************************/
+  /*
+   APIs that should only be used by the persistence layer
+   */
 
   /**
    * Method implemented in the most derived class to clone the (concrete)
-   * relation instance to produce an empty entity. Only called via
-   * {@link org.opendatakit.common.persistence.Datastore#createEntityUsingRelation(CommonFieldsBase, User)}
-   *
-   * @param user
-   * @return empty entity
+   * relation instance to produce an empty entity.
    */
   public abstract CommonFieldsBase getEmptyRow(User user);
 
-  /**
-   * @return true if the row contains data that originated from the persistent
-   *         store.
-   */
   public final boolean isFromDatabase() {
     return fromDatabase;
   }
@@ -500,16 +473,11 @@ public abstract class CommonFieldsBase {
    * persistent store. This should only be called from within the persistence
    * layer implementation. Used to determine whether to INSERT or UPDATE a
    * record in the persistent store.
-   *
-   * @param fromDatabase
    */
   public final void setFromDatabase(boolean fromDatabase) {
     this.fromDatabase = fromDatabase;
   }
 
-  /**
-   * @return the opaque object linked to this row by the persistence layer.
-   */
   public Object getOpaquePersistenceData() {
     return opaquePersistenceData;
   }
@@ -519,8 +487,6 @@ public abstract class CommonFieldsBase {
    * within the persistence layer implementation. Used by some persistence
    * layers to associated private information to a retrieved object that will be
    * needed if updates to the row are requested.
-   *
-   * @param opaquePersistenceData
    */
   public void setOpaquePersistenceData(Object opaquePersistenceData) {
     this.opaquePersistenceData = opaquePersistenceData;

@@ -33,8 +33,4 @@ public enum REDCapServerType {
     redcapServerType = value;
   }
 
-  public String getREDCapServerTypeValue() {
-    return redcapServerType;
-  }
-
 }

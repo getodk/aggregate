@@ -24,10 +24,8 @@ import org.opendatakit.aggregate.client.preferences.PreferenceSummary;
 import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.ErrorConsts;
 import org.opendatakit.aggregate.task.Watchdog;
-import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
-import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +40,7 @@ public class PreferenceServiceImpl extends RemoteServiceServlet implements
   private static final long serialVersionUID = -489283284844600170L;
 
   @Override
-  public PreferenceSummary getPreferences() throws AccessDeniedException, RequestFailureException,
-      DatastoreFailureException {
+  public PreferenceSummary getPreferences() throws RequestFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -59,8 +56,8 @@ public class PreferenceServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public void setFasterBackgroundActionsDisabled(Boolean disabled) throws AccessDeniedException,
-      RequestFailureException, DatastoreFailureException {
+  public void setFasterBackgroundActionsDisabled(Boolean disabled) throws
+      RequestFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -87,7 +84,7 @@ public class PreferenceServiceImpl extends RemoteServiceServlet implements
 
   @Override
   public void setSkipMalformedSubmissions(Boolean skipMalformedSubmissions)
-      throws AccessDeniedException, RequestFailureException, DatastoreFailureException {
+      throws RequestFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 

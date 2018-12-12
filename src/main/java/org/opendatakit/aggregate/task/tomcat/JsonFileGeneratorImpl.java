@@ -21,7 +21,6 @@ import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.task.JsonFileGenerator;
 import org.opendatakit.aggregate.task.JsonFileWorkerImpl;
-import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -36,7 +35,7 @@ public class JsonFileGeneratorImpl implements JsonFileGenerator {
 
   @Override
   public void createJsonFileTask(IForm form, SubmissionKey persistentResultsKey, long attemptCount,
-                                 CallingContext cc) throws ODKDatastoreException {
+                                 CallingContext cc) {
     WatchdogImpl wd = (WatchdogImpl) cc.getBean(BeanDefs.WATCHDOG);
     // use watchdog's calling context in runner...
     JsonRunner runner = new JsonRunner(form, persistentResultsKey, attemptCount, wd.getCallingContext());

@@ -68,7 +68,7 @@ public class GWTAccessDeniedHandlerImpl implements AccessDeniedHandler, ServletC
   }
 
   @Override
-  public void afterPropertiesSet() throws Exception {
+  public void afterPropertiesSet() {
     Assert.notNull(pImpl, "ordinaryAccessDeniedHandler must be specified");
     Assert.notNull(headerString, "gwtHeader must be specified");
   }

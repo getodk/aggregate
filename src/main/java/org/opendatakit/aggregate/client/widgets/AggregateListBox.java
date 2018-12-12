@@ -24,10 +24,6 @@ public class AggregateListBox extends ListBox implements ChangeHandler {
 
   private final AggregateBaseHandlers handlers;
 
-  public AggregateListBox(String tooltipText, boolean multipleValueSelection) {
-    this(tooltipText, multipleValueSelection, null);
-  }
-
   public AggregateListBox(String tooltipText, boolean multipleValueSelection, String helpBalloonText) {
     super();
     setMultipleSelect(multipleValueSelection);

@@ -211,7 +211,7 @@ public abstract class GoogleOauth2ExternalService extends AbstractExternalServic
 
   protected String executeStmt(String method, String urlString, String statement,
                                List<NameValuePair> qparams, boolean isFTQuery, CallingContext cc) throws
-      IOException, ODKExternalServiceException, GeneralSecurityException {
+      IOException, ODKExternalServiceException {
 
     if (statement == null && (POST.equals(method) || PATCH.equals(method) || PUT.equals(method))) {
       throw new ODKExternalServiceException("No body supplied for POST, PATCH or PUT request");

@@ -30,7 +30,6 @@ import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.exception.ODKParseException;
 import org.opendatakit.aggregate.form.FormFactory;
 import org.opendatakit.aggregate.form.IForm;
@@ -294,9 +293,6 @@ public class FragmentedCsvServlet extends ServletUtilBase {
       e.printStackTrace();
       emitInfoPage(req, resp, e.getMessage(), HttpServletResponse.SC_BAD_REQUEST, cc);
     } catch (ODKDatastoreException e) {
-      e.printStackTrace();
-      errorRetreivingData(resp);
-    } catch (ODKIncompleteSubmissionData e) {
       e.printStackTrace();
       errorRetreivingData(resp);
     }

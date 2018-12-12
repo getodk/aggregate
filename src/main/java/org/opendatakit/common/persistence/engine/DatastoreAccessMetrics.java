@@ -1,15 +1,15 @@
-/**
- * Copyright (C) 2011 University of Washington
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+/*
+  Copyright (C) 2011 University of Washington
+  <p>
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+  in compliance with the License. You may obtain a copy of the License at
+  <p>
+  http://www.apache.org/licenses/LICENSE-2.0
+  <p>
+  Unless required by applicable law or agreed to in writing, software distributed under the License
+  is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+  or implied. See the License for the specific language governing permissions and limitations under
+  the License.
  */
 package org.opendatakit.common.persistence.engine;
 
@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.EntityKey;
-import org.opendatakit.common.utils.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,12 +24,11 @@ import org.slf4j.LoggerFactory;
  * Tracks the access patterns for the datastore layer. Useful for identifying
  * inefficient datastore access patterns and minimizing excessive read/write
  * actions.
- *
+ * <p>
  * Note that if you create and delete many tables and don't reuse table names,
  * the tableMap and count arrays will grow without bounds.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public final class DatastoreAccessMetrics {
 
@@ -47,26 +45,8 @@ public final class DatastoreAccessMetrics {
   private short nextCountIdx = 0;
   private int readCount = 0;
   private long lastLogging = 0L;
-  public DatastoreAccessMetrics() {
-  }
 
-  public synchronized void logUsage() {
-    long now = System.currentTimeMillis();
-    lastLogging = now;
-    String gmtDate = WebUtils.iso8601Date(new java.util.Date(now));
-    logger.info("---------- " + gmtDate + " @ " + readCount + " ------------");
-    for (Map.Entry<String, Short> entry : tableMap.entrySet()) {
-      Short idx = entry.getValue();
-      logger.info(entry.getKey() + "," + countQueryArray.getUsage(idx) + ","
-          + countQueryResultArray.getUsage(idx) + "," + countGetArray.getUsage(idx) + ","
-          + countPutArray.getUsage(idx) + "," + countDeleteArray.getUsage(idx));
-    }
-    logger.info("-----------------------------------------");
-    countQueryArray.clear();
-    countQueryResultArray.clear();
-    countGetArray.clear();
-    countPutArray.clear();
-    countDeleteArray.clear();
+  public DatastoreAccessMetrics() {
   }
 
   /**
@@ -83,11 +63,8 @@ public final class DatastoreAccessMetrics {
   }
 
   /**
-   * Synchronized - this is the ONLY method that should manipulate the
+   * this is the ONLY method that should manipulate the
    * RingBufferCountArray or log usage statistics.
-   *
-   * @param fullyQualifiedName
-   * @param rbc
    */
   private synchronized void synchronizedRecordUsage(String fullyQualifiedName,
                                                     RingBufferCountArray rbc, int incCount) {
@@ -158,7 +135,7 @@ public final class DatastoreAccessMetrics {
 
   /**
    * Maintain a tally of which tables those actions were against.
-   *
+   * <p>
    * NOTE: this is NOT thread-safe. All accesses should occur only from within
    * synchronized methods.
    */
@@ -169,8 +146,6 @@ public final class DatastoreAccessMetrics {
     RingBufferCountArray() {
       clear();
     }
-
-    ;
 
     private void resizeArray(short arrayIdx) {
       if (arrayIdx >= countArray.length) {
@@ -192,13 +167,6 @@ public final class DatastoreAccessMetrics {
       resizeArray(countArrayIdx);
 
       countArray[countArrayIdx] = countArray[countArrayIdx] + incCount;
-    }
-
-    private Integer getUsage(short countArrayIdx) {
-      // make sure our count array is sized big enough...
-      resizeArray(countArrayIdx);
-
-      return countArray[countArrayIdx];
     }
 
     private void clear() {

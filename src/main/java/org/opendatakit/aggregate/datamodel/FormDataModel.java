@@ -1,15 +1,15 @@
-/**
- * Copyright (C) 2010 University of Washington
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+/*
+  Copyright (C) 2010 University of Washington
+  <p>
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+  in compliance with the License. You may obtain a copy of the License at
+  <p>
+  http://www.apache.org/licenses/LICENSE-2.0
+  <p>
+  Unless required by applicable law or agreed to in writing, software distributed under the License
+  is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+  or implied. See the License for the specific language governing permissions and limitations under
+  the License.
  */
 package org.opendatakit.aggregate.datamodel;
 
@@ -71,7 +71,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
- *
  */
 public final class FormDataModel extends CommonFieldsBase {
 
@@ -85,7 +84,9 @@ public final class FormDataModel extends CommonFieldsBase {
   private static final String TABLE_NAME = "_form_data_model";
   private static final DataField PARENT_URI_FORM_DATA_MODEL = new DataField(
       "PARENT_URI_FORM_DATA_MODEL", DataField.DataType.STRING, false, PersistConsts.URI_STRING_LEN);
-  /** ordinal (1st, 2nd, ... ) of this item in the form element */
+  /**
+   * ordinal (1st, 2nd, ... ) of this item in the form element
+   */
   private static final DataField ORDINAL_NUMBER = new DataField("ORDINAL_NUMBER",
       DataField.DataType.INTEGER, false);
   private static final DataField ELEMENT_TYPE = new DataField("ELEMENT_TYPE",
@@ -106,13 +107,12 @@ public final class FormDataModel extends CommonFieldsBase {
   ;
   private CommonFieldsBase backingObject = null;
   private DataField backingKey = null;
+
   /**
    * Constructor to create the relation prototype. Only called via
    * {@link #assertRelation(CallingContext)}
-   *
+   * <p>
    * Note that the backing relation is not created by this constructor.
-   *
-   * @param schemaName
    */
   FormDataModel(String schemaName) {
     super(schemaName, TABLE_NAME);
@@ -125,13 +125,11 @@ public final class FormDataModel extends CommonFieldsBase {
     fieldList.add(PERSIST_AS_TABLE_NAME);
     fieldList.add(PERSIST_AS_SCHEMA_NAME);
   }
+
   /**
    * Construct an empty entity. Only called via {@link #getEmptyRow(User)}
-   *
+   * <p>
    * Note that the backing relation is not created by this constructor.
-   *
-   * @param ref
-   * @param user
    */
   private FormDataModel(FormDataModel ref, User user) {
     super(ref, user);
@@ -141,12 +139,9 @@ public final class FormDataModel extends CommonFieldsBase {
    * Predicate function for determining whether a given field is one that is
    * expected to be stored within a data table, vs. in a special auxiliary
    * table. Returns true if it is stored in a data table.
-   *
+   * <p>
    * This predicate function is used to determine if a parent FormDataModel is
    * divided across multiple data tables.
-   *
-   * @param t
-   * @return
    */
   public static boolean isFieldStoredWithinDataTable(ElementType t) {
     switch (t) {
@@ -185,7 +180,7 @@ public final class FormDataModel extends CommonFieldsBase {
 
   /**
    * Reset the linked up values so FormDefinition can construct a new model.
-   *
+   * <p>
    * Called by the FormParserForJavaRosa to reset the FDM prior to trying once
    * again to create the relations it describes.
    */
@@ -282,15 +277,9 @@ public final class FormDataModel extends CommonFieldsBase {
    * or top-level group name is not part of the constructed qualified name.
    * <p>
    * For many uses, the SubmissionKey is likely more appropriate.
-   *
-   * @return the colon-separated qualified name for this element.
    */
   public final String getGroupQualifiedElementName() {
     return getGroupQualifiedElementNameCommon(false);
-  }
-
-  public final String getGroupQualifiedXpathElementName() {
-    return getGroupQualifiedElementNameCommon(true);
   }
 
   private final String getGroupQualifiedElementNameCommon(boolean xpath) {
@@ -395,24 +384,6 @@ public final class FormDataModel extends CommonFieldsBase {
     return getPersistAsSchema() + "." + table;
   }
 
-  public final FormDataModel findElementByName(String elementName) {
-    if (elementName == null) {
-      throw new IllegalArgumentException("null elementName passed in!");
-    }
-
-    for (FormDataModel m : children) {
-      if (m.getElementName() == null) {
-        // phantom...
-        FormDataModel t = m.findElementByName(elementName);
-        if (t != null)
-          return t;
-      } else if (m.getElementName().equals(elementName)) {
-        return m;
-      }
-    }
-    return null;
-  }
-
   public final FormDataModel getParent() {
     if (parent == null)
       return null;
@@ -504,7 +475,6 @@ public final class FormDataModel extends CommonFieldsBase {
     }
   }
 
-  /* xform element types */
   public static enum ElementType {
     // xform tag types
     STRING, JRDATETIME, JRDATE, JRTIME, INTEGER, DECIMAL, GEOPOINT, GEOTRACE, GEOSHAPE,
@@ -522,9 +492,6 @@ public final class FormDataModel extends CommonFieldsBase {
   /**
    * Class wrapping the persisted object name. Used when dealing with backing
    * object maps.
-   *
-   * @author mitchellsundt@gmail.com
-   *
    */
   public final class DDRelationName {
 

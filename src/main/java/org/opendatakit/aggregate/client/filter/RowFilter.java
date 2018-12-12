@@ -25,9 +25,6 @@ import org.opendatakit.aggregate.constants.common.Visibility;
 
 public final class RowFilter extends Filter implements Serializable {
 
-  /**
-   * Id for serialization
-   */
   private static final long serialVersionUID = -482917672621588696L;
   private Column column;
   private FilterOperation operation;
@@ -37,31 +34,20 @@ public final class RowFilter extends Filter implements Serializable {
     super();
   }
 
-  public RowFilter(Visibility keepRemove, Column column, FilterOperation compare, String inputParam,
-                   Long ordinal) {
+  public RowFilter(Visibility keepRemove, Column column, FilterOperation compare, String inputParam, Long ordinal) {
     super(keepRemove, RowOrCol.ROW, ordinal);
     this.operation = compare;
     this.input = inputParam;
     this.column = column;
   }
 
-  /**
-   * This constructor should only be used by the server
-   *
-   * @param uri
-   */
   public RowFilter(String uri) {
     super(uri);
   }
 
-  /**
-   * Used to clear the URI in the elements so it can be Saved As properly in the
-   * server, as the server creates a new entity when uri is set to URI_DEFAULT
-   */
   public void resetUriToDefault() {
     uri = UIConsts.URI_DEFAULT;
   }
-
 
   public FilterOperation getOperation() {
     return operation;
@@ -87,9 +73,6 @@ public final class RowFilter extends Filter implements Serializable {
     this.column = column;
   }
 
-  /**
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
   @Override
   public boolean equals(Object obj) {
     if (!(obj instanceof RowFilter)) {
@@ -106,9 +89,6 @@ public final class RowFilter extends Filter implements Serializable {
         && (operation == null ? (other.operation == null) : (operation.equals(other.operation)));
   }
 
-  /**
-   * @see java.lang.Object#hashCode()
-   */
   @Override
   public int hashCode() {
     int hashCode = 11;

@@ -40,10 +40,6 @@ public class RealmSecurityInfo implements Serializable {
   public RealmSecurityInfo() {
   }
 
-  public String getBasicAuthHashEncoding() {
-    return basicAuthHashEncoding;
-  }
-
   public void setBasicAuthHashEncoding(String basicAuthHashEncoding) {
     this.basicAuthHashEncoding = basicAuthHashEncoding;
   }

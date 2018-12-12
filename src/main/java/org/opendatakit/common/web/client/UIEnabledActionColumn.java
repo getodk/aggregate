@@ -26,10 +26,7 @@ import com.google.gwt.user.cellview.client.Column;
  * @author mitchellsundt@gmail.com
  */
 public class UIEnabledActionColumn<T> extends Column<T, T> {
-  public UIEnabledActionColumn(String label, UIVisiblePredicate<T> isVisiblePredicate,
-                               UIEnabledActionCell.Delegate<T> action) {
-    this(label, isVisiblePredicate, null, action);
-  }
+
 
   public UIEnabledActionColumn(String label, UIEnabledPredicate<T> isEnabledPredicate,
                                UIEnabledActionCell.Delegate<T> action) {

@@ -166,12 +166,6 @@ public class LargeStringTest {
             return new MyLargeStringRelation(this, user);
         }
         
-        public void print() {
-            System.out.println("PK " + getUri() + " " 
-                    + fieldLargeString.getName() + " " 
-                    + getStringField(fieldLargeString) );
-        }
-        
         static synchronized final MyLargeStringRelation assertRelation(CallingContext cc) throws ODKDatastoreException {
             MyLargeStringRelation relationPrototype;
             Datastore ds = cc.getDatastore();
@@ -219,12 +213,6 @@ public class LargeStringTest {
       @Override
       public CommonFieldsBase getEmptyRow(User user) {
          return new MyDynamicLargeStringRelation(this, user);
-      }
-      
-      public void print() {
-         System.out.println("PK " + getUri() + " " 
-               + fieldLargeString.getName() + " " 
-               + getStringField(fieldLargeString) );
       }
       
       static synchronized final MyDynamicLargeStringRelation assertRelation(CallingContext cc) throws ODKDatastoreException {

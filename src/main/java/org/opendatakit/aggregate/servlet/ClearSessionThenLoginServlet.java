@@ -16,7 +16,6 @@
 package org.opendatakit.aggregate.servlet;
 
 import java.io.IOException;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -42,7 +41,7 @@ public class ClearSessionThenLoginServlet extends ServletUtilBase {
   private static final long serialVersionUID = 629046684126101848L;
 
   @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException,
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws
       IOException {
     CallingContext cc = ContextFactory.getCallingContext(this, req);
     UserService userService = cc.getUserService();

@@ -1,15 +1,15 @@
-/**
- * Copyright (C) 2010 University of Washington
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+/*
+  Copyright (C) 2010 University of Washington
+  <p>
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+  in compliance with the License. You may obtain a copy of the License at
+  <p>
+  http://www.apache.org/licenses/LICENSE-2.0
+  <p>
+  Unless required by applicable law or agreed to in writing, software distributed under the License
+  is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+  or implied. See the License for the specific language governing permissions and limitations under
+  the License.
  */
 package org.opendatakit.aggregate.form;
 
@@ -58,7 +58,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
- *
  */
 public class FormDefinition {
 
@@ -68,22 +67,34 @@ public class FormDefinition {
    * Map from the uriSubmissionDataModel key (uuid) to the FormDefinition.
    * If forms are deleted and reloaded, they get a different key each time.
    * The key is defined in the SubmissionAssociationTable.
-   *
+   * <p>
    * NOTE: should only be accessed via synchronized methods to get or remove forms.
    */
   private static final Map<String, FormDefinition> formDefinitions = new HashMap<String, FormDefinition>();
 
-  /** the entity that defines the mapping of the form id to this data model */
+  /**
+   * the entity that defines the mapping of the form id to this data model
+   */
   private final SubmissionAssociationTable submissionAssociation;
-  /** list of all the elements in this submission definition */
+  /**
+   * list of all the elements in this submission definition
+   */
   private final List<FormDataModel> elementList = new ArrayList<FormDataModel>();
-  /** list of all tables (form, repeat group and auxillary) */
+  /**
+   * list of all tables (form, repeat group and auxillary)
+   */
   private final List<FormDataModel> tableList = new ArrayList<FormDataModel>();
-  /** list of non-repeat groups in xform */
+  /**
+   * list of non-repeat groups in xform
+   */
   private final List<FormDataModel> groupList = new ArrayList<FormDataModel>();
-  /** list of structured fields in xform */
+  /**
+   * list of structured fields in xform
+   */
   private final List<FormDataModel> geopointList = new ArrayList<FormDataModel>();
-  /** map from fully qualified tableName to CFB definition */
+  /**
+   * map from fully qualified tableName to CFB definition
+   */
   private final Map<String, DynamicCommonFieldsBase> backingTableMap;
   private final String qualifiedTopLevelTable;
   private final String formId;
@@ -356,14 +367,6 @@ public class FormDefinition {
     topLevelGroupElement = FormElementModel.buildFormElementModelTree(topLevelGroup);
   }
 
-  static final FormElementModel findElement(FormElementModel group, DataField backingKey) {
-    for (FormElementModel m : group.getChildren()) {
-      if (m.isMetadata()) continue;
-      if (m.getFormDataModel().getBackingKey() == backingKey) return m;
-    }
-    return null;
-  }
-
   private static final SubmissionAssociationTable getSubmissionAssociation(String formId, boolean canBeIncomplete, CallingContext cc) {
     try {
       SubmissionAssociationTable sa = null;
@@ -400,11 +403,6 @@ public class FormDefinition {
   /**
    * Traverse the form data model and assertRelation() on all the backing objects.
    * Called from within the synchronized getFormDefinition() static method.
-   *
-   * @param m
-   * @param objs
-   * @param cc
-   * @throws ODKDatastoreException
    */
   private static synchronized final void assertBackingObjects(FormDataModel m,
                                                               Set<CommonFieldsBase> objs, CallingContext cc) throws ODKDatastoreException {
@@ -423,12 +421,9 @@ public class FormDefinition {
    * Synchronized access to the formDefinitions map.  Synchronization is only required for the
    * put operation on the map, but also aids in efficient quota usage during periods of intense start-up.
    *
-   * @param xformParameters  -- the form id, version and ui version of a form definition.
-   * @param uriSubmissionDataModel -- the uri of the definition specification.
-   * @param cc
    * @return The definition.  The uriSubmissionDataModel is used to ensure that the
-   *          currently valid definition of a form is being used (should the form be
-   *          deleted then reloaded).
+   *     currently valid definition of a form is being used (should the form be
+   *     deleted then reloaded).
    */
   public static synchronized final FormDefinition getFormDefinition(String formId, CallingContext cc) {
 
@@ -614,11 +609,6 @@ public class FormDefinition {
     submissionAssociation.setIsSubmissionAllowed(value);
   }
 
-  /**
-   * Get the top-level group for this form.
-   *
-   * @return
-   */
   public final FormDataModel getTopLevelGroup() {
     return topLevelGroup;
   }
@@ -627,67 +617,7 @@ public class FormDefinition {
     return topLevelGroupElement;
   }
 
-  public final FormElementModel getElementByName(String name) {
-    String[] path = name.split("/");
-    FormElementModel m = topLevelGroupElement;
-    boolean first = true;
-    for (String p : path) {
-      if (first) {
-        first = false;
-        // first entry can be form id...
-        if (formId.equals(p)) continue;
-      }
-
-      m = getElementByNameHelper(m, p);
-      if (m == null) return null;
-    }
-    return m;
-  }
-
-  private final FormElementModel getElementByNameHelper(FormElementModel group, String name) {
-    if (group.getElementName() != null && group.getElementName().equals(name)) {
-      return group;
-    }
-    for (FormElementModel m : group.getChildren()) {
-      // depth first traversal...
-      FormElementModel tmp = getElementByNameHelper(m, name);
-      if (tmp != null) return tmp;
-    }
-    return null;
-  }
-
-  public final String getQualifiedTopLevelTable() {
-    return qualifiedTopLevelTable;
-  }
-
-  public CommonFieldsBase getQualifiedTable(String qualifiedTableName) {
-    return backingTableMap.get(qualifiedTableName);
-  }
-
   public Collection<? extends CommonFieldsBase> getBackingTableSet() {
     return backingTableMap.values();
-  }
-
-  public SubmissionAssociationTable getSubmissionAssociation() {
-    return submissionAssociation;
-  }
-
-  public String getFormId() {
-    return formId;
-  }
-
-  public String getElementKey(String keyString) {
-    // TODO pick apart an "odkId" to return the key within... steal code from 0.9.3
-    throw new IllegalStateException("unimplemented");
-  }
-
-  public static final class OrdinalSequence {
-    Long ordinal;
-    int sequenceCounter;
-
-    OrdinalSequence() {
-      ordinal = 1L;
-      sequenceCounter = 1;
-    }
   }
 }

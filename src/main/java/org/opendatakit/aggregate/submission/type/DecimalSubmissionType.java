@@ -22,7 +22,6 @@ import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.format.element.ElementFormatter;
 import org.opendatakit.common.datamodel.DynamicCommonFieldsBase;
 import org.opendatakit.common.persistence.WrappedBigDecimal;
-import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 
 /**
@@ -35,8 +34,6 @@ public class DecimalSubmissionType extends
     SubmissionSingleValueBase<WrappedBigDecimal> {
   /**
    * Constructor
-   *
-   * @param propertyName Name of submission element
    */
   public DecimalSubmissionType(DynamicCommonFieldsBase backingObject,
                                FormElementModel element) {
@@ -70,8 +67,7 @@ public class DecimalSubmissionType extends
    *                      proper format for output
    */
   @Override
-  public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc)
-      throws ODKDatastoreException {
+  public void formatValue(ElementFormatter elemFormatter, Row row, String ordinalValue, CallingContext cc) {
     elemFormatter.formatDecimal(getValue(), element, ordinalValue, row);
   }
 

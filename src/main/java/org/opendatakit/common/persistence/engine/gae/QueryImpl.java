@@ -1,15 +1,15 @@
-/**
- * Copyright (C) 2010 University of Washington
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+/*
+  Copyright (C) 2010 University of Washington
+  <p>
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+  in compliance with the License. You may obtain a copy of the License at
+  <p>
+  http://www.apache.org/licenses/LICENSE-2.0
+  <p>
+  Unless required by applicable law or agreed to in writing, software distributed under the License
+  is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+  or implied. See the License for the specific language governing permissions and limitations under
+  the License.
  */
 package org.opendatakit.common.persistence.engine.gae;
 
@@ -21,21 +21,15 @@ import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.apphosting.api.ApiProxy.OverQuotaException;
-import java.math.BigDecimal;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
 import org.opendatakit.common.persistence.DataField.DataType;
-import org.opendatakit.common.persistence.EntityKey;
 import org.opendatakit.common.persistence.QueryResult;
 import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.WrappedBigDecimal;
@@ -48,10 +42,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public class QueryImpl implements org.opendatakit.common.persistence.Query {
 
@@ -81,8 +73,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
   private final List<Tracker> filterList = new ArrayList<Tracker>();
   private final List<SortTracker> sortList = new ArrayList<SortTracker>();
 
-  public QueryImpl(CommonFieldsBase relation, String loggingContextTag, DatastoreImpl datastore,
-                   User user) {
+  public QueryImpl(CommonFieldsBase relation, String loggingContextTag, DatastoreImpl datastore, User user) {
     this.relation = relation;
     this.loggingContextTag = loggingContextTag;
     this.datastore = datastore;
@@ -199,48 +190,11 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
   }
 
   @Override
-  public void addValueSetFilter(DataField attribute, Collection<?> valueSet) {
-    // do everything locally except the first one (later)...
-    // TODO: this is not correct for WrappedDecimal filters
-    // TODO: fortunately, there are no uses of that pathway.
-    if (attribute.getDataType() == DataType.DECIMAL) {
-      List<BigDecimal> bdList = new ArrayList<BigDecimal>();
-      for (Object value : valueSet) {
-        if (value != null) {
-          // ensure the value is always a BigDecimal and always rounded to scale
-          BigDecimal bd;
-          if (value instanceof BigDecimal) {
-            bd = (BigDecimal) value;
-          } else {
-            bd = new BigDecimal(value.toString());
-          }
-          if (!attribute.isDoublePrecision()) {
-            bd = bd.setScale(attribute.getNumericScale(), BigDecimal.ROUND_HALF_UP);
-          }
-          bdList.add(bd);
-        } else {
-          bdList.add(null);
-        }
-      }
-      filterList.add(new ValueSetFilterTracker(attribute, bdList));
-      throw new IllegalStateException("addValueSetFilter for DECIMAL is not correctly implemented");
-    } else {
-      filterList.add(new ValueSetFilterTracker(attribute, valueSet));
-    }
-  }
-
-  @Override
   public void addSort(DataField attribute, Direction direction) {
     // do the sort locally -- later...
     sortList.add(new SortTracker(attribute, direction));
   }
 
-  /**
-   *
-   * @param dominantSortAttr
-   * @param startCursorFilter
-   * @return true if there is at least one filter criteria against the dominant sort attribute
-   */
   private boolean hasDominantAttributeFilter(DataField dominantSortAttr, SimpleFilterTracker startCursorFilter) {
 
     // apply the startCursor filter on dominant attr.
@@ -258,15 +212,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     return false;
   }
 
-  /**
-   * If there is no filter criteria on the dominant sort attribute, we need
-   * to query the database to find the min/max value for the attribute and then
-   * apply that to the query.  This is a work-around for broken GAE functionality.
-   *
-   * @return null if no records in table; otherwise, produce the needed filter.
-   * @throws ODKDatastoreException
-   */
-  private SimpleFilterTracker getImpliedDominantAttributeFilter() throws ODKDatastoreException {
+  private SimpleFilterTracker getImpliedDominantAttributeFilter() {
     // GAE production throws an exception when a query with equality
     // filters and a sort on a column not constrained by any filter
     // is issued.
@@ -306,12 +252,8 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
 
     Object dominantFilterValue = null;
     // and apply the filter...
-    try {
-      CommonFieldsBase odkEntity = (CommonFieldsBase) m.mapRow(datastore, values.get(0), 0);
-      dominantFilterValue = EngineUtils.getDominantSortAttributeValue(odkEntity, dominantSortAttr);
-    } catch (SQLException e) {
-      throw new ODKDatastoreException("[" + loggingContextTag + "] Unable to complete request", e);
-    }
+    CommonFieldsBase odkEntity = (CommonFieldsBase) m.mapRow(datastore, values.get(0), 0);
+    dominantFilterValue = EngineUtils.getDominantSortAttributeValue(odkEntity, dominantSortAttr);
 
     SimpleFilterTracker impliedDominantFilter = constructFilter(dominantSortAttr,
         dominantSort.direction.equals(Direction.ASCENDING)
@@ -321,16 +263,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     return impliedDominantFilter;
   }
 
-  /**
-   * Construct the query appropriate for this fragment of the result-set production.
-   *
-   * @param startCursorFilter
-   * @param impliedDominantFilter
-   * @return
-   * @throws ODKOverQuotaException
-   * @throws ODKDatastoreException
-   */
-  private PreparedQuery prepareQuery(SimpleFilterTracker startCursorFilter, SimpleFilterTracker impliedDominantFilter) throws ODKOverQuotaException, ODKDatastoreException {
+  private PreparedQuery prepareQuery(SimpleFilterTracker startCursorFilter, SimpleFilterTracker impliedDominantFilter) throws ODKDatastoreException {
 
     SortTracker dominantSort = sortList.get(0);
     DataField dominantSortAttr = dominantSort.getAttribute();
@@ -406,26 +339,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     }
   }
 
-  /**
-   * Inner action function that can fill odkEntities with > fetchLimit+1 entries
-   * beyond the set of entries matching the initial dominantSortAttr value.
-   * We must gather all end values matching the dominant sort attribute's value
-   * of the 'final' value and then grab the value after those as well.  This
-   * is because the 'final' value can have nested sorts applied that will reorder
-   * the sequence.
-   *
-   * @param odkEntities
-   *          -- list of entities being assembled.
-   * @param startCursorFilter
-   *          -- filter appropriate for this cursor.
-   * @param fetchLimit
-   *          -- number of records the requester wants.
-   * @return
-   * @throws ODKDatastoreException
-   * @throws ODKOverQuotaException
-   */
-  private void chunkFetch(ResultContainer odkEntities, SimpleFilterTracker startCursorFilter,
-                          int fetchLimit) throws ODKDatastoreException, ODKOverQuotaException {
+  private void chunkFetch(ResultContainer odkEntities, SimpleFilterTracker startCursorFilter, int fetchLimit) throws ODKDatastoreException {
 
     // Step 1: create a prepared query that we may repeatedly
     // fetch values from using a chunk size, fetch limit and
@@ -577,29 +491,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     logger.debug("hqrLoop: done fetching everything!");
   }
 
-  /**
-   * Updates WorkingValues with current status values.
-   * This fetches the records from the result-set iterator
-   * and applies the filter criteria to them.  It assumes
-   * the query production will return a consistently ordered
-   * set of results.
-   *
-   * @param it
-   * @param dominantSort
-   * @param dominantSortAttr
-   * @param m
-   * @param mustReadEverything
-   * @param fetchLimit
-   * @param odkEntitiesSize
-   * @param w
-   * @return false if completely done, true if still more work to be done.
-   * @throws ODKDatastoreException
-   * @throws ODKOverQuotaException
-   */
-  private final boolean fetchResults(Iterable<com.google.appengine.api.datastore.Entity> it,
-                                     SortTracker dominantSort, DataField dominantSortAttr, EntityRowMapper m,
-                                     boolean mustReadEverything, int fetchLimit, Integer readSetLimit, int odkEntitiesSize,
-                                     WorkingValues w) throws ODKDatastoreException, ODKOverQuotaException {
+  private final boolean fetchResults(Iterable<com.google.appengine.api.datastore.Entity> it, SortTracker dominantSort, DataField dominantSortAttr, EntityRowMapper m, boolean mustReadEverything, int fetchLimit, Integer readSetLimit, int odkEntitiesSize, WorkingValues w) throws ODKDatastoreException {
 
     // loop as long as the query returns at least one result...
     boolean hasQueryResults = false;
@@ -701,10 +593,6 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
         return false;
       }
       logger.debug("hqrLoop: done with one batch fetch!");
-    } catch (SQLException e) {
-      e.printStackTrace();
-      throw new ODKDatastoreException("[" + loggingContextTag + "] SQL: "
-          + gaeCostLogger.queryString + " exception: " + e.getMessage(), e);
     } catch (OverQuotaException e) {
       throw new ODKOverQuotaException("[" + loggingContextTag + "] Quota exceeded", e);
     } catch (Exception e) {
@@ -715,13 +603,6 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     return hasQueryResults;
   }
 
-  /**
-   * If the primary key does not already have a sort order applied,
-   * ensure that it is ordered in the same ascending/descending
-   * order as the dominant sort parameter.
-   *
-   * @param dominantSort
-   */
   private void enforcePrimaryKeyOrdering(SortTracker dominantSort) {
     // if we don't have any sort on the PK, add one
     // direction of PK sort matches that of dominant sort
@@ -744,21 +625,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     }
   }
 
-  /**
-   * Uses chunkFetch(...) to fetch at least fetchLimit+1 values beyond
-   * the start-value (or all values, if fetchLimit is zero).  Then orders
-   * the returned values and filters them w.r.t. the start cursor's PK
-   * restriction, constructing and returning the ordered list of results
-   * to the caller.
-   *
-   * @param startCursor
-   * @param fetchLimit
-   * @return
-   * @throws ODKDatastoreException
-   * @throws ODKOverQuotaException
-   */
-  private CoreResult coreExecuteQuery(QueryResumePoint startCursor, int fetchLimit)
-      throws ODKDatastoreException, ODKOverQuotaException {
+  private CoreResult coreExecuteQuery(QueryResumePoint startCursor, int fetchLimit) throws ODKDatastoreException {
 
     // get the dominant sort definition
     if (sortList.isEmpty()) {
@@ -842,8 +709,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
   }
 
   @Override
-  public QueryResult executeQuery(QueryResumePoint startCursor, int fetchLimit)
-      throws ODKDatastoreException, ODKOverQuotaException {
+  public QueryResult executeQuery(QueryResumePoint startCursor, int fetchLimit) throws ODKDatastoreException {
     try {
       CoreResult r = coreExecuteQuery(startCursor, fetchLimit);
 
@@ -876,13 +742,6 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     }
   }
 
-  /**
-   * Incoming queries that lack an sort criteria will have the
-   * field of the first filter criteria passed down as a sort
-   * criteria.  If zig-zag queries are supported, the sort
-   * field will be the first non-equality test in the initial
-   * query (or the PK if there is none).
-   */
   private void establishDominantSort() {
     // Ensure at least one dominant sort is applied to the result set.
     // This allows the methods that return all matches to leverage the
@@ -922,7 +781,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
   }
 
   @Override
-  public List<? extends CommonFieldsBase> executeQuery() throws ODKDatastoreException, ODKOverQuotaException {
+  public List<? extends CommonFieldsBase> executeQuery() throws ODKDatastoreException {
 
     try {
       establishDominantSort();
@@ -934,30 +793,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
   }
 
   @Override
-  public Set<EntityKey> executeForeignKeyQuery(CommonFieldsBase topLevelTable,
-                                               DataField topLevelAuri) throws ODKDatastoreException, ODKOverQuotaException {
-
-    try {
-      List<?> keys = doExecuteDistinctValueForDataField(topLevelAuri);
-
-      Set<EntityKey> keySet = new HashSet<EntityKey>();
-      for (Object o : keys) {
-        String key = (String) o;
-        // we don't have the top level records themselves. Construct the entity
-        // keys
-        // from the supplied relation and the value of the AURI fields in the
-        // records
-        // we do have.
-        keySet.add(new EntityKey(topLevelTable, key));
-      }
-      return keySet;
-    } finally {
-      gaeCostLogger.wrapUp();
-    }
-  }
-
-  @Override
-  public List<?> executeDistinctValueForDataField(DataField dataField) throws ODKDatastoreException, ODKOverQuotaException {
+  public List<?> executeDistinctValueForDataField(DataField dataField) throws ODKDatastoreException {
     try {
       return doExecuteDistinctValueForDataField(dataField);
     } finally {
@@ -965,8 +801,7 @@ public class QueryImpl implements org.opendatakit.common.persistence.Query {
     }
   }
 
-  private List<?> doExecuteDistinctValueForDataField(DataField dataField)
-      throws ODKDatastoreException, ODKOverQuotaException {
+  private List<?> doExecuteDistinctValueForDataField(DataField dataField) throws ODKDatastoreException {
 
     establishDominantSort();
     SortTracker dominantSort = sortList.get(0);

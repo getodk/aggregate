@@ -31,22 +31,6 @@ public class ODKEntityPersistException extends ODKDatastoreException {
   private static final long serialVersionUID = -8914267881767842131L;
 
   /**
-   * Default constructor
-   */
-  public ODKEntityPersistException() {
-    super();
-  }
-
-  /**
-   * Construct exception with the error message
-   *
-   * @param message exception message
-   */
-  public ODKEntityPersistException(String message) {
-    super(message);
-  }
-
-  /**
    * Construction exception with error message and throwable cause
    *
    * @param message exception message

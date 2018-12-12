@@ -177,7 +177,7 @@ public class WrappedBigDecimal implements Comparable<WrappedBigDecimal> {
   }
 
   @Override
-  protected Object clone() throws CloneNotSupportedException {
+  protected Object clone() {
     return new WrappedBigDecimal(this);
   }
 

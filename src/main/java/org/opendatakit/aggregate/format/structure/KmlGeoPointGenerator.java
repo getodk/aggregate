@@ -82,16 +82,6 @@ public class KmlGeoPointGenerator extends AbstractKmlElementBase implements Repe
 
   }
 
-  boolean childVerifyFieldsArePresent(List<FormElementModel> elements) {
-    if (titleElement != null && !elements.contains(titleElement)) {
-      return false;
-    }
-    if (imgElement != null && !elements.contains(imgElement)) {
-      return false;
-    }
-    return true;
-  }
-
   @Override
   String generatePlacemarkSubmission(Submission sub, List<FormElementModel> propertyNames,
                                      CallingContext cc) throws ODKDatastoreException {

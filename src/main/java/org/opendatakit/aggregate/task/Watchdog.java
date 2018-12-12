@@ -38,40 +38,11 @@ import org.opendatakit.common.web.CallingContext;
  */
 public interface Watchdog {
 
-  /**
-   * Get whether or not the watchdog is currently on a fast or slow cycle.
-   * This triggers a periodic interrogation of the datastore and will
-   * automatically transition the watchdog into the appropriate cycle
-   * should the datastore indicate that such a change is necessary.
-   * <p>
-   * The determination of the Watchdog state honors both:
-   * ServerPreferencesProperties.getFasterBackgroundActionsDisabled() and
-   * ServerPreferencesProperties.getFasterWatchdogCycleEnabled() settings.
-   *
-   * @return
-   */
-  public boolean getFasterWatchdogCycleEnabled();
+  boolean getFasterWatchdogCycleEnabled();
 
-  /**
-   * Triggers the change in behavior between the slow and fast cycles.
-   * Note: this does not alter the ServerPreferencesProperties
-   * values.  When the next getFasterWatchdogCycleEnabled() is called,
-   * the Watchdog may therefore reset itself to the opposite cycle.
-   *
-   * @param value
-   */
-  public void setFasterWatchdogCycleEnabled(boolean value);
+  void setFasterWatchdogCycleEnabled(boolean value);
 
-  /**
-   * Invoked to schedule a Watchdog.  This is a no-op on Tomcat, but is
-   * the primary means by which GAE schedules watchdog workers.
-   *
-   * @param cc
-   */
-  public void onUsage(long delayMilliseconds, CallingContext cc);
+  void onUsage(long delayMilliseconds, CallingContext cc);
 
-  /**
-   * @return implemented only on Tomcat for getting CC in task context.
-   */
-  public CallingContext getCallingContext();
+  CallingContext getCallingContext();
 }

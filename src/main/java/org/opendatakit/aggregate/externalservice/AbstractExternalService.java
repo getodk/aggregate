@@ -1,15 +1,15 @@
-/**
- * Copyright (C) 2010 University of Washington
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+/*
+  Copyright (C) 2010 University of Washington
+  <p>
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+  in compliance with the License. You may obtain a copy of the License at
+  <p>
+  http://www.apache.org/licenses/LICENSE-2.0
+  <p>
+  Unless required by applicable law or agreed to in writing, software distributed under the License
+  is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+  or implied. See the License for the specific language governing permissions and limitations under
+  the License.
  */
 package org.opendatakit.aggregate.externalservice;
 
@@ -66,10 +66,8 @@ import org.opendatakit.common.web.constants.HtmlConsts;
 
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public abstract class AbstractExternalService implements ExternalService {
 
@@ -105,10 +103,6 @@ public abstract class AbstractExternalService implements ExternalService {
     this.fsc = formServiceCursor;
   }
 
-  /**
-   * Helper function for constructors.
-   *
-   */
   protected static FormServiceCursor createFormServiceCursor(IForm form, CommonFieldsBase entity, ExternalServicePublicationOption externalServiceOption, ExternalServiceType type, CallingContext cc) throws ODKDatastoreException {
     FormServiceCursor formServiceCursor = FormServiceCursor.createFormServiceCursor(form, type, entity, cc);
     formServiceCursor.setExternalServiceOption(externalServiceOption);
@@ -119,29 +113,12 @@ public abstract class AbstractExternalService implements ExternalService {
     return formServiceCursor;
   }
 
-  /**
-   * Helper function for constructors.
-   *
-   * @param parameterTableRelation
-   * @param cc
-   * @return
-   * @throws ODKDatastoreException
-   */
-  protected static final <T extends CommonFieldsBase> T newEntity(T parameterTableRelation, CallingContext cc) throws ODKDatastoreException {
+  protected static final <T extends CommonFieldsBase> T newEntity(T parameterTableRelation, CallingContext cc) {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
     return ds.createEntityUsingRelation(parameterTableRelation, user);
   }
 
-  /**
-   * Helper function for constructors.
-   *
-   * @param parameterTableRelation
-   * @param fsc
-   * @param cc
-   * @return
-   * @throws ODKDatastoreException
-   */
   protected static final <T extends CommonFieldsBase> T retrieveEntity(T parameterTableRelation, FormServiceCursor fsc, CallingContext cc) throws ODKDatastoreException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
@@ -263,14 +240,6 @@ public abstract class AbstractExternalService implements ExternalService {
   }
 
   @Override
-  public void abandon(CallingContext cc) throws ODKDatastoreException {
-    if (fsc.getOperationalStatus() != OperationalStatus.COMPLETED) {
-      fsc.setOperationalStatus(OperationalStatus.ABANDONED);
-      persist(cc);
-    }
-  }
-
-  @Override
   public void delete(CallingContext cc) throws ODKDatastoreException {
     CommonFieldsBase serviceEntity = retrieveObjectEntity();
     List<? extends CommonFieldsBase> repeats = retrieveRepeatElementEntities();
@@ -326,9 +295,6 @@ public abstract class AbstractExternalService implements ExternalService {
         getDescriptiveTargetString());
   }
 
-  /**
-   * @see java.lang.Object#hashCode()
-   */
   @Override
   public int hashCode() {
     int hashCode = 13;

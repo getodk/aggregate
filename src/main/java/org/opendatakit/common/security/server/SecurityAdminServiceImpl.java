@@ -40,7 +40,7 @@ public class SecurityAdminServiceImpl extends XsrfProtectedServiceServlet implem
   private static final long serialVersionUID = -5028277386314314356L;
 
   @Override
-  public ArrayList<UserSecurityInfo> getAllUsers(boolean withAuthorities) throws AccessDeniedException, DatastoreFailureException {
+  public ArrayList<UserSecurityInfo> getAllUsers(boolean withAuthorities) throws DatastoreFailureException {
 
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);

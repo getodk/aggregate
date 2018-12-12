@@ -51,6 +51,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, InitializingB
   private PasswordType passwordType = PasswordType.Random;
   private CredentialType credentialType = CredentialType.Username;
   private Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
+
   UserDetailsServiceImpl() {
   }
 
@@ -102,7 +103,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, InitializingB
   }
 
   @Override
-  public void afterPropertiesSet() throws Exception {
+  public void afterPropertiesSet() {
     if (datastore == null) {
       throw new IllegalStateException("datastore must be specified");
     }

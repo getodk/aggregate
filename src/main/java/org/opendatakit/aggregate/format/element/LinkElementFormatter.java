@@ -79,8 +79,7 @@ public class LinkElementFormatter extends BasicElementFormatter {
   }
 
   @Override
-  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row, CallingContext cc)
-      throws ODKDatastoreException {
+  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row, CallingContext cc) {
     if (repeat == null) {
       row.addFormattedValue(null);
       return;

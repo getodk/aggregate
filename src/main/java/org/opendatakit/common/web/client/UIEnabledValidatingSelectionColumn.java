@@ -33,20 +33,6 @@ public abstract class UIEnabledValidatingSelectionColumn<T> extends
 
   protected UIEnabledValidatingSelectionColumn(
       StringValidationPredicate<T> validationPredicate,
-      UIVisiblePredicate<T> isVisiblePredicate, Comparator<T> comparator,
-      ArrayList<String> choices) {
-    this(validationPredicate, isVisiblePredicate, null, comparator, choices);
-  }
-
-  protected UIEnabledValidatingSelectionColumn(
-      StringValidationPredicate<T> validationPredicate,
-      UIEnabledPredicate<T> isEnabledPredicate, Comparator<T> comparator,
-      ArrayList<String> choices) {
-    this(validationPredicate, null, isEnabledPredicate, comparator, choices);
-  }
-
-  protected UIEnabledValidatingSelectionColumn(
-      StringValidationPredicate<T> validationPredicate,
       UIVisiblePredicate<T> isVisiblePredicate,
       UIEnabledPredicate<T> isEnabledPredicate, Comparator<T> comparator,
       ArrayList<String> choices) {

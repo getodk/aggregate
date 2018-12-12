@@ -34,10 +34,6 @@ public enum RowOrCol implements Serializable {
     displayText = display;
   }
 
-  public String getDisplayText() {
-    return displayText;
-  }
-
   public String toString() {
     return displayText;
   }

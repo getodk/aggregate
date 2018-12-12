@@ -1,21 +1,19 @@
-/**
- * Copyright (C) 2011 University of Washington
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+/*
+  Copyright (C) 2011 University of Washington
+  <p>
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+  in compliance with the License. You may obtain a copy of the License at
+  <p>
+  http://www.apache.org/licenses/LICENSE-2.0
+  <p>
+  Unless required by applicable law or agreed to in writing, software distributed under the License
+  is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+  or implied. See the License for the specific language governing permissions and limitations under
+  the License.
  */
 package org.opendatakit.common.utils;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -27,10 +25,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.CharEncoding;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.javarosa.core.model.utils.DateUtils;
@@ -43,7 +37,6 @@ import org.slf4j.LoggerFactory;
  * Useful methods for parsing boolean and date values and formatting dates.
  *
  * @author mitchellsundt@gmail.com
- *
  */
 public class WebUtils {
 
@@ -53,22 +46,8 @@ public class WebUtils {
   static final String ATTRIBUTE_NAME_TAG = "attributeName";
   static final String CURSOR_TAG = "cursor";
   static final Logger logger = LoggerFactory.getLogger(WebUtils.class);
-  /**
-   * Date format pattern used to parse HTTP date headers in RFC 1123 format.
-   * copied from apache.commons.lang.DateUtils
-   */
   private static final String PATTERN_RFC1123 = "EEE, dd MMM yyyy HH:mm:ss zzz";
-
-  /**
-   * Date format pattern used to parse HTTP date headers in RFC 1036 format.
-   * copied from apache.commons.lang.DateUtils
-   */
   private static final String PATTERN_RFC1036 = "EEEE, dd-MMM-yy HH:mm:ss zzz";
-
-  /**
-   * Date format pattern used to parse HTTP date headers in ANSI C
-   * <code>asctime()</code> format. copied from apache.commons.lang.DateUtils
-   */
   private static final String PATTERN_ASCTIME = "EEE MMM d HH:mm:ss yyyy";
   private static final String PATTERN_DATE_TOSTRING = "EEE MMM dd HH:mm:ss zzz yyyy";
   private static final String PATTERN_ISO8601 = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
@@ -85,84 +64,6 @@ public class WebUtils {
   private WebUtils() {
   }
 
-  ;
-
-  /**
-   * Safely encode a string for use as a query parameter.
-   *
-   * @param rawString
-   * @return encoded string
-   */
-  public static String safeEncode(String rawString) {
-    if (rawString == null || rawString.length() == 0) {
-      return null;
-    }
-
-    try {
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
-      GZIPOutputStream gzip = new GZIPOutputStream(out);
-      gzip.write(rawString.getBytes(CharEncoding.UTF_8));
-      gzip.finish();
-      gzip.close();
-      String candidate = Base64.encodeBase64URLSafeString(out.toByteArray());
-      return candidate;
-    } catch (UnsupportedEncodingException e) {
-      e.printStackTrace();
-      throw new IllegalArgumentException("Unexpected failure: " + e.toString());
-    } catch (IOException e) {
-      e.printStackTrace();
-      throw new IllegalArgumentException("Unexpected failure: " + e.toString());
-    }
-  }
-
-  /**
-   * Decode a safeEncode() string.
-   *
-   * @param encodedWebsafeString
-   * @return rawString
-   */
-  public static String safeDecode(String encodedWebsafeString) {
-    if (encodedWebsafeString == null || encodedWebsafeString.length() == 0) {
-      return encodedWebsafeString;
-    }
-
-    try {
-      ByteArrayInputStream in = new ByteArrayInputStream(Base64.decodeBase64(encodedWebsafeString
-          .getBytes(CharEncoding.UTF_8)));
-      GZIPInputStream gzip = new GZIPInputStream(in);
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
-      int ch = gzip.read();
-      while (ch >= 0) {
-        out.write(ch);
-        ch = gzip.read();
-      }
-      gzip.close();
-      out.flush();
-      out.close();
-      return new String(out.toByteArray(), CharEncoding.UTF_8);
-    } catch (UnsupportedEncodingException e) {
-      e.printStackTrace();
-      throw new IllegalArgumentException("Unexpected failure: " + e.toString());
-    } catch (IOException e) {
-      e.printStackTrace();
-      throw new IllegalArgumentException("Unexpected failure: " + e.toString());
-    }
-  }
-
-  /**
-   * Parse a string into a boolean value. Any of:
-   * <ul>
-   * <li>ok</li>
-   * <li>yes</li>
-   * <li>true</li>
-   * <li>t</li>
-   * <li>y</li>
-   * </ul>
-   * are interpretted as boolean true.
-   *
-   * @param value
-   * @return
-   */
   public static final Boolean parseBoolean(String value) {
     Boolean b = null;
     if (value != null && value.length() != 0) {
@@ -182,8 +83,7 @@ public class WebUtils {
     return b;
   }
 
-  private static final Date parseDateSubset(String value, String[] parsePatterns, Locale l,
-                                            TimeZone tz) {
+  private static final Date parseDateSubset(String value, String[] parsePatterns, Locale l, TimeZone tz) {
     // borrowed from apache.commons.lang.DateUtils...
     Date d = null;
     SimpleDateFormat parser = null;
@@ -208,14 +108,6 @@ public class WebUtils {
     return d;
   }
 
-  /**
-   * Parse a string into a datetime value. Tries the common Http formats, the
-   * iso8601 format (used by Javarosa), the default formatting from
-   * Date.toString(), and a time-only format.
-   *
-   * @param value
-   * @return
-   */
   public static final Date parseDate(String value) {
     if (value == null || value.length() == 0)
       return null;
@@ -321,48 +213,6 @@ public class WebUtils {
     return DateUtils.formatTime(d, DateUtils.FORMAT_ISO8601);
   }
 
-  /**
-   * Useful static method for constructing a UPPER_CASE persistence layer name
-   * from a camelCase name. This inserts an underscore before a leading capital
-   * letter and toUpper()s the resulting string. The transformation maps
-   * multiple camelCase names to the same UPPER_CASE name so it is not
-   * reversible.
-   * <ul>
-   * <li>thisURL => THIS_URL</li>
-   * <li>thisUrl => THIS_URL</li>
-   * <li>myFirstObject => MY_FIRST_OBJECT</li>
-   * </ul>
-   *
-   * @param name
-   * @return
-   */
-  public static final String unCamelCase(String name) {
-    StringBuilder b = new StringBuilder();
-    boolean lastCap = true;
-    for (int i = 0; i < name.length(); ++i) {
-      char ch = name.charAt(i);
-      if (Character.isUpperCase(ch)) {
-        if (!lastCap) {
-          b.append('_');
-        }
-        lastCap = true;
-        b.append(ch);
-      } else if (Character.isLetterOrDigit(ch)) {
-        lastCap = false;
-        b.append(Character.toUpperCase(ch));
-      } else {
-        throw new IllegalArgumentException("Argument is not a valid camelCase name: " + name);
-      }
-    }
-    return b.toString();
-  }
-
-  /**
-   * Return the GoogleDocs datetime string representation of a datetime.
-   *
-   * @param d
-   * @return
-   */
   public static final String googleDocsDateTime(Date d) {
     if (d == null)
       return null;
@@ -371,12 +221,6 @@ public class WebUtils {
     return asGoogleDoc.format(d);
   }
 
-  /**
-   * Return the GoogleDocs date string representation of a date-only datetime.
-   *
-   * @param d
-   * @return
-   */
   public static final String googleDocsDateOnly(Date d) {
     if (d == null)
       return null;
@@ -385,12 +229,6 @@ public class WebUtils {
     return asGoogleDocDateOnly.format(d);
   }
 
-  /**
-   * Return the ISO8601 string representation of a date.
-   *
-   * @param d
-   * @return
-   */
   public static final String iso8601Date(Date d) {
     if (d == null)
       return null;
@@ -402,12 +240,6 @@ public class WebUtils {
     return asGMTiso8601.format(d);
   }
 
-  /**
-   * Return the RFC1123 string representation of a date.
-   *
-   * @param d
-   * @return
-   */
   public static final String rfc1123Date(Date d) {
     if (d == null)
       return null;
@@ -436,30 +268,6 @@ public class WebUtils {
     return purgeDateFormat.parse(str);
   }
 
-  /**
-   * Return a string with utf-8 characters replaced with backslash-uxxxx codes.
-   * Useful for debugging.
-   *
-   * @param str
-   * @return printable rendition of non-ASCII utf-8 characters.
-   */
-  public static final String escapeUTF8String(String str) {
-    StringBuilder b = new StringBuilder();
-    for (int i = 0; i < str.length(); ++i) {
-      int code = str.codePointAt(i);
-      if (code < 127) {
-        b.append(str.charAt(i));
-      } else {
-        String val = Integer.toHexString(code);
-        while (val.length() < 4) {
-          val = '0' + val;
-        }
-        b.append("\\u" + val);
-      }
-    }
-    return b.toString();
-  }
-
   public static String readResponse(HttpResponse resp) throws IOException {
 
     HttpEntity e = resp.getEntity();
@@ -470,8 +278,7 @@ public class WebUtils {
     return BasicConsts.EMPTY_STRING;
   }
 
-  public static String readGoogleResponse(com.google.api.client.http.HttpResponse resp)
-      throws IOException {
+  public static String readGoogleResponse(com.google.api.client.http.HttpResponse resp) throws IOException {
     if (resp != null) {
       return WebUtils.readResponseHelper(resp.getContent());
     }

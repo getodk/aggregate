@@ -81,12 +81,9 @@ public final class VisualizationPopup extends AbstractPopupBase {
   private static final String SUM_COLUMNS_END = "?]";
   private static final String GEOPOINT_TOOLTIP = "Geopoint field to map";
   private static final String GEOPOINT_BALLOON = "Choose the geopoint field to map.";
-
   private static final String TYPE_TXT = "<h2 id=\"form_name\">Type:</h2>";
-  private static final String COLUMN_TXT = "<h2 id=\"form_name\">" + HtmlConsts.TAB
-      + "Column to Visualize:</h2>";
-  private static final String GPS_TXT = "<h2 id=\"form_name\">" + HtmlConsts.TAB
-      + "GeoPoint to Map:</h2>";
+  private static final String COLUMN_TXT = "<h2 id=\"form_name\">" + HtmlConsts.TAB + "Column to Visualize:</h2>";
+  private static final String GPS_TXT = "<h2 id=\"form_name\">" + HtmlConsts.TAB + "GeoPoint to Map:</h2>";
   private static final String RADIO_GROUP = "vizRadioGroup";
   private static final String RESIZE_UNITS = "px";
   private static final String VIZ_TYPE_TOOLTIP = "Type of Visualization";
@@ -326,11 +323,6 @@ public final class VisualizationPopup extends AbstractPopupBase {
     return data;
   }
 
-  /**
-   * Create pie chart
-   *
-   * @return
-   */
   private PieChart createPieChart() {
     DataTable data = createDataTable();
     PieOptions options = PieChart.createPieOptions();
@@ -340,11 +332,6 @@ public final class VisualizationPopup extends AbstractPopupBase {
     return new PieChart(data, options);
   }
 
-  /**
-   * Create bar chart
-   *
-   * @return
-   */
   private BarChart createBarChart() {
     DataTable data = createDataTable();
     Options options = Options.create();

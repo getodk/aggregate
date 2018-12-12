@@ -17,12 +17,10 @@
 
 package org.opendatakit.aggregate.externalservice;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -53,8 +51,6 @@ import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
-import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.security.User;
 import org.opendatakit.common.security.common.EmailParser;
 import org.opendatakit.common.utils.WebUtils;
@@ -90,39 +86,14 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
 
   /**
    * Common base initialization of a FusionTable (both new and existing).
-   *
-   * @param entity
-   * @param formServiceCursor
-   * @param form
-   * @param cc
-   * @throws ODKExternalServiceCredentialsException
-   * @throws IOException
-   * @throws GeneralSecurityException
    */
-  private FusionTable(FusionTable2ParameterTable entity, FormServiceCursor formServiceCursor,
-                      IForm form, CallingContext cc) throws ODKExternalServiceException {
+  private FusionTable(FusionTable2ParameterTable entity, FormServiceCursor formServiceCursor, IForm form, CallingContext cc) throws ODKExternalServiceException {
     super(FUSION_TABLE_OAUTH2_SCOPE, form, formServiceCursor, new FusionTableElementFormatter(
         cc.getServerURL()), new FusionTableHeaderFormatter(), cc);
     this.objectEntity = entity;
   }
 
-  /**
-   * Continuation of the creation of a brand new FusionTable. Needed because
-   * entity must be passed into two objects in the constructor.
-   *
-   * @param entity
-   * @param form
-   * @param externalServiceOption
-   * @param cc
-   * @throws ODKEntityPersistException
-   * @throws ODKOverQuotaException
-   * @throws ODKDatastoreException
-   * @throws ODKExternalServiceException
-   */
-  private FusionTable(FusionTable2ParameterTable entity, IForm form,
-                      ExternalServicePublicationOption externalServiceOption, CallingContext cc)
-      throws ODKEntityPersistException, ODKOverQuotaException, ODKDatastoreException,
-      ODKExternalServiceException {
+  private FusionTable(FusionTable2ParameterTable entity, IForm form, ExternalServicePublicationOption externalServiceOption, CallingContext cc) throws ODKDatastoreException, ODKExternalServiceException {
     this(entity, createFormServiceCursor(form, entity, externalServiceOption,
         ExternalServiceType.GOOGLE_FUSIONTABLES, cc), form, cc);
 
@@ -141,18 +112,7 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
     persist(cc);
   }
 
-  /**
-   * Reconstruct a FusionTable definition from its persisted representation in
-   * the datastore.
-   *
-   * @param formServiceCursor
-   * @param form
-   * @param cc
-   * @throws ODKDatastoreException
-   * @throws ODKExternalServiceException
-   */
-  public FusionTable(FormServiceCursor formServiceCursor, IForm form, CallingContext cc)
-      throws ODKDatastoreException, ODKExternalServiceException {
+  public FusionTable(FormServiceCursor formServiceCursor, IForm form, CallingContext cc) throws ODKDatastoreException, ODKExternalServiceException {
 
     this(retrieveEntity(FusionTable2ParameterTable.assertRelation(cc), formServiceCursor, cc),
         formServiceCursor, form, cc);
@@ -161,37 +121,12 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
         objectEntity.getUri(), cc));
   }
 
-  /**
-   * Create a brand new FusionTable
-   *
-   * @param form
-   * @param externalServiceOption
-   * @param ownerUserEmail        -- user that should be granted ownership of the fusionTable
-   *                              artifact(s)
-   * @param cc
-   * @throws ODKEntityPersistException
-   * @throws ODKOverQuotaException
-   * @throws ODKDatastoreException
-   * @throws ODKExternalServiceException
-   */
-  public FusionTable(IForm form, ExternalServicePublicationOption externalServiceOption,
-                     String ownerEmail, CallingContext cc) throws ODKEntityPersistException,
-      ODKOverQuotaException, ODKDatastoreException, ODKExternalServiceException {
+  public FusionTable(IForm form, ExternalServicePublicationOption externalServiceOption, String ownerEmail, CallingContext cc) throws ODKDatastoreException, ODKExternalServiceException {
     this(newFusionTableEntity(ownerEmail, cc), form, externalServiceOption, cc);
     persist(cc);
   }
 
-  /**
-   * Helper function to create a FusionTable parameter table (missing the
-   * not-yet-created tableId).
-   *
-   * @param ownerEmail
-   * @param cc
-   * @return
-   * @throws ODKDatastoreException
-   */
-  private static final FusionTable2ParameterTable newFusionTableEntity(String ownerEmail,
-                                                                       CallingContext cc) throws ODKDatastoreException {
+  private static final FusionTable2ParameterTable newFusionTableEntity(String ownerEmail, CallingContext cc) throws ODKDatastoreException {
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
 
@@ -274,8 +209,7 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
     postUploadTask(cc);
   }
 
-  private void sharePublishedFiles(String ownerEmail, CallingContext cc)
-      throws ODKExternalServiceException, ODKDatastoreException {
+  private void sharePublishedFiles(String ownerEmail, CallingContext cc) throws ODKExternalServiceException {
 
     executeDrivePermission(objectEntity.getFusionTableId(), objectEntity.getOwnerEmail());
     if (objectEntity.getFusionTableViewId() != null) {
@@ -292,8 +226,7 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
   }
 
   @Override
-  protected void insertData(Submission submission, CallingContext cc)
-      throws ODKExternalServiceException {
+  protected void insertData(Submission submission, CallingContext cc) throws ODKExternalServiceException {
     try {
       FusionTableFormattedSubmission formattedSubmission = new FusionTableFormattedSubmission(
           submission, cc);
@@ -330,8 +263,7 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
   }
 
   @Override
-  public void sendSubmissions(List<Submission> submissions, boolean streaming, CallingContext cc)
-      throws ODKExternalServiceException {
+  public void sendSubmissions(List<Submission> submissions, boolean streaming, CallingContext cc) throws ODKExternalServiceException {
 
     Datastore ds = cc.getDatastore();
     User user = cc.getCurrentUser();
@@ -389,8 +321,7 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
     return true;
   }
 
-  private String executeFusionTableCreation(FormElementModel root, CallingContext cc)
-      throws ODKExternalServiceException {
+  private String executeFusionTableCreation(FormElementModel root, CallingContext cc) throws ODKExternalServiceException {
 
     String resultRequest;
     try {
@@ -430,8 +361,7 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
     }
   }
 
-  private String createFusionTableStatement(IForm form, FormElementModel rootNode)
-      throws JsonGenerationException, JsonMappingException, IOException {
+  private String createFusionTableStatement(IForm form, FormElementModel rootNode) throws IOException {
 
     Map<String, Object> tableResource = new HashMap<String, Object>();
     tableResource.put("kind", "fusiontables#table");
@@ -468,9 +398,7 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
     return createStmt;
   }
 
-  private String executeFusionTableViewCreation(String parentTableId,
-                                                List<RepeatViewInfo> repeatInfoList, IForm form, CallingContext cc)
-      throws ODKExternalServiceException {
+  private String executeFusionTableViewCreation(String parentTableId, List<RepeatViewInfo> repeatInfoList, IForm form, CallingContext cc) throws ODKExternalServiceException {
 
     String resultRequest;
     try {
@@ -530,9 +458,6 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
     }
   }
 
-  /**
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
   @Override
   public boolean equals(Object obj) {
     if (!(obj instanceof FusionTable)) {
@@ -594,11 +519,6 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
     return repeatElementEntities;
   }
 
-  /**
-   * Private class that turns a submission into the formatted strings to be
-   * batched
-   */
-
   private class FusionTableFormattedSubmission {
 
     private final Submission submission;
@@ -606,7 +526,7 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
     private final Map<String, String> formattedSubmissionStrings;
 
     FusionTableFormattedSubmission(Submission submission, CallingContext cc)
-        throws ODKExternalServiceException, ODKDatastoreException {
+        throws ODKDatastoreException {
       this.submission = submission;
       this.formattedSubmissionStrings = new HashMap<String, String>();
 
@@ -688,9 +608,6 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
 
   }
 
-  /**
-   * Private class that determines how to break up the submission into batches
-   */
   private class SubmissionBatcher {
 
     private final LinkedList<FusionTableFormattedSubmission> needToProcess;
@@ -706,7 +623,7 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
     private FusionTableFormattedSubmission lastProccessedSubmission;
 
     SubmissionBatcher(List<Submission> submissions, int maxStringSize, CallingContext cc)
-        throws ODKExternalServiceException, ODKDatastoreException {
+        throws ODKDatastoreException {
       this.maxStringSize = maxStringSize;
       this.needToProcess = new LinkedList<FusionTableFormattedSubmission>();
       this.currentSet = new LinkedList<FusionTableFormattedSubmission>();
@@ -737,7 +654,6 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
      * Get string for batch insert, removes the string so not available after
      * the first call
      *
-     * @param tableId
      * @return string and remove from batch temp storage
      */
     String getBatchInsertString(String tableId) {
@@ -767,7 +683,6 @@ public class FusionTable extends GoogleOauth2ExternalService implements External
      *
      * @return true if more submissions need to be processed to be sent, false
      *     if all submissions have been processed
-     * @throws ODKExternalServiceException
      */
     boolean processSubmissionsForBatch() throws ODKExternalServiceException {
       if (needToProcess.isEmpty()) {

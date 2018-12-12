@@ -1,15 +1,15 @@
-/**
- * Copyright (C) 2013 University of Washington
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+/*
+  Copyright (C) 2013 University of Washington
+  <p>
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+  in compliance with the License. You may obtain a copy of the License at
+  <p>
+  http://www.apache.org/licenses/LICENSE-2.0
+  <p>
+  Unless required by applicable law or agreed to in writing, software distributed under the License
+  is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+  or implied. See the License for the specific language governing permissions and limitations under
+  the License.
  */
 package org.opendatakit.aggregate.externalservice;
 
@@ -21,32 +21,18 @@ import org.opendatakit.common.security.User;
 import org.opendatakit.common.web.CallingContext;
 
 /**
- *
  * @author wbrunette@gmail.com
  * @author mitchellsundt@gmail.com
- *
  */
 public final class REDCapServerParameterTable extends CommonFieldsBase {
 
   private static final String TABLE_NAME = "_redcap_server";
 
-  private static final DataField API_KEY_PROPERTY = new DataField("API_KEY",
-      DataField.DataType.STRING, true, 4096L);
-
-  private static final DataField URL_PROPERTY = new DataField("URL", DataField.DataType.STRING,
-      true, 4096L);
-
-  private static final DataField OWNER_EMAIL_PROPERTY = new DataField("OWNER_EMAIL",
-      DataField.DataType.STRING, true, 4096L);
+  private static final DataField API_KEY_PROPERTY = new DataField("API_KEY", DataField.DataType.STRING, true, 4096L);
+  private static final DataField URL_PROPERTY = new DataField("URL", DataField.DataType.STRING, true, 4096L);
+  private static final DataField OWNER_EMAIL_PROPERTY = new DataField("OWNER_EMAIL", DataField.DataType.STRING, true, 4096L);
   private static REDCapServerParameterTable relation = null;
 
-  /**
-   * Construct a relation prototype. Only called via
-   * {@link #assertRelation(CallingContext)}
-   *
-   * @param databaseSchema
-   * @param tableName
-   */
   REDCapServerParameterTable(String schemaName) {
     super(schemaName, TABLE_NAME);
     fieldList.add(API_KEY_PROPERTY);
@@ -54,18 +40,11 @@ public final class REDCapServerParameterTable extends CommonFieldsBase {
     fieldList.add(OWNER_EMAIL_PROPERTY);
   }
 
-  /**
-   * Construct an empty entity. Only called via {@link #getEmptyRow(User)}
-   *
-   * @param ref
-   * @param user
-   */
   private REDCapServerParameterTable(REDCapServerParameterTable ref, User user) {
     super(ref, user);
   }
 
-  public static synchronized final REDCapServerParameterTable assertRelation(CallingContext cc)
-      throws ODKDatastoreException {
+  public static synchronized final REDCapServerParameterTable assertRelation(CallingContext cc) throws ODKDatastoreException {
     if (relation == null) {
       REDCapServerParameterTable relationPrototype;
       Datastore ds = cc.getDatastore();
@@ -78,7 +57,6 @@ public final class REDCapServerParameterTable extends CommonFieldsBase {
     return relation;
   }
 
-  // Only called from within the persistence layer.
   @Override
   public REDCapServerParameterTable getEmptyRow(User user) {
     return new REDCapServerParameterTable(this, user);

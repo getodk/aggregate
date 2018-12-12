@@ -35,13 +35,7 @@ import org.opendatakit.common.security.common.GrantedAuthorityName;
 @RemoteServiceRelativePath("securityadminservice")
 public interface SecurityAdminService extends RemoteService {
 
-  /**
-   * @param withAuthorities if true, populate the groups and granted authorities sets.
-   * @return all registered users and the Anonymous user.
-   * @throws AccessDeniedException
-   * @throws DatastoreFailureException
-   */
-  ArrayList<UserSecurityInfo> getAllUsers(boolean withAuthorities) throws AccessDeniedException, DatastoreFailureException;
+  ArrayList<UserSecurityInfo> getAllUsers(boolean withAuthorities) throws DatastoreFailureException;
 
   @XsrfProtect
   void setUsersAndGrantedAuthorities(String xsrfString, ArrayList<UserSecurityInfo> users, ArrayList<GrantedAuthorityName> allGroups) throws AccessDeniedException, DatastoreFailureException;

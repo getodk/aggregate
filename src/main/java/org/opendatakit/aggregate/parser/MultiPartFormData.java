@@ -52,18 +52,7 @@ public class MultiPartFormData {
 
   private final Map<String, MultiPartFormItem> fileNameWithoutExtensionNameMap;
 
-  /**
-   * Construct a mult-part form data container by parsing a multi part form
-   * request into a set of multipartformitems. The information are stored in
-   * items and are indexed by either the field name or the file name (or both)
-   * provided in the http submission
-   *
-   * @param req an HTTP request from a multipart form
-   * @throws FileUploadException
-   * @throws IOException
-   */
-  public MultiPartFormData(HttpServletRequest req)
-      throws FileUploadException, IOException {
+  public MultiPartFormData(HttpServletRequest req) throws FileUploadException, IOException {
 
     simpleFieldNameMap = new HashMap<String, String>();
     fieldNameMap = new HashMap<String, MultiPartFormItem>();
@@ -192,7 +181,4 @@ public class MultiPartFormData {
     return Collections.unmodifiableSet(fileNameMap.entrySet());
   }
 
-  public Set<Map.Entry<String, MultiPartFormItem>> getFieldNameEntrySet() {
-    return Collections.unmodifiableSet(fieldNameMap.entrySet());
-  }
 }

@@ -32,10 +32,6 @@ public class GeopointHeaderIncludes {
     this.includeAccuracy = accuracy;
   }
 
-  public String getElementName() {
-    return elementName;
-  }
-
   public boolean includeLatitude() {
     return includeLatitude;
   }

@@ -21,7 +21,6 @@ import org.opendatakit.aggregate.servlet.FormMultipleValueServlet;
 import org.opendatakit.aggregate.submission.SubmissionRepeat;
 import org.opendatakit.aggregate.submission.type.GeoPoint;
 import org.opendatakit.common.persistence.WrappedBigDecimal;
-import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
@@ -70,7 +69,7 @@ public class FusionTableElementFormatter extends LinkElementFormatter {
   }
 
   @Override
-  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row, CallingContext cc) throws ODKDatastoreException {
+  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row, CallingContext cc) {
     basicStringConversion(repeat.getUniqueKeyStr(), row);
   }
 

@@ -21,7 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.opendatakit.aggregate.ContextFactory;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
-import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.servlet.ServletUtilBase;
 import org.opendatakit.aggregate.task.WatchdogWorkerImpl;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
@@ -72,11 +71,6 @@ public class WatchdogServlet extends ServletUtilBase {
       odkIdNotFoundError(resp);
       return;
     } catch (ODKDatastoreException e) {
-      e.printStackTrace();
-      logger.error(e.toString());
-      resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
-      return;
-    } catch (ODKIncompleteSubmissionData e) {
       e.printStackTrace();
       logger.error(e.toString());
       resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());

@@ -15,9 +15,6 @@
  */
 package org.opendatakit.common.utils;
 
-import com.google.api.client.http.HttpTransport;
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.ConnectionConfig;
 import org.apache.http.config.SocketConfig;
@@ -33,16 +30,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
  * @author wbrunette@gmail.com
  */
 public interface HttpClientFactory {
+  CloseableHttpClient createHttpClient(SocketConfig socketConfig, ConnectionConfig connectionConfig, RequestConfig requestConfig);
 
-  /**
-   * All arguments can be null. Updated to Apache 4.5.2 active usage.
-   *
-   * @param socketConfig
-   * @param connectionConfig
-   * @param requestConfig
-   * @return
-   */
-  public CloseableHttpClient createHttpClient(SocketConfig socketConfig, ConnectionConfig connectionConfig, RequestConfig requestConfig);
-
-  public HttpTransport getGoogleOAuth2Transport() throws GeneralSecurityException, IOException;
 }

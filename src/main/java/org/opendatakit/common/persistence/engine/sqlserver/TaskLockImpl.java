@@ -19,7 +19,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.DataField;
@@ -376,14 +375,6 @@ public class TaskLockImpl implements TaskLock {
       if (!setStringField(taskType, value)) {
         throw new IllegalStateException("overflow taskType");
       }
-    }
-
-    Date getExpirationDateTime() {
-      return getDateField(expirationDateTime);
-    }
-
-    void setExpirationDateTime(Date value) {
-      setDateField(expirationDateTime, value);
     }
 
     @Override

@@ -49,7 +49,6 @@ import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
 import org.opendatakit.common.persistence.client.exception.DatastoreFailureException;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
-import org.opendatakit.common.security.client.exception.AccessDeniedException;
 import org.opendatakit.common.web.CallingContext;
 
 public class SubmissionServiceImpl extends RemoteServiceServlet implements
@@ -62,8 +61,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
 
   @Override
   public SubmissionUISummary getSubmissions(FilterGroup filterGroup)
-      throws FormNotAvailableException, RequestFailureException, DatastoreFailureException,
-      AccessDeniedException {
+      throws FormNotAvailableException, RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -103,8 +101,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
 
   @Override
   public SubmissionUISummary getRepeatSubmissions(String keyString)
-      throws FormNotAvailableException, RequestFailureException, DatastoreFailureException,
-      AccessDeniedException {
+      throws FormNotAvailableException, RequestFailureException, DatastoreFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
@@ -161,7 +158,7 @@ public class SubmissionServiceImpl extends RemoteServiceServlet implements
   }
 
   @Override
-  public String getSubmissionAuditCSV(String keyString) throws AccessDeniedException, RequestFailureException, DatastoreFailureException {
+  public String getSubmissionAuditCSV(String keyString) throws RequestFailureException {
     HttpServletRequest req = this.getThreadLocalRequest();
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 

@@ -45,15 +45,6 @@ public final class FilterSet implements Serializable {
     groups.add(group);
   }
 
-  /**
-   * This should remove the filter group altogether
-   *
-   * @param group the group to be removed
-   */
-  public void removeFilterGroup(FilterGroup group) {
-    groups.remove(group);
-  }
-
   public String getFormId() {
     return formId;
   }

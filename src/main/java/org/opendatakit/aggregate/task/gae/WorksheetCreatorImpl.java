@@ -19,7 +19,6 @@ import java.util.Map;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.externalservice.ExternalServiceConsts;
 import org.opendatakit.aggregate.constants.externalservice.SpreadsheetConsts;
-import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.form.MiscTasks;
 import org.opendatakit.aggregate.task.WorksheetCreator;
@@ -40,7 +39,7 @@ public class WorksheetCreatorImpl implements WorksheetCreator {
 
   @Override
   public final void createWorksheetTask(IForm form, MiscTasks miscTasks, long attemptCount,
-                                        CallingContext cc) throws ODKFormNotFoundException, ODKDatastoreException {
+                                        CallingContext cc) throws ODKDatastoreException {
     Map<String, String> params = miscTasks.getRequestParameters();
 
     TaskOptionsBuilder b = new TaskOptionsBuilder(WorksheetServlet.ADDR);
