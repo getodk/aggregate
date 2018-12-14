@@ -37,11 +37,10 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.PermissionsSubTab;
 import org.opendatakit.aggregate.client.SecureGWT;
@@ -53,7 +52,6 @@ import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
 import org.opendatakit.common.security.common.EmailParser;
-import org.opendatakit.common.security.common.EmailParser.Email;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.opendatakit.common.web.client.BooleanValidationPredicate;
 import org.opendatakit.common.web.client.StringValidationPredicate;
@@ -61,7 +59,6 @@ import org.opendatakit.common.web.client.UIEnabledActionCell;
 import org.opendatakit.common.web.client.UIEnabledActionColumn;
 import org.opendatakit.common.web.client.UIEnabledPredicate;
 import org.opendatakit.common.web.client.UIEnabledValidatingCheckboxColumn;
-import org.opendatakit.common.web.client.UIEnabledValidatingSelectionColumn;
 import org.opendatakit.common.web.client.UIEnabledValidatingTextInputColumn;
 import org.opendatakit.common.web.client.UIVisiblePredicate;
 
@@ -73,14 +70,13 @@ public class AccessConfigurationSheet extends Composite {
 
   private static final ArrayList<String> userType;
   private static final String ACCOUNT_TYPE_ODK = "ODK";
-  private static final String ACCOUNT_TYPE_GOOGLE = "Google";
   private static TemporaryAccessConfigurationSheetUiBinder uiBinder = GWT
       .create(TemporaryAccessConfigurationSheetUiBinder.class);
 
   static {
+    // TODO Make this a singletonList and inline
     userType = new ArrayList<String>();
     userType.add(ACCOUNT_TYPE_ODK);
-    userType.add(ACCOUNT_TYPE_GOOGLE);
   }
 
   private final ListDataProvider<UserSecurityInfo> dataProvider = new ListDataProvider<UserSecurityInfo>();
@@ -133,10 +129,6 @@ public class AccessConfigurationSheet extends Composite {
         "Change Password", new EnableLocalAccountPredicate(), new ChangePasswordActionCallback());
     userTable.addColumn(changePassword, "");
 
-    // Type of User
-    AccountTypeSelectionColumn type = new AccountTypeSelectionColumn();
-    userTable.addColumn(type, "Account Type");
-
     GroupMembershipColumn dc = new GroupMembershipColumn(GrantedAuthorityName.GROUP_DATA_COLLECTORS);
     userTable.addColumn(dc, GrantedAuthorityName.GROUP_DATA_COLLECTORS.getDisplayText());
 
@@ -148,7 +140,6 @@ public class AccessConfigurationSheet extends Composite {
 
     columnSortHandler.setComparator(username, username.getComparator());
     columnSortHandler.setComparator(fullname, fullname.getComparator());
-    columnSortHandler.setComparator(type, type.getComparator());
     columnSortHandler.setComparator(dc, dc.getComparator());
     columnSortHandler.setComparator(dv, dv.getComparator());
     columnSortHandler.setComparator(formsAdmin, formsAdmin.getComparator());
@@ -234,39 +225,25 @@ public class AccessConfigurationSheet extends Composite {
 
   @UiHandler("addNow")
   void onAddUsersClick(ClickEvent e) {
-    String text = addedUsers.getText();
-    Collection<Email> emails = EmailParser.parseEmails(text);
-    HashMap<String, UserSecurityInfo> localUsers = new HashMap<String, UserSecurityInfo>();
-    HashMap<String, UserSecurityInfo> googleUsers = new HashMap<String, UserSecurityInfo>();
-    List<UserSecurityInfo> list = dataProvider.getList();
-    for (UserSecurityInfo u : list) {
-      if (u.getUsername() != null) {
-        localUsers.put(u.getUsername(), u);
-      } else {
-        googleUsers.put(u.getEmail(), u);
-      }
+    if (addedUsers.getText().contains("@")) {
+      Window.alert("Usernames with '@' are not supported (email accounts are not supported)");
+      return;
     }
-    int nAdded = 0;
-    for (Email email : emails) {
-      boolean localUser = (email.getUsername() != null);
-      UserSecurityInfo u = localUser ? localUsers.get(email.getUsername()) : googleUsers.get(email
-          .getEmail());
-      if (u == null) {
-        u = new UserSecurityInfo(email.getUsername(), email.getFullName(), email.getEmail(),
-            UserType.REGISTERED);
-        list.add(u);
-        if (localUser) {
-          localUsers.put(u.getUsername(), u);
-        } else {
-          googleUsers.put(u.getEmail(), u);
-        }
-        ++nAdded;
-      }
+
+    List<String> existingUsernames = dataProvider.getList().stream().map(UserSecurityInfo::getUsername).collect(Collectors.toList());
+    List<UserSecurityInfo> newAccounts = new ArrayList<>();
+    for (String username : addedUsers.getText().split(" \n")) {
+      String trimmedUsername = username.trim();
+      if (!trimmedUsername.isEmpty() && !existingUsernames.contains(trimmedUsername))
+        newAccounts.add(new UserSecurityInfo(trimmedUsername, null, null, UserType.REGISTERED));
     }
-    if (nAdded != 0) {
-      userTable.setPageSize(Math.max(15, list.size()));
+
+    if (!newAccounts.isEmpty()) {
+      dataProvider.getList().addAll(newAccounts);
+      userTable.setPageSize(Math.max(15, dataProvider.getList().size()));
       uiOutOfSyncWithServer();
     }
+    addedUsers.setText("");
   }
 
   @UiHandler("button")
@@ -403,16 +380,6 @@ public class AccessConfigurationSheet extends Composite {
     }
   }
 
-  private static final class VisibleNotAnonymousPredicate implements
-      UIVisiblePredicate<UserSecurityInfo> {
-
-    @Override
-    public boolean isVisible(UserSecurityInfo info) {
-      // enable only if it is not the anonymous user
-      return (info.getType() != UserType.ANONYMOUS);
-    }
-  }
-
   private static final class EnableNotAnonymousOrSuperUserPredicate implements
       UIEnabledPredicate<UserSecurityInfo> {
     @Override
@@ -473,36 +440,6 @@ public class AccessConfigurationSheet extends Composite {
         return (arg1 != null) ? arg0.getFullName().compareToIgnoreCase(arg1.getFullName()) : 1;
       }
       return -1;
-    }
-  }
-
-  /**
-   * If a Google account type is chosen, the username should be an e-mail
-   * address.
-   */
-  private static final class ValidatingAccountTypePredicate implements
-      StringValidationPredicate<UserSecurityInfo> {
-
-    @Override
-    public boolean isValid(String prospectiveValue, UserSecurityInfo key) {
-      if (prospectiveValue == null || prospectiveValue.length() == 0) {
-        Window.alert("Account Type cannot be empty");
-        return false;
-      }
-
-      if (prospectiveValue.equals(ACCOUNT_TYPE_GOOGLE) && key.getEmail() == null) {
-        // must be changing to a Google account type from an ODK account
-        // verify that the username is a well-formed e-mail address...
-        String username = key.getUsername();
-        if (username == null || username.length() == 0) {
-          return false;
-        }
-        if (EmailParser.hasInvalidEmailCharacters(username) || username.indexOf(EmailParser.K_AT) == -1) {
-          Window.alert(NOT_VALID_EMAIL);
-          return false;
-        }
-      }
-      return true;
     }
   }
 
@@ -684,67 +621,6 @@ public class AccessConfigurationSheet extends Composite {
       uiOutOfSyncWithServer();
       // validation happens in the validation predicate...
       object.setFullName(value);
-    }
-  }
-
-  private class AccountTypeComparator implements Comparator<UserSecurityInfo> {
-
-    @Override
-    public int compare(UserSecurityInfo arg0, UserSecurityInfo arg1) {
-      if (arg0 == arg1)
-        return 0;
-
-      if (arg0 != null) {
-        if (arg1 == null)
-          return 1;
-        if (arg0.getUsername() == null) {
-          return (arg1.getUsername() == null) ? 0 : -1;
-        } else {
-          return (arg1.getUsername() == null) ? 1 : 0;
-        }
-      }
-      return -1;
-    }
-  }
-
-  private class AccountTypeSelectionColumn extends
-      UIEnabledValidatingSelectionColumn<UserSecurityInfo> {
-
-    protected AccountTypeSelectionColumn() {
-      super(new ValidatingAccountTypePredicate(), new VisibleNotAnonymousPredicate(),
-          new EnableNotAnonymousOrSuperUserPredicate(), new AccountTypeComparator(), userType);
-    }
-
-    @Override
-    public String getValue(UserSecurityInfo object) {
-      if (object.getUsername() == null) {
-        return ACCOUNT_TYPE_GOOGLE;
-      } else {
-        return ACCOUNT_TYPE_ODK;
-      }
-    }
-
-    @Override
-    public void setValue(UserSecurityInfo object, String value) {
-      String email = object.getEmail();
-      String username = object.getUsername();
-      if (value.equals(ACCOUNT_TYPE_ODK)) {
-        if (username == null) {
-          object.setEmail(null);
-          object.setUsername(email.substring(EmailParser.K_MAILTO.length()));
-          uiOutOfSyncWithServer();
-          userTable.redraw(); // because this changes the Change
-          // Password button...
-        }
-      } else {
-        if (email == null) {
-          object.setUsername(null);
-          object.setEmail(EmailParser.K_MAILTO + username);
-          uiOutOfSyncWithServer();
-          userTable.redraw(); // because this changes the Change
-          // Password button...
-        }
-      }
     }
   }
 
