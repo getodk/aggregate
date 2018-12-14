@@ -78,7 +78,7 @@ import org.xml.sax.SAXException;
 
 
 public class REDCapServer extends AbstractExternalService implements ExternalService {
-  private static final Logger logger = LoggerFactory.getLogger(FusionTable.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(REDCapServer.class.getName());
 
   /**
    * Datastore entity specific to this type of external service
