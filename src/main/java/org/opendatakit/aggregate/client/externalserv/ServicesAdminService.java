@@ -39,19 +39,10 @@ public interface ServicesAdminService extends RemoteService {
   ExternServSummary[] getExternalServices(String formid) throws RequestFailureException, DatastoreFailureException;
 
   @XsrfProtect
-  String createFusionTable(String formId, ExternalServicePublicationOption esOption, String ownerEmail) throws RequestFailureException, DatastoreFailureException;
-
-  @XsrfProtect
   String createGoogleSpreadsheet(String formId, String name, ExternalServicePublicationOption esOption, String ownerEmail) throws RequestFailureException, DatastoreFailureException;
 
   @XsrfProtect
   String createSimpleJsonServer(String formId, String authKey, String url, ExternalServicePublicationOption es, String ownerEmail, BinaryOption binaryOption) throws RequestFailureException, DatastoreFailureException;
-
-  @XsrfProtect
-  String createOhmageJsonServer(String formId, String campaignUrn, String campaignTimestamp, String user, String hashedPassword, String url, ExternalServicePublicationOption es, String ownerEmail) throws RequestFailureException, DatastoreFailureException;
-
-  @XsrfProtect
-  String createRedCapServer(String formId, String apiKey, String url, ExternalServicePublicationOption esOption, String ownerEmail) throws RequestFailureException, DatastoreFailureException;
 
   @XsrfProtect
   Boolean deletePublisher(String uri) throws RequestFailureException, DatastoreFailureException;
