@@ -103,7 +103,7 @@ public class ServicesAdminServiceImpl extends RemoteServiceServlet implements
       // Form is being deleted. Disallow exports.
       if (deletionTimestamp != null) {
         throw new RequestFailureException(
-            "Form is marked for deletion - publishing request for fusion table aborted.");
+            "Form is marked for deletion - publishing request for spreadsheet aborted.");
       }
       IForm form = FormFactory.retrieveFormByFormId(formId, cc);
       if (!form.hasValidFormDefinition()) {

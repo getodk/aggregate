@@ -28,7 +28,7 @@ import org.opendatakit.common.persistence.client.exception.DatastoreFailureExcep
 /**
  * These are the actions requiring the ROLE_DATA_OWNER privilege.  They
  * pertain to setting up and canceling the publication of data to external
- * servers (e.g., Google Fusion Tables or Google Spreadsheets).
+ * servers (e.g., Google Spreadsheets).
  *
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com

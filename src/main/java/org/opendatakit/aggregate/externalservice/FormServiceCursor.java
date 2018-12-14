@@ -124,7 +124,7 @@ public final class FormServiceCursor extends CommonFieldsBase {
    * This needs to be within a TaskLock to prevent a concurrent update of the
    * ExternalServiceCursor from leaving the ExternalServiceCursor object in the
    * database while the underlying Publisher records
-   * (e.g., FusionTable2ParameterTable, GoogleSpreadsheet2ParameterTable)
+   * (e.g., GoogleSpreadsheet2ParameterTable)
    * are deleted.
    */
   public static final boolean deleteExternalServiceTask(ExternalService service, CallingContext cc) throws ODKDatastoreException {

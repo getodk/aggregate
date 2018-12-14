@@ -47,7 +47,7 @@ public class PreferencesSubTab extends AggregateSubTabBase {
   private static final String GOOGLE_API_KEY_LABEL = "<h3>Simple API Access Key</h3>";
   private static final String GOOGLE_API_KEY_INFO = "<p>Recommended for accessing Google Maps.</p>";
   private static final String GOOGLE_API_CLIENT_ID_LABEL = "<h3>Google OAuth2 Credentials</h3>";
-  private static final String GOOGLE_API_CLIENT_ID_INFO = "<p>Necessary for publishing to Google Spreadsheets and Fusion Tables</p>";
+  private static final String GOOGLE_API_CLIENT_ID_INFO = "<p>Necessary for publishing to Google Spreadsheets</p>";
 
   private static final String NEW_SERVICE_ACCOUNT_TXT = "Change Google API Credentials";
   private static final String NEW_SERVICE_ACCOUNT_TOOLTIP_TXT = "Upload NEW Google Simple API Key and Oauth2 Service Account information.";

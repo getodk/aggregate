@@ -37,7 +37,7 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
   public static final String GOOGLE_API_CLIENT_ID = "GOOGLE_CLIENT_ID";
   public static final String GOOGLE_API_SERVICE_ACCOUNT_EMAIL = "GOOGLE_SERVICE_ACCOUNT_EMAIL";
   public static final String PRIVATE_KEY_FILE_CONTENTS = "PRIVATE_KEY_FILE_CONTENTS";
-  public static final String GOOGLE_FUSION_TABLE_OAUTH2_ACCESS_TOKEN = "GOOGLE_FUSION_TABLE_OAUTH2_ACCESS_TOKEN";
+  public static final String GOOGLE_OAUTH2_ACCESS_TOKEN = "GOOGLE_FUSION_TABLE_OAUTH2_ACCESS_TOKEN";
   public static final String OAUTH2_ACCESS_TOKEN_POSTFIX = "_OAUTH2_ACCESS_TOKEN";
   public static final String OAUTH2_REFRESH_TOKEN_POSTFIX = "_OAUTH2_REFRESH_TOKEN";
   public static final String OAUTH2_EXPIRATION_TIME_POSTFIX = "_OAUTH2_EXPIRATION_TIME";

@@ -101,5 +101,4 @@ public final class ErrorConsts {
   public static final String EXPORTED_FILE_PROBLEM = "Problem accessing exported datafile";
 
   public static final String JAVA_ROSA_PARSING_PROBLEM = "Problem with JavaRosa Parsing Form:";
-  public static final String ERROR_OBTAINING_FUSION_TABLE_ID = "ERROR CREATING FUSION TABLE - DID NOT GET A TABLE NUMBER";
 }
