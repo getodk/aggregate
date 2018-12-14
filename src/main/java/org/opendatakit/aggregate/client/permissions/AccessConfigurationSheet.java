@@ -64,20 +64,8 @@ import org.opendatakit.common.web.client.UIVisiblePredicate;
 
 public class AccessConfigurationSheet extends Composite {
 
-  private static final String NOT_VALID_EMAIL = "Username is not a valid Email address.\n\n"
-      + "Usernames for Google accounts must be\n" + "Email addresses that Google can\n"
-      + "authenticate (Google login is not supported at this time).";
-
-  private static final ArrayList<String> userType;
-  private static final String ACCOUNT_TYPE_ODK = "ODK";
   private static TemporaryAccessConfigurationSheetUiBinder uiBinder = GWT
       .create(TemporaryAccessConfigurationSheetUiBinder.class);
-
-  static {
-    // TODO Make this a singletonList and inline
-    userType = new ArrayList<String>();
-    userType.add(ACCOUNT_TYPE_ODK);
-  }
 
   private final ListDataProvider<UserSecurityInfo> dataProvider = new ListDataProvider<UserSecurityInfo>();
   private final ListHandler<UserSecurityInfo> columnSortHandler = new ListHandler<UserSecurityInfo>(
