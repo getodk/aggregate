@@ -236,7 +236,11 @@ public class WatchdogWorkerImpl {
   }
 
   private boolean checkStreaming(FormServiceCursor fsc, UploadSubmissions uploadSubmissions, CallingContext cc) throws ODKFormNotFoundException, ODKDatastoreException, ODKExternalServiceException {
-    logger.info("Checking streaming for " + fsc.getExternalServiceType() + " fsc: " + fsc.getUri());
+    logger.info("Checking streaming for fsc: " + fsc.getUri());
+    if (fsc.getExternalServiceType().isObsolete()) {
+      logger.warn("Obsolete external service");
+      return false;
+    }
     // get the last submission sent to the external service
     IForm form = FormFactory.retrieveFormByFormId(fsc.getFormId(), cc);
     if (!form.hasValidFormDefinition()) {

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010 University of Washington
+ * Copyright (C) 2018 Nafundi
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,38 +18,32 @@ package org.opendatakit.aggregate.constants.common;
 
 import java.io.Serializable;
 
-
-/**
- * Enum of all the available external services. Provides UI and type mapping
- * information
- *
- * @author wbrunette@gmail.com
- * @author mitchellsundt@gmail.com
- */
 public enum ExternalServiceType implements Serializable {
-  GOOGLE_SPREADSHEET("Google Spreadsheet"),
-  JSON_SERVER("Z-ALPHA JSON Server"),
-  OHMAGE_JSON_SERVER("Z-ALPHA Ohmage JSON Server (To be removed in v2.0)"),
-  GOOGLE_FUSIONTABLES("Google FusionTables"),
-  REDCAP_SERVER("Z-ALPHA REDCap Server (To be removed in v2.0)"),
-  GOOGLE_MAPS_ENGINE("Z-OBSOLETE Google Maps Engine");
+  GOOGLE_SPREADSHEET("Google Spreadsheet", false),
+  JSON_SERVER("Z-ALPHA JSON Server", false),
+  // Obsolete external service type as of v2.0
+  OHMAGE_JSON_SERVER("OBSOLETE - Ohmage JSON Server", true),
+  GOOGLE_FUSIONTABLES("OBSOLETE - Google FusionTables", true),
+  REDCAP_SERVER("OBSOLETE - REDCap Server", true),
+  GOOGLE_MAPS_ENGINE("OBSOLETE Google Maps Engine", true);
 
-  private String serviceName;
+  private final String name;
+  private final boolean obsolete;
 
-  private ExternalServiceType() {
-    // GWT
+  ExternalServiceType(String name, boolean obsolete) {
+    this.name = name;
+    this.obsolete = obsolete;
   }
 
-  private ExternalServiceType(String name) {
-    serviceName = name;
-  }
-
-  public String getDisplayText() {
-    return serviceName;
+  public String getName() {
+    return name;
   }
 
   public String toString() {
-    return serviceName;
+    return name;
   }
 
+  public boolean isObsolete() {
+    return obsolete;
+  }
 }

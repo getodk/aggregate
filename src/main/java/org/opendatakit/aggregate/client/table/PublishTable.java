@@ -94,7 +94,7 @@ public class PublishTable extends FlexTable {
       this.setText(i + STARTING_ROW, LAST_PUBLISHED, (d == null) ? "" : d.toString());
       this.setText(i + STARTING_ROW, TIME_PUBLISH_START, e.getTimeEstablished().toString());
       this.setText(i + STARTING_ROW, ACTION, e.getPublicationOption().getDescriptionOfOption());
-      this.setText(i + STARTING_ROW, TYPE, e.getExternalServiceType().getDisplayText());
+      this.setText(i + STARTING_ROW, TYPE, e.getExternalServiceType().getName());
       this.setWidget(i + STARTING_ROW, OWNERSHIP, new HTML(new SafeHtmlBuilder().appendEscaped(e.getOwnership()).toSafeHtml()));
       HTML link = e.getExternalServiceType() == JSON_SERVER
           ? new HTML(new SafeHtmlBuilder().appendHtmlConstant("<a target=\"_blank\" href=\"" + e.getName() + "\">").appendEscaped(e.getName()).appendHtmlConstant("</a>").toSafeHtml())
