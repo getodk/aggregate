@@ -17,7 +17,7 @@
 package org.opendatakit.aggregate.submission.type.jr;
 
 import static java.time.ZoneId.systemDefault;
-import static java.time.format.DateTimeFormatter.ISO_DATE;
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
 import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 import static java.time.format.DateTimeFormatter.ISO_OFFSET_TIME;
 import static java.util.Objects.requireNonNull;
@@ -56,7 +56,7 @@ public interface JRTemporal<T extends Temporal> {
 
   static JRTemporal date(Date parsed) {
     OffsetDateTime value = OffsetDateTime.ofInstant(requireNonNull(parsed).toInstant(), systemDefault()).truncatedTo(ChronoUnit.DAYS);
-    return new JRDate(Date.from(value.toInstant()), value.toLocalDate(), value.format(ISO_DATE));
+    return new JRDate(Date.from(value.toInstant()), value.toLocalDate(), value.format(ISO_LOCAL_DATE));
   }
 
   static JRTemporal date(Date parsed, String raw) {

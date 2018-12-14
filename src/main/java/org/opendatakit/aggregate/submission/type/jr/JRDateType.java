@@ -69,7 +69,7 @@ public class JRDateType extends SubmissionSingleValueBase<JRTemporal> {
       raw = parsed
           .map(Date::toInstant)
           .map(i -> OffsetDateTime.ofInstant(i, ZoneId.systemDefault()))
-          .map(odt -> odt.format(DateTimeFormatter.ISO_DATE));
+          .map(odt -> odt.format(DateTimeFormatter.ISO_LOCAL_DATE));
     } else
       for (FormDataModel m : element.getFormDataModel().getChildren()) {
         switch (m.getOrdinalNumber().intValue()) {
