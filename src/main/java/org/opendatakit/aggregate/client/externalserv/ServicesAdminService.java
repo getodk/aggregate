@@ -59,6 +59,4 @@ public interface ServicesAdminService extends RemoteService {
   @XsrfProtect
   void restartPublisher(String uri) throws RequestFailureException, DatastoreFailureException;
 
-  @XsrfProtect
-  void updateApiKeyAndRestartPublisher(String uri, String apiKey) throws RequestFailureException, DatastoreFailureException;
 }

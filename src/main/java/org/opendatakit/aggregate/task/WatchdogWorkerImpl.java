@@ -165,15 +165,6 @@ public class WatchdogWorkerImpl {
             case JSON_SERVER:
               backoffInterval = JsonServerConsts.BACKOFF_DELAY_MILLISECONDS;
               break;
-            case OHMAGE_JSON_SERVER:
-              backoffInterval = OhmageJsonServerConsts.BACKOFF_DELAY_MILLISECONDS;
-              break;
-            case GOOGLE_FUSIONTABLES:
-              backoffInterval = FusionTableConsts.BACKOFF_DELAY_MILLISECONDS;
-              break;
-            case REDCAP_SERVER:
-              backoffInterval = REDCapServerConsts.BACKOFF_DELAY_MILLISECONDS;
-              break;
             default:
               backoffInterval = 60000L; // 1 minute
               this.logger.equals("No explicit backoff delay set for ExternalServiceType: "

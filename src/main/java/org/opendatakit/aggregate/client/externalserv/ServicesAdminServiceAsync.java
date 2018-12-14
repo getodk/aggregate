@@ -38,6 +38,4 @@ public interface ServicesAdminServiceAsync {
 
   void restartPublisher(String uri, AsyncCallback<Void> callback);
 
-  void updateApiKeyAndRestartPublisher(String uri, String apiKey, AsyncCallback<Void> callback);
-
 }
