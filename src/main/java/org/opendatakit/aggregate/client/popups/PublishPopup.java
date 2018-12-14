@@ -47,8 +47,7 @@ public final class PublishPopup extends AbstractPopupBase {
   private static final String HTTP_LOCALHOST = "http://localhost";
   private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Publish";
   private static final String TOOLTIP_TXT = "Publish the data";
-  private static final String HELP_BALLOON_TXT = "This will publish the data to Google Fusion Tables, "
-      + " Google Spreadsheets, a REDCap server, or a server accepting JSON content.";
+  private static final String HELP_BALLOON_TXT = "This will publish the data to Google Spreadsheets or a server accepting JSON content.";
   private static final String ES_SERVICEOPTIONS_TOOLTIP = "Method data should be published";
   private static final String ES_SERVICEOPTIONS_BALLOON = "Choose whether you would like only old data, only new data, or all data to be published.";
   private static final String ES_TYPE_TOOLTIP = "Type of External Service Connection";
@@ -74,19 +73,6 @@ public final class PublishPopup extends AbstractPopupBase {
   private final TextBox jsUrl;
   private final EnumListBox<BinaryOption> jsBinaryOptions;
 
-  // to hold the jsonServer only options
-  private final FlexTable ohmageBar;
-  private final TextBox ohmageCampaignUrn;
-  private final TextBox ohmageCampaignTimestamp;
-  private final TextBox ohmageUsername;
-  private final TextBox ohmageHashedPassword;
-  private final TextBox ohmageUrl;
-
-  // to hold the redcap only options
-  private final FlexTable rcBar;
-  private final TextBox rcApiKey;
-  private final TextBox rcUrl;
-
   private final String formId;
 
   private final EnumListBox<ExternalServiceType> serviceType;
@@ -99,10 +85,7 @@ public final class PublishPopup extends AbstractPopupBase {
     this.publishButton = new AggregateButton(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
     publishButton.addClickHandler(new CreateExernalServiceHandler());
 
-    ExternalServiceType[] valuesToShow = {ExternalServiceType.GOOGLE_FUSIONTABLES,
-        ExternalServiceType.GOOGLE_SPREADSHEET,
-        ExternalServiceType.REDCAP_SERVER, ExternalServiceType.JSON_SERVER,
-        ExternalServiceType.OHMAGE_JSON_SERVER};
+    ExternalServiceType[] valuesToShow = {ExternalServiceType.GOOGLE_SPREADSHEET, ExternalServiceType.JSON_SERVER};
     serviceType = new EnumListBox<>(valuesToShow, ES_TYPE_TOOLTIP,
         ES_TYPE_BALLOON);
     serviceType.addChangeHandler(new ExternalServiceTypeChangeHandler());
@@ -153,72 +136,18 @@ public final class PublishPopup extends AbstractPopupBase {
     jsAuthKey.setText(EMPTY_STRING);
     jsAuthKey.setVisibleLength(45);
     jsBar.setWidget(2, 1, jsAuthKey);
-    // make the options for how to handle the binary 
+    // make the options for how to handle the binary
     jsBar.setWidget(3, 0, new HTML("<h3>Include Media as:</h3>"));
     jsBinaryOptions = new EnumListBox<>(
         BinaryOption.values(), BO_TYPE_TOOLTIP,
         BO_TYPE_BALLOON);
     jsBar.setWidget(3, 1, jsBinaryOptions);
 
-    // this is only for ohmage server
-    ohmageBar = new FlexTable();
-    ohmageBar.addStyleName("stretch_header");
-    ohmageBar.setWidget(1, 0, new HTML("<h3>Url to publish to:</h3>"));
-    // make the name textbox an appropriate size
-    ohmageUrl = new TextBox();
-    ohmageUrl.setText(HTTP_LOCALHOST);
-    ohmageUrl.setVisibleLength(60);
-    ohmageBar.setWidget(1, 1, ohmageUrl);
-    ohmageBar.setWidget(2, 0, new HTML("<h3>Campaign URN:</h3>"));
-    // make the name textbox an appropriate size
-    ohmageCampaignUrn = new TextBox();
-    ohmageCampaignUrn.setText(EMPTY_STRING);
-    ohmageCampaignUrn.setVisibleLength(60);
-    ohmageBar.setWidget(2, 1, ohmageCampaignUrn);
-    ohmageBar.setWidget(3, 0, new HTML("<h3>Campaign Creation Timestamp:</h3>"));
-    // make the name textbox an appropriate size
-    ohmageCampaignTimestamp = new TextBox();
-    ohmageCampaignTimestamp.setText(EMPTY_STRING);
-    ohmageCampaignTimestamp.setVisibleLength(45);
-    ohmageBar.setWidget(3, 1, ohmageCampaignTimestamp);
-    ohmageBar.setWidget(4, 0, new HTML("<h3>Ohmage Username:</h3>"));
-    // make the name textbox an appropriate size
-    ohmageUsername = new TextBox();
-    ohmageUsername.setText(EMPTY_STRING);
-    ohmageUsername.setVisibleLength(60);
-    ohmageBar.setWidget(4, 1, ohmageUsername);
-    ohmageBar.setWidget(5, 0, new HTML("<h3>Ohmage hashed Password:</h3>"));
-    // make the name textbox an appropriate size
-    ohmageHashedPassword = new TextBox();
-    ohmageHashedPassword.setText(EMPTY_STRING);
-    ohmageHashedPassword.setVisibleLength(60);
-    ohmageBar.setWidget(5, 1, ohmageHashedPassword);
-
-    // this is only for REDCap server
-    rcBar = new FlexTable();
-    rcBar.addStyleName("stretch_header");
-    rcBar.setWidget(1, 0, new HTML("<h3>REDCap Url to publish to:</h3>"));
-    // make the name textbox an appropriate size
-    rcUrl = new TextBox();
-    rcUrl.setText(HTTP_LOCALHOST);
-    rcUrl.setVisibleLength(60);
-    rcBar.setWidget(1, 1, rcUrl);
-    rcBar.setWidget(2, 0, new HTML("<h3>REDCap API Key:</h3>"));
-    // make the name textbox an appropriate size
-    rcApiKey = new TextBox();
-    rcApiKey.setText(EMPTY_STRING);
-    rcApiKey.setVisibleLength(45);
-    rcBar.setWidget(2, 1, rcApiKey);
-
     FlowPanel grouping = new FlowPanel();
     grouping.add(gsBar);
     grouping.add(jsBar);
-    grouping.add(rcBar);
-    grouping.add(ohmageBar);
     gsBar.setVisible(false);
     jsBar.setVisible(false);
-    rcBar.setVisible(false);
-    ohmageBar.setVisible(false);
     optionsBar.setWidget(2, 0, grouping);
     optionsBar.getFlexCellFormatter().setColSpan(2, 0, 2);
 
@@ -243,8 +172,6 @@ public final class PublishPopup extends AbstractPopupBase {
     if (type == null) {
       gsBar.setVisible(false);
       jsBar.setVisible(false);
-      rcBar.setVisible(false);
-      ohmageBar.setVisible(false);
       publishButton.setEnabled(false);
       return;
     }
@@ -255,43 +182,16 @@ public final class PublishPopup extends AbstractPopupBase {
       case GOOGLE_SPREADSHEET:
         gsBar.setVisible(true);
         jsBar.setVisible(false);
-        rcBar.setVisible(false);
-        ohmageBar.setVisible(false);
         optionsBar.getRowFormatter().setStyleName(2, "enabledTableRow");
         break;
       case JSON_SERVER:
         gsBar.setVisible(false);
         jsBar.setVisible(true);
-        rcBar.setVisible(false);
-        ohmageBar.setVisible(false);
         optionsBar.getRowFormatter().setStyleName(2, "enabledTableRow");
-        break;
-      case OHMAGE_JSON_SERVER:
-        gsBar.setVisible(false);
-        jsBar.setVisible(false);
-        rcBar.setVisible(false);
-        ohmageBar.setVisible(true);
-        optionsBar.getRowFormatter().setStyleName(2, "enabledTableRow");
-        break;
-      case REDCAP_SERVER:
-        gsBar.setVisible(false);
-        jsBar.setVisible(false);
-        rcBar.setVisible(true);
-        ohmageBar.setVisible(false);
-        optionsBar.getRowFormatter().setStyleName(2, "enabledTableRow");
-        break;
-      case GOOGLE_FUSIONTABLES:
-        gsBar.setVisible(false);
-        jsBar.setVisible(false);
-        rcBar.setVisible(false);
-        ohmageBar.setVisible(false);
-        optionsBar.getRowFormatter().setStyleName(2, "disabledTableRow");
         break;
       default: // unknown type
         gsBar.setVisible(false);
         jsBar.setVisible(false);
-        rcBar.setVisible(false);
-        ohmageBar.setVisible(false);
         optionsBar.getRowFormatter().setStyleName(2, "disabledTableRow");
         publishButton.setEnabled(false);
         break;
@@ -325,14 +225,6 @@ public final class PublishPopup extends AbstractPopupBase {
               this::onFailure
           );
           break;
-        case REDCAP_SERVER:
-          secureRequest(
-              SecureGWT.getServicesAdminService(),
-              (rpc, sc, cb) -> rpc.createRedCapServer(formId, rcApiKey.getText(), rcUrl.getText(), serviceOp, ownerEmail, cb),
-              NO_OP_CONSUMER,
-              this::onFailure
-          );
-          break;
         case JSON_SERVER: {
           final String jsBinaryOpString = jsBinaryOptions.getSelectedValue();
           final BinaryOption jsBinaryOp = (jsBinaryOpString == null) ? null : BinaryOption.valueOf(jsBinaryOpString);
@@ -344,25 +236,6 @@ public final class PublishPopup extends AbstractPopupBase {
           );
         }
         break;
-        case OHMAGE_JSON_SERVER:
-          secureRequest(
-              SecureGWT.getServicesAdminService(),
-              (rpc, sc, cb) -> rpc.createOhmageJsonServer(formId,
-                  ohmageCampaignUrn.getText(), ohmageCampaignTimestamp.getText(),
-                  ohmageUsername.getText(), ohmageHashedPassword.getText(), ohmageUrl.getText(),
-                  serviceOp, ownerEmail, cb),
-              NO_OP_CONSUMER,
-              this::onFailure
-          );
-          break;
-        case GOOGLE_FUSIONTABLES:
-          secureRequest(
-              SecureGWT.getServicesAdminService(),
-              (rpc, sc, cb) -> rpc.createFusionTable(formId, serviceOp, ownerEmail, cb),
-              NO_OP_CONSUMER,
-              this::onFailure
-          );
-          break;
         default: // unknown type
           break;
       }
