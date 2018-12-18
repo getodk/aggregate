@@ -181,7 +181,7 @@ public class SecurityServiceUtil {
 
   public static void setAuthenticationListsForSpecialUser(UserSecurityInfo userInfo, GrantedAuthorityName specialGroup, CallingContext cc) throws DatastoreFailureException {
     RoleHierarchy hierarchy = (RoleHierarchy) cc.getBean("hierarchicalRoleRelationships");
-    Set<GrantedAuthority> badGrants = new TreeSet<GrantedAuthority>();
+    Set<GrantedAuthority> badGrants = new HashSet<>();
     // The assigned groups are the specialGroup that this user defines
     // (i.e., anonymous or daemon) plus all directly-assigned assignable
     // permissions.
@@ -264,7 +264,7 @@ public class SecurityServiceUtil {
   }
 
   private static void setUsersOfGrantedAuthority(Map<UserSecurityInfo, String> pkMap, GrantedAuthority auth, CallingContext cc) throws DatastoreFailureException {
-    Set<GrantedAuthority> badGrants = new TreeSet<GrantedAuthority>();
+    Set<GrantedAuthority> badGrants = new HashSet<>();
     GrantedAuthorityName name = mapName(auth, badGrants);
     if (name != null) {
       // build the set of uriUsers for this granted authority...
