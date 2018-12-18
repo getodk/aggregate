@@ -35,8 +35,5 @@ public final class FormatConsts {
   public static final String TO_STRING_DELIMITER = BasicConsts.COLON + BasicConsts.SPACE;
   public static final String HEADER_PARENT_UID = "*parent_uid*";
   public static final String TIME_FORMAT_STRING = "%02d:%02d:%02d";
-  public static final String REDCAP_TIME_FORMAT_STRING = "%02d:%02d";
-  public static final String REDCAP_DATE_ONLY_FORMAT_STRING = "%d-%02d-%02d";
-  public static final String REDCAP_DATE_TIME_FORMAT_STRING = "%d-%02d-%02d %02d:%02d:%02d";
 
 }

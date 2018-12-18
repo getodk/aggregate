@@ -64,7 +64,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Refactoring and base implementation using the new gdata APIs for accessing
- * Google Spreadsheet, Fusion Table and Map Engine.
+ * Google Spreadsheet, and Map Engine.
  *
  * @author wbrunette@gmail.com
  */

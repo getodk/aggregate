@@ -24,10 +24,7 @@ import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.constants.common.UIConsts;
-import org.opendatakit.aggregate.constants.externalservice.FusionTableConsts;
 import org.opendatakit.aggregate.constants.externalservice.JsonServerConsts;
-import org.opendatakit.aggregate.constants.externalservice.OhmageJsonServerConsts;
-import org.opendatakit.aggregate.constants.externalservice.REDCapServerConsts;
 import org.opendatakit.aggregate.constants.externalservice.SpreadsheetConsts;
 import org.opendatakit.aggregate.datamodel.TopLevelDynamicBase;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
@@ -165,15 +162,6 @@ public class WatchdogWorkerImpl {
             case JSON_SERVER:
               backoffInterval = JsonServerConsts.BACKOFF_DELAY_MILLISECONDS;
               break;
-            case OHMAGE_JSON_SERVER:
-              backoffInterval = OhmageJsonServerConsts.BACKOFF_DELAY_MILLISECONDS;
-              break;
-            case GOOGLE_FUSIONTABLES:
-              backoffInterval = FusionTableConsts.BACKOFF_DELAY_MILLISECONDS;
-              break;
-            case REDCAP_SERVER:
-              backoffInterval = REDCapServerConsts.BACKOFF_DELAY_MILLISECONDS;
-              break;
             default:
               backoffInterval = 60000L; // 1 minute
               this.logger.equals("No explicit backoff delay set for ExternalServiceType: "
@@ -236,7 +224,11 @@ public class WatchdogWorkerImpl {
   }
 
   private boolean checkStreaming(FormServiceCursor fsc, UploadSubmissions uploadSubmissions, CallingContext cc) throws ODKFormNotFoundException, ODKDatastoreException, ODKExternalServiceException {
-    logger.info("Checking streaming for " + fsc.getExternalServiceType() + " fsc: " + fsc.getUri());
+    logger.info("Checking streaming for fsc: " + fsc.getUri());
+    if (fsc.getExternalServiceType().isObsolete()) {
+      logger.warn("Obsolete external service");
+      return false;
+    }
     // get the last submission sent to the external service
     IForm form = FormFactory.retrieveFormByFormId(fsc.getFormId(), cc);
     if (!form.hasValidFormDefinition()) {

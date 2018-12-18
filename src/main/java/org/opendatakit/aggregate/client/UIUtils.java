@@ -55,20 +55,6 @@ public class UIUtils {
     return newFilterName;
   }
 
-  public static String promptForREDCapApiKey() throws Exception {
-    String newApiKey = Window.prompt(UIConsts.PROMPT_FOR_REDCAP_APIKEY_TXT, BasicConsts.EMPTY_STRING);
-
-    while (true) {
-      if (newApiKey == null) { // cancel was pressed
-        throw new Exception("User Cancelled"); // exit
-      } else if (newApiKey.equals(BasicConsts.EMPTY_STRING)) {
-        newApiKey = Window.prompt(UIConsts.REPROMPT_FOR_REDCAP_APIKEY_TXT, BasicConsts.EMPTY_STRING);
-      } else {
-        return newApiKey;
-      }
-    }
-  }
-
   public static String promptForEmailAddress() throws Exception {
     String newEmailName = Window.prompt(UIConsts.PROMPT_FOR_EMAIL_TXT, BasicConsts.EMPTY_STRING);
 

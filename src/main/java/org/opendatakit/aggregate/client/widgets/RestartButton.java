@@ -22,9 +22,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.UIUtils;
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
-import org.opendatakit.aggregate.constants.common.ExternalServiceType;
 
 /**
  * Restarts Publisher because of failures
@@ -35,7 +33,6 @@ public final class RestartButton extends AggregateButton implements ClickHandler
   };
   private static final String BUTTON_BAD_CREDENTIAL_TXT = "<b><img src=\"images/green_right_arrow.png\" /> Restart Publisher - Credential was BAD";
 
-  ;
   private static final String TOOLTIP_BAD_CREDENTIAL_TEXT = "Publish failure because of bad credential - click to Restart the Publisher";
   private static final String HELP_BALLOON_BAD_CREDENTIAL_TXT = "The external service was failing or the credentials were bad. Click to restart the publisher.";
   private static final String BUTTON_FAILURE_TXT = "<b><img src=\"images/green_right_arrow.png\" /> Restart Publisher - Failed";
@@ -61,33 +58,12 @@ public final class RestartButton extends AggregateButton implements ClickHandler
   public void onClick(ClickEvent event) {
     super.onClick(event);
 
-    ExternalServiceType type = publisher.getExternalServiceType();
-
-    switch (type) {
-
-      case REDCAP_SERVER:
-        String apiKey;
-        try {
-          apiKey = UIUtils.promptForREDCapApiKey();
-        } catch (Exception e) {
-          return; // user pressed cancel
-        }
-        secureRequest(
-            SecureGWT.getServicesAdminService(),
-            (rpc, sc, cb) -> rpc.updateApiKeyAndRestartPublisher(publisher.getUri(), apiKey, cb),
-            NO_OP_RUNNABLE,
-            this::onFailure
-        );
-        break;
-      default:
-        secureRequest(
-            SecureGWT.getServicesAdminService(),
-            (rpc, sc, cb) -> rpc.restartPublisher(publisher.getUri(), cb),
-            NO_OP_RUNNABLE,
-            this::onFailure
-        );
-        break;
-    }
+    secureRequest(
+        SecureGWT.getServicesAdminService(),
+        (rpc, sc, cb) -> rpc.restartPublisher(publisher.getUri(), cb),
+        NO_OP_RUNNABLE,
+        this::onFailure
+    );
   }
 
   private void onFailure(Throwable cause) {

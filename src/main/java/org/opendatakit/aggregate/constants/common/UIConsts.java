@@ -46,8 +46,6 @@ public class UIConsts {
   public static final String ERROR_NO_NAME = "You need to provide a name for this filter group to continue";
   public static final String PROMPT_FOR_NAME_TXT = "Please enter a name for this group";
   public static final String REPROMPT_FOR_NAME_TXT = "That group already exists. Please enter a new name";
-  public static final String PROMPT_FOR_REDCAP_APIKEY_TXT = "Please enter the REDCap API Key to access this server";
-  public static final String REPROMPT_FOR_REDCAP_APIKEY_TXT = "That is not a valid REDCap API Key. Please enter the REDCap API Key to access this server";
   public static final String PROMPT_FOR_EMAIL_TXT = "Please enter the e-mail address that will be granted access to these documents";
   public static final String REPROMPT_FOR_EMAIL_TXT = "That is not a valid e-mail address. Please enter the e-mail address that will be granted access to these documents";
 

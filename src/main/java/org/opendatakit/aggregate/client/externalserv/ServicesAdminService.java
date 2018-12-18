@@ -28,7 +28,7 @@ import org.opendatakit.common.persistence.client.exception.DatastoreFailureExcep
 /**
  * These are the actions requiring the ROLE_DATA_OWNER privilege.  They
  * pertain to setting up and canceling the publication of data to external
- * servers (e.g., Google Fusion Tables or Google Spreadsheets).
+ * servers (e.g., Google Spreadsheets).
  *
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
@@ -39,19 +39,10 @@ public interface ServicesAdminService extends RemoteService {
   ExternServSummary[] getExternalServices(String formid) throws RequestFailureException, DatastoreFailureException;
 
   @XsrfProtect
-  String createFusionTable(String formId, ExternalServicePublicationOption esOption, String ownerEmail) throws RequestFailureException, DatastoreFailureException;
-
-  @XsrfProtect
   String createGoogleSpreadsheet(String formId, String name, ExternalServicePublicationOption esOption, String ownerEmail) throws RequestFailureException, DatastoreFailureException;
 
   @XsrfProtect
   String createSimpleJsonServer(String formId, String authKey, String url, ExternalServicePublicationOption es, String ownerEmail, BinaryOption binaryOption) throws RequestFailureException, DatastoreFailureException;
-
-  @XsrfProtect
-  String createOhmageJsonServer(String formId, String campaignUrn, String campaignTimestamp, String user, String hashedPassword, String url, ExternalServicePublicationOption es, String ownerEmail) throws RequestFailureException, DatastoreFailureException;
-
-  @XsrfProtect
-  String createRedCapServer(String formId, String apiKey, String url, ExternalServicePublicationOption esOption, String ownerEmail) throws RequestFailureException, DatastoreFailureException;
 
   @XsrfProtect
   Boolean deletePublisher(String uri) throws RequestFailureException, DatastoreFailureException;
@@ -59,6 +50,4 @@ public interface ServicesAdminService extends RemoteService {
   @XsrfProtect
   void restartPublisher(String uri) throws RequestFailureException, DatastoreFailureException;
 
-  @XsrfProtect
-  void updateApiKeyAndRestartPublisher(String uri, String apiKey) throws RequestFailureException, DatastoreFailureException;
 }
