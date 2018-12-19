@@ -9,26 +9,6 @@
     <param-value>classpath:odk-settings.xml,/WEB-INF/applicationContext-security.xml</param-value>
   </context-param>
 
-  <security-constraint>
-    <web-resource-collection>
-      <web-resource-name>TaskQueue Interfaces</web-resource-name>
-      <url-pattern>/gae/*</url-pattern>
-    </web-resource-collection>
-    <auth-constraint>
-      <role-name>admin</role-name>
-    </auth-constraint>
-  </security-constraint>
-
-  <security-constraint>
-    <web-resource-collection>
-      <web-resource-name>RemoteControl Interfaces</web-resource-name>
-      <url-pattern>/remote_api</url-pattern>
-    </web-resource-collection>
-    <auth-constraint>
-      <role-name>admin</role-name>
-    </auth-constraint>
-  </security-constraint>
-
   <security-role>
     <role-name>admin</role-name>
   </security-role>
@@ -369,16 +349,6 @@
   <servlet-mapping>
     <servlet-name>multimodeLoginPage</servlet-name>
     <url-pattern>/multimode_login.html</url-pattern>
-  </servlet-mapping>
-
-  <servlet>
-    <servlet-name>RemoteApi</servlet-name>
-    <servlet-class>com.google.apphosting.utils.remoteapi.RemoteApiServlet</servlet-class>
-  </servlet>
-
-  <servlet-mapping>
-    <servlet-name>RemoteApi</servlet-name>
-    <url-pattern>/remote_api</url-pattern>
   </servlet-mapping>
 
   <welcome-file-list>

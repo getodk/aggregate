@@ -36,8 +36,6 @@
   <!--	they utilize.  This means that the isFullyAuthenticated() criteria cannot be used-->
   <!--	for those pages.  -->
   <filter-security-metadata-source id="securityPolicy" use-expressions="true">
-    <intercept-url pattern="/_ah/**" access="true"/> <!-- local GAE admin console -->
-
     <intercept-url pattern="/Aggregate.html" access="hasRole('ROLE_USER') or hasRole('ROLE_SITE_ACCESS_ADMIN')"/>
 
     <!--  secure the GWT client interfaces -->
@@ -100,11 +98,6 @@
 
     <intercept-url pattern="/ssl/**" access="hasRole('ROLE_SITE_ACCESS_ADMIN')"/>
     <intercept-url pattern="/enk/**" access="hasRole('ROLE_DATA_COLLECTOR') or hasRole('ROLE_DATA_VIEWER') or hasRole('ROLE_SITE_ACCESS_ADMIN')"/>
-
-    <!--	GAE access is controlled in web.xml -->
-    <intercept-url pattern="/gae/**" access="true"/>
-    <!--	RemoteAPI access is controlled in web.xml -->
-    <intercept-url pattern="/remote_api" access="true"/>
 
     <!-- ODK Tables API (order is important) -->
     <!-- FileManifestService -->
@@ -228,7 +221,6 @@
     <beans:property name="channelDecisionManager" ref="channelDecisionManager"/>
     <beans:property name="securityMetadataSource">
       <filter-security-metadata-source request-matcher="ant" use-expressions="false">
-        <intercept-url pattern="/_ah/**" access="ANY_CHANNEL"/> <!-- local GAE admin console -->
         <intercept-url pattern="/favicon.ico" access="ANY_CHANNEL"/>
         <intercept-url pattern="/odk_color.png" access="ANY_CHANNEL"/>
         <intercept-url pattern="/images/**" access="ANY_CHANNEL"/>
@@ -244,8 +236,6 @@
         <intercept-url pattern="/relogin.html" access="${security.server.channelType}"/>
         <intercept-url pattern="/ssl/**" access="${security.server.secureChannelType}"/>
         <intercept-url pattern="/local_login.html" access="${security.server.channelType}"/>
-        <intercept-url pattern="/gae/**" access="ANY_CHANNEL"/> <!-- GAE picks the scheme -->
-        <intercept-url pattern="/remote_api/**" access="ANY_CHANNEL"/> <!-- GAE picks the scheme -->
         <intercept-url pattern="/**" access="${security.server.channelType}"/>
       </filter-security-metadata-source>
     </beans:property>
