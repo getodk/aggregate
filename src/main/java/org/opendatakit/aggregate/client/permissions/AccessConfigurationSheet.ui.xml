@@ -12,9 +12,6 @@
       <li>via an <strong>ODK account</strong>, with a username and password that a site
         administrator has configured for them.
       </li>
-      <li>via an <strong>Oauth 2.0 token</strong> (requires an Email account (e.g., user@gmail.com)
-        and an Oauth 2.0 token issued by Google with access to userInfo.email)
-      </li>
     </ul>
     <h4>Capabilities are as follows:</h4>
     <ul>
@@ -62,11 +59,7 @@
     <g:Button styleName="gwt-Button" ui:field="button" text="Save Changes"/>
     <hr/>
     <h3>Add Users</h3>
-    <p>Enter the usernames (for ODK accounts) or e-mail addresses (for Google Gmail accounts) to add
-      to the
-      list of users in the above table. Iteractive logins with Google accounts are no longer
-      supported.
-    </p>
+    <p>Enter the usernames to add to the list of users in the above table (one per line)</p>
     <g:TextArea visibleLines="3" characterWidth="80" ui:field="addedUsers"/>
     <br/>
     <g:Button styleName="gwt-Button" ui:field="addNow" text="Add"/>
