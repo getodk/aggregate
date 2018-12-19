@@ -19,6 +19,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.ConnectionConfig;
 import org.apache.http.config.SocketConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 /**
  * Interface for the bean that will construct an HttpClient that is appropriate
@@ -29,7 +30,19 @@ import org.apache.http.impl.client.CloseableHttpClient;
  * @author mitchellsundt@gmail.com
  * @author wbrunette@gmail.com
  */
-public interface HttpClientFactory {
-  CloseableHttpClient createHttpClient(SocketConfig socketConfig, ConnectionConfig connectionConfig, RequestConfig requestConfig);
+public class HttpClientFactory {
+  public CloseableHttpClient createHttpClient(SocketConfig socketConfig, ConnectionConfig connectionConfig, RequestConfig requestConfig) {
+    HttpClientBuilder builder = HttpClientBuilder.create();
+    if (socketConfig != null) {
+      builder.setDefaultSocketConfig(socketConfig);
+    }
+    if (connectionConfig != null) {
+      builder.setDefaultConnectionConfig(connectionConfig);
+    }
+    if (requestConfig != null) {
+      builder.setDefaultRequestConfig(requestConfig);
+    }
+    return builder.build();
+  }
 
 }

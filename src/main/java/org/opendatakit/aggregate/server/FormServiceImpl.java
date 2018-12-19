@@ -404,7 +404,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
         if (firstItem) {
           firstItem = false;
         } else {
-          encodedKmlSettings.append(KmlGenerator.KML_SELECTIONS_DELIMITER);
+          encodedKmlSettings.append("###");
         }
         // TODO: think about a bad setting (checking comment out above will prevent this);
         String tmpString = kmlSetting.generateEncodedString();
@@ -412,7 +412,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
       }
 
       Map<String, String> params = new HashMap<String, String>();
-      params.put(KmlGenerator.KML_SELECTIONS_KEY, encodedKmlSettings.toString());
+      params.put("KMLSELECTIONS", encodedKmlSettings.toString());
 
       PersistentResults r = new PersistentResults(ExportType.KML, form, filterGrp, params, cc);
       r.persist(cc);

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010 University of Washington
+ * Copyright (C) 2018 Nafundi
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,18 +16,26 @@
  */
 package org.opendatakit.aggregate.task;
 
+import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.externalservice.FormServiceCursor;
+import org.opendatakit.common.persistence.exception.ODKEntityNotFoundException;
 import org.opendatakit.common.web.CallingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * API for creation of form upload (to an external service) tasks.
- *
- * @author wbrunette@gmail.com
- * @author mitchellsundt@gmail.com
- */
-public interface UploadSubmissions {
+public class UploadSubmissions {
+  private static final Logger logger = LoggerFactory.getLogger(UploadSubmissions.class);
 
-  void createFormUploadTask(FormServiceCursor fsc, boolean onBackground, CallingContext cc)
-      throws ODKExternalServiceException;
+  public void createFormUploadTask(FormServiceCursor fsc, boolean onBackground, CallingContext cc) {
+    Watchdog wd = (Watchdog) cc.getBean(BeanDefs.WATCHDOG);
+    UploadSubmissionsWorkerImpl worker = new UploadSubmissionsWorkerImpl(fsc, wd.getFasterWatchdogCycleEnabled(), wd.getCallingContext());
+    AggregrateThreadExecutor.getAggregateThreadExecutor().execute(() -> {
+      try {
+        worker.uploadAllSubmissions();
+      } catch (ODKEntityNotFoundException | ODKExternalServiceException e) {
+        logger.error("Error uploading all submissions", e);
+      }
+    });
+  }
 }

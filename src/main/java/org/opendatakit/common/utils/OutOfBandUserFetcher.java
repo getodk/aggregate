@@ -23,7 +23,7 @@ package org.opendatakit.common.utils;
  *
  * @author mitchellsundt@gmail.com
  */
-public interface OutOfBandUserFetcher {
+public class OutOfBandUserFetcher {
 
   /**
    * Through means outside the webserver scope, obtain the
@@ -33,6 +33,8 @@ public interface OutOfBandUserFetcher {
    *
    * @return the user's email string (mailto:username@domain.org)
    */
-  public String getEmail();
+  public String getEmail() {
+    return null;
+  }
 
 }

@@ -16,8 +16,13 @@
 
 package org.opendatakit.aggregate.util;
 
-public interface ImageUtil {
+import org.opendatakit.tomcatutil.ImageResize;
 
-  public byte[] resizeImage(byte[] imageBlob, int width, int height);
+public class ImageUtil {
+
+  public byte[] resizeImage(byte[] imageBlob, int width, int height) {
+    ImageResize resize = new ImageResize();
+    return resize.resizeImage(imageBlob, width, height);
+  }
 
 }

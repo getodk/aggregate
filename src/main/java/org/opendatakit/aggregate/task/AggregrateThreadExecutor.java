@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.opendatakit.aggregate.task.tomcat;
+package org.opendatakit.aggregate.task;
 
 import java.util.Date;
 import java.util.concurrent.ScheduledFuture;
