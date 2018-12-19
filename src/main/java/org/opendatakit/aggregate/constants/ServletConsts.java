@@ -26,12 +26,6 @@ package org.opendatakit.aggregate.constants;
  */
 public final class ServletConsts {
 
-  // TODO: remove temporary debug variable
-  /**
-   * TEMPORARY: used for turning on and off debug code
-   */
-  public final static boolean DEBUG = false;
-
   // system constants
   public static final String APPLICATION_NAME = "ODK AGGREGATE";
 
@@ -64,19 +58,6 @@ public final class ServletConsts {
   public static final String FORM_ID = "formId";
 
   /**
-   * For PersistentResults and MiscTasks generator gae servlets.
-   * the key holding the Uri of the persistent result or misc task record.
-   */
-  public static final String PERSISTENT_RESULTS_KEY = "persistentResult";
-
-  public static final String MISC_TASKS_KEY = "miscTask";
-
-  public static final String ATTEMPT_COUNT = "attemptCount";
-
-  public static final String BACKEND_GAE_SERVICE = "background";
-
-  public static final String HOST = "Host";
-  /**
    * The name of the property that determines how to format webpage
    */
   public static final String HUMAN_READABLE = "readable";
@@ -87,22 +68,9 @@ public final class ServletConsts {
    */
   public static final String EXTERNAL_SERVICE_TYPE = "externalServiceType";
 
-  // href link text
-  public static final String BRIEFCASE_LINK_TEXT = "Download Entire Dataset (Briefcase)";
-  public static final String UPLOAD_SUBMISSIONS_LINK_TEXT = "Upload Submissions";
-  public static final String UPLOAD_XFORM_LINK_TEXT = "Upload a Form Definition";
-
   public static final String BLOB_KEY = "blobKey";
 
   public static final String AS_ATTACHMENT = "as_attachment";
-
-  public static final String OAUTH_CONSUMER_KEY = "anonymous";
-
-  public static final String OAUTH_CONSUMER_SECRET = "anonymous";
-
-  public static final String OAUTH_TOKEN_PARAMETER = "oauth_token";
-
-  public static final String OAUTH_TOKEN_SECRET_PARAMETER = "oauth_token_secret";
 
   public static final String DOWNLOAD_XML_BUTTON_TXT = "Download XML";
 
@@ -125,10 +93,6 @@ public final class ServletConsts {
    * cursor (fragmented Csv servlet).
    */
   public static final String NUM_ENTRIES = "numEntries";
-
-  public static final String CHECK_INTERVAL_PARAM = "checkIntervalMilliseconds";
-
-  public static final String START_DATE = "startDate";
 
   /**
    * Script path to include...
