@@ -6,13 +6,11 @@ Currently we only test PostgreSQL support. We need feedback and help to follow s
 
 # Database configuration
 
-Wether you choose to run Aggregate on Google App Engine or Tomcat, properly configured `jdbc.properties` and `odk-settings.xml` files must exist inside the WAR/EAR artifact.
+Properly configured `jdbc.properties` and `odk-settings.xml` files must exist inside the WAR artifact.
 
 You can find these files in `src/main/resources` directories on each submodule.
 
 ## `jdbc.properties`
-
-If you want to work with Google App Engine and Google Big Table, just leave the file empty.
 
 All three supported RDBs use the same configuration file structure. This is an example for PostgreSQL:
 
@@ -50,7 +48,6 @@ Table of posible values:
 | PostgreSQL        | `org.opendatakit.common.persistence.engine.pgres.DatastoreImpl`     |
 | MySQL             | `org.opendatakit.common.persistence.engine.mysql.DatastoreImpl`     |
 | SQLServer         | `org.opendatakit.common.persistence.engine.sqlserver.DatastoreImpl` |
-| Google App Engine | `org.opendatakit.common.persistence.engine.gae.DatastoreImpl`       |
 
 # Database initialization
 
