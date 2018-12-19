@@ -99,7 +99,7 @@ public class WatchdogWorkerImpl {
     Watchdog wd = null;
     try {
       wd = (Watchdog) cc.getBean(BeanDefs.WATCHDOG);
-      cullThisWatchdog = BackendActionsTable.updateWatchdogStart(wd, cc);
+      cullThisWatchdog = BackendActionsTable.updateWatchdogStart(cc);
       formSubmissionsMap.clear();
 
       UploadSubmissions uploadSubmissions = (UploadSubmissions) cc
