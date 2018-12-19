@@ -4,7 +4,8 @@ task installerClean() {
   delete 'build/installer'
 }
 
-task installerBuild(dependsOn: [installerClean, gaeDownloadSDK], type: Copy) {
+// TODO Fix this after removal of GAE support
+task installerBuild(dependsOn: [installerClean /*, gaeDownloadSDK */], type: Copy) {
   into "${buildDir}/installer"
   from fileTree(dir: 'installer/installBuilder')
 

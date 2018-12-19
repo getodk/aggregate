@@ -1,8 +1,4 @@
 warMode=complete
-aggregateInstanceName=aggregate
-aggregateUsername=administrator
-gaeAppId=aggregate
-gaeEmail=some.email@example.org
 
 # Aggregate needs Java 8 to compile. Set the path below to a Java 8 install if you run Java 9.
 # org.gradle.java.home=/Library/Java/JavaVirtualMachines/jdk1.8.0_162.jdk/Contents/Home
