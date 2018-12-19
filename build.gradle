@@ -153,8 +153,6 @@ gwt {
 
 war {
   if (warMode == "installer") {
-    println "Excluding Guava from WAR"
-    war.rootSpec.exclude("**/guava*.jar")
     println "Excluding config files from WAR"
     war.rootSpec.exclude "jdbc.properties"
     war.rootSpec.exclude "logging.properties"
