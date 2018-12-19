@@ -70,14 +70,12 @@ def versions = [
     gson          : '2.8.0',
     kxml2         : '2.3.0',
     odk           : [
-        javarosa     : '2.12.1',
-        tomcatUtil   : '1.0.1'
+        javarosa     : '2.12.1'
     ],
     jdbc          : [
         mysql     : '5.1.44',
         postgresql: '42.1.4.jre7'
     ],
-    odkTomcatUtil : '1.0.1',
     servletApi    : '3.1.0',
     junit         : '4.12',
     mockito       : '2.+'
@@ -93,7 +91,6 @@ dependencies {
   compile group: 'org.slf4j', name: 'log4j-over-slf4j', version: '1.7.25'
   compile group: 'org.slf4j', name: 'slf4j-jdk14', version: '1.7.25'
 
-  compile group: 'org.opendatakit', name: 'odk-tomcatutil', version: versions.odk.tomcatUtil
   compile group: 'org.springframework', name: 'spring-aop', version: versions.spring
   compile group: 'org.springframework', name: 'spring-aspects', version: versions.spring
   compile group: 'org.springframework', name: 'spring-beans', version: versions.spring
@@ -137,7 +134,6 @@ dependencies {
   compile group: 'org.opendatakit', name: 'opendatakit-javarosa', version: versions.odk.javarosa
   compile group: 'mysql', name: 'mysql-connector-java', version: versions.jdbc.mysql
   compile group: 'org.postgresql', name: 'postgresql', version: versions.jdbc.postgresql
-  compile group: 'org.opendatakit', name: 'odk-tomcatutil', version: versions.odkTomcatUtil
   compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: versions.servletApi
   testCompile group: 'junit', name: 'junit', version: versions.junit
   testCompile group: 'org.springframework', name: 'spring-test', version: versions.spring
