@@ -50,8 +50,8 @@ public class Realm implements InitializingBean {
     Logger log = LoggerFactory.getLogger(Realm.class);
     log.info("Version: " + BuildConfig.VERSION);
     log.info("Hostname: " + hostname);
-    log.info("Port: " + Integer.toString(port));
-    log.info("SecurePort: " + Integer.toString(securePort));
+    log.info("Port: " + port);
+    log.info("SecurePort: " + securePort);
     log.info("SslIsRequired: " + (sslIsRequired ? "yes" : "no"));
     log.info("SslIsAvailable: " + (sslIsAvailable ? "yes" : "no"));
     log.info("ForceHttpsLinks: " + (forceHttpsLinks ? "yes" : "no"));
