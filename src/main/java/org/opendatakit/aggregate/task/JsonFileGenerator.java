@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2012 University of Washington
+ * Copyright (C) 2018 Nafundi
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,19 +17,15 @@
 
 package org.opendatakit.aggregate.task;
 
+import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.common.web.CallingContext;
 
-/**
- * API for creating JSON File generation tasks.
- *
- * @author wbrunette@gmail.com
- * @author mitchellsundt@gmail.com
- */
-public interface JsonFileGenerator {
-
-  public void createJsonFileTask(IForm form, SubmissionKey persistentResultsKey,
-                                 long attemptCount, CallingContext cc);
-
+public class JsonFileGenerator {
+  public void createJsonFileTask(IForm form, SubmissionKey persistentResultsKey, long attemptCount, CallingContext cc) {
+    Watchdog wd = (Watchdog) cc.getBean(BeanDefs.WATCHDOG);
+    JsonFileWorkerImpl worker = new JsonFileWorkerImpl(form, persistentResultsKey, attemptCount, wd.getCallingContext());
+    AggregrateThreadExecutor.getAggregateThreadExecutor().execute(worker::generateJsonFile);
+  }
 }

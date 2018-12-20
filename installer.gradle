@@ -4,22 +4,12 @@ task installerClean() {
   delete 'build/installer'
 }
 
-task installerBuild(dependsOn: [installerClean, gaeDownloadSDK], type: Copy) {
+task installerBuild(dependsOn: [installerClean], type: Copy) {
   into "${buildDir}/installer"
-  from fileTree(dir: 'installer/installBuilder')
+  from fileTree(dir: 'installer/project')
 
   into('files') {
-    from zipTree('installer/appEngineSDK.zip')
-    from zipTree('installer/legacyremoval.zip')
-    from zipTree('installer/other.zip')
-    from zipTree('installer/gae.zip')
-    from zipTree('installer/sqljdbc_6.0.zip')
     from "${buildDir}/libs/${archivesBaseName}-${version}.war"
-  }
-
-  into('files/conf') {
-    from fileTree(dir: 'installer/platforms')
-    from zipTree('installer/ear.zip')
   }
 
   into('files/conf/common') {
@@ -34,16 +24,5 @@ task installerBuild(dependsOn: [installerClean, gaeDownloadSDK], type: Copy) {
   doLast {
     setXmlValue("${buildDir}/installer/buildWar.xml", "version", version)
     file("${buildDir}/installer/files/${archivesBaseName}-${version}.war").renameTo(file("build/installer/files/ODKAggregate.war"))
-    file("${buildDir}/installer/files/appengine-java-sdk-1.9.63").renameTo(file("build/installer/files/appengine-java-sdk"))
-    delete "${buildDir}/installer/files/appengine-java-sdk/demos"
-    delete "${buildDir}/installer/files/appengine-java-sdk/docs/endpoints"
-    delete "${buildDir}/installer/files/appengine-java-sdk/docs/javadoc"
-    delete "${buildDir}/installer/files/appengine-java-sdk/docs/remoteapi"
-    delete "${buildDir}/installer/files/appengine-java-sdk/docs/spi"
-    delete "${buildDir}/installer/files/appengine-java-sdk/docs/testing"
-    delete "${buildDir}/installer/files/appengine-java-sdk/docs/tools"
-    delete "${buildDir}/installer/files/appengine-java-sdk/jetty93"
-    delete "${buildDir}/installer/files/appengine-java-sdk/jetty93-base"
-    delete "${buildDir}/installer/files/appengine-java-sdk/src"
   }
 }

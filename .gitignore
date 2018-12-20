@@ -5,12 +5,10 @@ target
 build
 war
 .gradle
-installer/appEngineSDK.zip
 gradle.properties
 logs
 .settings
 jdbc.properties
-odk-settings.xml
 packer/build/*
 packer/packer
 packer/packer_cache

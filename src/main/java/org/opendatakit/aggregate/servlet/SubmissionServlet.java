@@ -244,18 +244,13 @@ public class SubmissionServlet extends ServletUtilBase {
         UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
 
         // publication failures should not fail the submission...
-        try {
-          CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
-          ccDaemon.setAsDaemon(true);
-          for (ExternalService rs : tmp) {
-            // only create upload tasks for active publishers
-            if (rs.getFormServiceCursor().getOperationalStatus() == OperationalStatus.ACTIVE) {
-              uploadTask.createFormUploadTask(rs.getFormServiceCursor(), false, ccDaemon);
-            }
+        CallingContext ccDaemon = ContextFactory.getCallingContext(this, req);
+        ccDaemon.setAsDaemon(true);
+        for (ExternalService rs : tmp) {
+          // only create upload tasks for active publishers
+          if (rs.getFormServiceCursor().getOperationalStatus() == OperationalStatus.ACTIVE) {
+            uploadTask.createFormUploadTask(rs.getFormServiceCursor(), false, ccDaemon);
           }
-        } catch (ODKExternalServiceException e) {
-          logger.info("Publishing enqueue failure (this is recoverable) - " + e.getMessage());
-          e.printStackTrace();
         }
       }
 

@@ -54,7 +54,7 @@ public class BackendActionsTable extends CommonFieldsBase {
   /**
    * delay between re-loads of the lastPublisherRevision HashMap. 30 seconds.
    */
-  public static final long HASHMAP_LIFETIME_MILLISECONDS = PersistConsts.MAX_SETTLE_MILLISECONDS * 10L;
+  private static final long HASHMAP_LIFETIME_MILLISECONDS = PersistConsts.MAX_SETTLE_MILLISECONDS * 10L;
   /**
    * delay between re-issuing uploadSubmissions tasks for a given uriFsc. 3.5
    * seconds
@@ -89,11 +89,11 @@ public class BackendActionsTable extends CommonFieldsBase {
   /**
    * last time we reloaded the publisher hashMap from the datastore
    */
-  public static long lastHashmapCleanTimestamp = 0L;
+  private static long lastHashmapCleanTimestamp = 0L;
   /**
    * the publisher hashMap<uriFsc, lastUploadSubmissionTaskEnqueueTime>
    */
-  public static Map<String, Long> lastPublisherRevision = new HashMap<String, Long>();
+  private static Map<String, Long> lastPublisherRevision = new HashMap<>();
   /**
    * last time we reloaded the lastWatchdog... values from the datastore
    */
@@ -112,17 +112,17 @@ public class BackendActionsTable extends CommonFieldsBase {
   private static long lastWatchdogSchedulingTime = 0L;
   private static BackendActionsTable relation = null;
 
-  protected BackendActionsTable(String schemaName) {
+  private BackendActionsTable(String schemaName) {
     super(schemaName, TABLE_NAME);
     fieldList.add(LAST_REVISION_DATE);
   }
 
-  protected BackendActionsTable(BackendActionsTable ref, User user) {
+  private BackendActionsTable(BackendActionsTable ref, User user) {
     super(ref, user);
   }
 
-  private static synchronized final BackendActionsTable assertRelation(Datastore datastore,
-                                                                       User user) throws ODKDatastoreException {
+  private static synchronized BackendActionsTable assertRelation(Datastore datastore,
+                                                                 User user) throws ODKDatastoreException {
     if (relation == null) {
       BackendActionsTable relationPrototype;
       relationPrototype = new BackendActionsTable(datastore.getDefaultSchemaName());
@@ -132,10 +132,10 @@ public class BackendActionsTable extends CommonFieldsBase {
     return relation;
   }
 
-  private static final BackendActionsTable getSingletonRecord(String uri, Datastore datastore,
-                                                              User user) throws ODKDatastoreException {
+  private static BackendActionsTable getSingletonRecord(String uri, Datastore datastore,
+                                                        User user) throws ODKDatastoreException {
     BackendActionsTable prototype = assertRelation(datastore, user);
-    BackendActionsTable record = null;
+    BackendActionsTable record;
     try {
       record = datastore.getEntity(prototype, uri, user);
     } catch (ODKEntityNotFoundException e) {
@@ -148,7 +148,7 @@ public class BackendActionsTable extends CommonFieldsBase {
     return record;
   }
 
-  public static final synchronized boolean mayHaveRecentPublisherRevision(String uriFsc, CallingContext cc)
+  public static synchronized boolean mayHaveRecentPublisherRevision(String uriFsc, CallingContext cc)
       throws ODKDatastoreException {
     boolean wasDaemon = cc.getAsDeamon();
     cc.setAsDaemon(true);
@@ -161,7 +161,7 @@ public class BackendActionsTable extends CommonFieldsBase {
         lastHashmapCleanTimestamp = now;
       }
 
-      BackendActionsTable t = null;
+      BackendActionsTable t;
       Long oldTime = lastPublisherRevision.get(uriFsc);
       if (oldTime == null) {
         // see if we have anything in the table (created if missing).
@@ -175,7 +175,7 @@ public class BackendActionsTable extends CommonFieldsBase {
     }
   }
 
-  public static final synchronized boolean triggerPublisher(String uriFsc, CallingContext cc) {
+  public static synchronized boolean triggerPublisher(String uriFsc, CallingContext cc) {
     boolean wasDaemon = cc.getAsDeamon();
     cc.setAsDaemon(true);
     try {
@@ -226,7 +226,7 @@ public class BackendActionsTable extends CommonFieldsBase {
    * Updates the time the watchdog last ran. Called only from within the
    * WatchdogWorkerImpl class.
    */
-  public static final synchronized boolean updateWatchdogStart(Watchdog wd, CallingContext cc) {
+  public static synchronized boolean updateWatchdogStart(CallingContext cc) {
     boolean wasDaemon = cc.getAsDeamon();
 
     try {
@@ -244,8 +244,8 @@ public class BackendActionsTable extends CommonFieldsBase {
       long expectedNextStart = oldStartTime + FAST_PUBLISHING_RETRY_MILLISECONDS;
 
       if (expectedNextStart > lastWatchdogStartTime) {
-        logger.warn("watchdog started early: " + Long.toString(lastWatchdogStartTime) + " vs "
-            + Long.toString(expectedNextStart));
+        logger.warn("watchdog started early: " + lastWatchdogStartTime + " vs "
+            + expectedNextStart);
         if (expectedNextStart > lastWatchdogStartTime + PersistConsts.MAX_SETTLE_MILLISECONDS) {
           // we likely have 2 or more Watchdog timers running.
           // use the DEATH_TOGGLE datetime as a boolean flag
@@ -275,8 +275,8 @@ public class BackendActionsTable extends CommonFieldsBase {
     return false;
   }
 
-  private static final void logValues(String tag, long now, long futureMilliseconds,
-                                      long requestedTime) {
+  private static void logValues(String tag, long now, long futureMilliseconds,
+                                long requestedTime) {
     String msg;
     if (requestedTime == -1L) {
       msg = String.format(
@@ -305,8 +305,8 @@ public class BackendActionsTable extends CommonFieldsBase {
    * Schedule a watchdog to run the specified number of milliseconds into the
    * future (zero is OK).
    */
-  private static final synchronized void scheduleFutureWatchdog(Watchdog wd,
-                                                                long futureMilliseconds, CallingContext cc) {
+  private static synchronized void scheduleFutureWatchdog(Watchdog wd,
+                                                          long futureMilliseconds, CallingContext cc) {
     boolean wasDaemon = cc.getAsDeamon();
 
     long now = System.currentTimeMillis();
@@ -423,7 +423,7 @@ public class BackendActionsTable extends CommonFieldsBase {
    * determines that there is work pending, it will schedule a watchdog every
    * FAST_PUBLISHING_RETRY_MILLISECONDS.
    */
-  public static final synchronized void triggerWatchdog(CallingContext cc) {
+  public static synchronized void triggerWatchdog(CallingContext cc) {
 
     Watchdog wd = (Watchdog) cc.getBean(BeanDefs.WATCHDOG);
 
@@ -452,8 +452,8 @@ public class BackendActionsTable extends CommonFieldsBase {
    * effect, but is a suggested next start time, and only if the website is
    * active will it be honored.
    */
-  public static final synchronized void rescheduleWatchdog(boolean hasActiveTasks,
-                                                           boolean cullThisWatchdog, CallingContext cc) {
+  public static synchronized void rescheduleWatchdog(boolean hasActiveTasks,
+                                                     boolean cullThisWatchdog, CallingContext cc) {
 
     Watchdog wd = (Watchdog) cc.getBean(BeanDefs.WATCHDOG);
 
@@ -485,9 +485,7 @@ public class BackendActionsTable extends CommonFieldsBase {
         // this is only used if fast publishing is disabled.
         scheduleFutureWatchdog(wd, FAST_PUBLISHING_RETRY_MILLISECONDS, cc);
       }
-    } catch (ODKEntityNotFoundException e) {
-      e.printStackTrace();
-    } catch (ODKOverQuotaException e) {
+    } catch (ODKEntityNotFoundException | ODKOverQuotaException e) {
       e.printStackTrace();
     }
   }
@@ -495,8 +493,7 @@ public class BackendActionsTable extends CommonFieldsBase {
   // Only called from within the persistence layer.
   @Override
   public CommonFieldsBase getEmptyRow(User user) {
-    BackendActionsTable t = new BackendActionsTable(this, user);
-    return t;
+    return new BackendActionsTable(this, user);
   }
 
   private Date getLastRevisionDate() {

@@ -12,7 +12,7 @@ ODK Aggregate provides a ready-to-deploy server and data repository to:
 - export data (e.g., as CSV files for spreadsheets, or as KML files for Google Earth), and
 - publish data to external systems (e.g., Google Spreadsheets or Google Fusion Tables).
 
-ODK Aggregate can be deployed on Google's App Engine, enabling users to quickly get running without facing the complexities of setting up their own scalable web service. ODK Aggregate can also be deployed locally on a Tomcat server (or any servlet 2.5-compatible (or higher) web container) backed with a MySQL or PostgreSQL database server.
+ODK Aggregate can be deployed on a Tomcat server (or any servlet 2.5-compatible (or higher) web container) backed with a PostgreSQL or a MySQL database server.
 
 * ODK website: [https://opendatakit.org](https://opendatakit.org)
 * ODK Aggregate usage instructions: [https://opendatakit.org/use/aggregate/](https://opendatakit.org/use/aggregate/)
@@ -33,7 +33,7 @@ ODK Aggregate can be deployed on Google's App Engine, enabling users to quickly 
 
 ## Setting up the database
 
-Aggregate supports a variety of DBs, but we strongly recommend you use PostgreSQL first to ensure everything is working. If you wish to use another DB (e.g., Google App Engine, MySQL, or SQLServer databases) after that see [database configurations](docs/database-configurations.md).
+Aggregate supports a variety of DBs, but we strongly recommend you use PostgreSQL first to ensure everything is working. If you wish to use another DB (e.g., MySQL, or SQLServer databases) after that see [database configurations](docs/database-configurations.md).
 
 ### PostgreSQL with Docker
 
@@ -84,10 +84,6 @@ Aggregate is built using Gradle and Gretty, but we strongly recommend you use [I
     | Key | Valid values | Description |
     | --- | ------------ | ----------- |
     | `warMode` | `complete` or `installer` | Use `installer` if you are going to produce an installer with the resulting WAR artifact and `complete` otherwise |
-    | `aggregateInstanceName`|  | Only required for GAE deployment. The name of your instance. It's important that this value doesn't change for an already existing Aggregate instance |
-    | `aggregateUsername` |  | Only required for GAE deployment. The username of the Aggregate superuser |
-    | `gaeAppId` |  | Only required for GAE deployment. The Google AppEngine project Id |
-    | `gaeEmail` |  | Only required for GAE deployment. The email account of the owner of the Google AppEngine instance |
     | `org.gradle.java.home` |  | Set path to a Java 8 install. This is only required if you have Java 9 installed.  |
 
     - Any property can be overwritten by passing `-Pkey=value` arguments to any Gradle task. 
@@ -147,39 +143,6 @@ By default, Gretty will launch a server using a `localhost` address which will n
 
 - In `src/main/resources/security.properties`, change `security.server.hostname` to the address
 - In `build.gradle`, inside the `gretty` block, change `host` to the same address
-
-### Deploy to Google App Engine
-
-1. Follow part of the official instructions for [Installing on App Engine (Cloud)](http://docs.opendatakit.org/aggregate-install/#installing-on-app-engine). Stop after Google configures the server, and before the tutorial.
-
-1. Press the + button to add a `Gradle` configuration
-
-    * Name: `gaeUpdate` (or whatever you'd like)
-    * Gradle project: `odk-aggregate`
-    * Tasks: `gaeUpdate`
-    
-1. Press `OK`
-
-1. Edit `gradle.properties` file at the root of the project and set its values according to your Google App Engine instance:
-
-    | Key | Default | Description |
-    | --- | ------- | ----------- |
-    | `warMode` | `complete` | WAR build mode. Leave set to `complete` for GAE deployments |
-    | `aggregateInstanceName` | `aggregate` | ODK Aggregate instance name. Set this value to whatever is already set in the currently running Aggregate instance. Any changes to this will invalidate all the ODK Aggregate passwords |
-    | `aggregateUsername` | `administrator` | ODK Aggregate administrator name |
-    | `gaeAppId` | `aggregate` | App Engine project ID |
-    | `gaeEmail` | `some.email@example.org` | Your Google Cloud account's email address |
-    
-    - Alternatively, you can overwrite these properties by adding `-Pkey=value` arguments to your Gradle task invocations
-
-1. Authenticate yourself using one of the following methods described in [How the Application Default Credentials Work](https://developers.google.com/identity/protocols/application-default-credentials#howtheywork) guide of Google Cloud Platform.
- 
-    * We recommend the option of [installing Google Cloud SDK](https://cloud.google.com/sdk/downloads) and running the command `gcloud auth application-default login`.
-    * Any other option will require adjustments in the Run configuration for `gaeUpdate`
-
-1. To run Aggregate, go to the `Run` menu, then to `Run...` and `Run` the `gaeUpdate` configuration. This will compile Aggregate and upload it to App Engine, replacing your running instance with the new version.
-
-This process can fail sometimes. If that happens, you will have to manually rollback the failed update launching the `gaeRollback` task. You can follow these same steps to create a new Run Configuration for it. 
 
 ## Extended topics
 

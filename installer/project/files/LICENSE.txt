@@ -1,0 +1,174 @@
+Copyright (C) 2009 Google Inc.
+Copyright (C) 2010-2016 University of Washington
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may
+not use this software except in compliance with the License. You may
+obtain a copy of the License at LICENSE-2.0
+<http://www.apache.org/licenses/LICENSE-2.0>
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+This software includes the following jar files (libraries):
+
+http://www.oracle.com/technetwork/java/jaf11-139815.html      /standard extension/
+    activation-1.1.jar
+https://github.com/AzureAD/azure-activedirectory-library-for-java  /Apache 2.0/
+	adal4j-1.2.0.jar
+http://aopalliance.sourceforge.net                      /Public domain/
+    aopalliance-1.0.jar
+https://cloud.google.com/appengine/docs/java/release-notes  /Apache 2.0/
+    appengine-api-1.0-sdk-1.9.54.jar
+    appengine-api-labs-1.9.54.jar
+    appengine-jsr107cache-1.9.54.jar
+http://www.eclipse.org/aspectj        /Eclipse Public License - v 1.0/
+    aspectjweaver-1.8.9.jar
+http://www.bouncycastle.org/java.html     /Bouncy Castle (MIT License)/
+	bcpkix-jdk15on-1.56.jar
+	bcprov-jdk15on-1.56.jar
+http://apache.org/                                        /Apache 2.0/
+    commons-codec-1.10.jar
+	commons-collections4-4.1.jar
+	commons-dbcp2-2.1.1.jar
+    commons-fileupload-1.3.2.jar
+    commons-io-2.5.jar
+    commons-lang-2.3.jar
+    commons-lang3-3.5.jar
+    commons-logging-1.2.jar
+	commons-pool2-2.4.2.jar
+http://geronimo.apache.org/                               /Apache 2.0/
+    geronimo-annotation_1.1_spec-1.0.jar
+    geronimo-jaxrs_1.1_spec-1.0.jar
+https://github.com/google/google-api-java-client          /Apache 2.0/
+    google-api-client-1.22.0.jar
+    google-api-client-appengine-1.22.0.jar
+    google-api-client-servlet-1.22.0.jar
+https://developers.google.com/api-client-library/java/apis/drive/v3   /Apache 2.0/
+    google-api-services-drive-v3-rev52-1.22.0.jar
+https://developers.google.com/api-client-library/java/apis/sheets/v4   /Apache 2.0/
+    google-api-services-sheets-v4-rev38-1.22.0.jar
+https://developers.google.com/api-client-library/java/apis/sqladmin/v1beta4   /Apache 2.0/
+    google-api-services-sqladmin-v1beta4-rev25-1.22.0.jar
+https://github.com/google/google-http-java-client         /Apache 2.0/
+    google-http-client-1.22.0.jar
+    google-http-client-appengine-1.22.0.jar
+    google-http-client-jackson2-1.22.0.jar
+    google-http-client-jdo-1.22.0.jar
+https://github.com/google/google-oauth-java-client        /Apache 2.0/
+    google-oauth-client-1.22.0.jar
+    google-oauth-client-appengine-1.22.0.jar
+    google-oauth-client-servlet-1.22.0.jar
+https://github.com/google/gson                            /Apache 2.0/
+    gson-2.8.0.jar
+https://github.com/google/guava                           /Apache 2.0/
+    guava-21.0.jar
+    guava-20.0.jar         (for Google AppEngine deployments)
+    guava-22.0-android.jar (for Google AppEngine deployments)
+http://code.google.com/p/gwt-google-maps-v3/              /Apache 2.0/
+now at: https://github.com/opendatakit/aggregate-components
+    gwt-google-maps-v3-1.0.1.jar
+    See the ODK Aggregate (Components) README.txt
+    for how this is built.
+http://www.gwtproject.org/                                /Apache 2.0/
+    gwt-servlet-2.7.0.jar
+http://code.google.com/p/gwt-google-apis/                 /Apache 2.0/
+now at: https://github.com/opendatakit/aggregate-components
+    gwt-visualization-1.1.2.jar
+    See the ODK Aggregate (Components) README.txt
+    for how this is built.
+http://apache.org/                                       /Apache 2.0/
+    httpclient-4.5.2.jar
+    httpcore-4.4.5.jar
+    httpmime-4.5.2.jar
+https://github.com/FasterXML/jackson                     /Apache 2.0/
+    jackson-annotations-2.8.5.jar
+    jackson-core-2.8.5.jar
+    jackson-databind-2.8.5.jar
+    jackson-databind-xml-2.8.5.jar
+    jackson-jaxrs-base-2.8.5.jar
+    jackson-jaxrs-json-provider-2.8.5.jar
+    jackson-jaxrs-xml-provider-2.8.5.jar
+    jackson-module-jaxb-annotations-2.8.5.jar
+https://github.com/jai-imageio/jai-imageio-core   /3-clause BSD with nuclear disclaimer/
+    jai-imageio-core-1.30.jar
+    Copyright (c) 2005 Sun Microsystems, Inc.
+    Copyright © 2010-2014 University of Manchester
+    Copyright © 2010-2015 Stian Soiland-Reyes
+    Copyright © 2015 Peter Hull
+    All Rights Reserved.
+https://jaxb.java.net/                                     /CDDL 1.1/
+http://www.oracle.com/technetwork/middleware/oedq/help/edq11help-2152391.pdf
+    jaxb-api-2.2.jar
+    jaxb-impl-2.2.1.1.jar
+http://stephenc.github.com/jcip-annotations              /Apache 2.0/
+	jcip-annotations-1.0-1.jar
+http://db.apache.org/jdo/index.html                      /Apache 2.0/
+    jdo2-api-2.3-eb.jar
+http://www.joda.org/joda-time/                           /Apache 2.0/
+    joda-time-2.9.9.jar
+http://www.minidev.net/                                  /Apache 2.0/
+	json-smart-1.3.1.jar
+https://github.com/findbugsproject                  /New BSD license/
+    jsr305-3.0.1.jar
+http://kxml.sourceforge.net/kxml2/                      /BSD license/
+    kxml2-2.3.0.jar
+https://bitbucket.org/connect2id/nimbus-language-tags    /Apache 2.0/
+	lang-tag-1.4.3.jar
+??                                                       /CDDL 1.1/	
+http://www.oracle.com/technetwork/middleware/oedq/help/edq11help-2152391.pdf
+	mail-1.4.7.jar
+https://github.com/Microsoft/mssql-jdbc                  /MIT license/	
+	mssql-jdbc-6.1.5.jre8-preview.jar
+https://github.com/GoogleCloudPlatform/cloud-sql-mysql-socket-factory    /Apache 2.0/
+    mysql-socket-factory-1.0.2.jar
+	mysql-socket-factory-core-1.0.2.jar
+https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions /Apache 2.0/
+	oauth2-oidc-sdk-5.18.1.jar
+https://opendatakit.org/                                 /Apache 2.0/
+at: https://github.com/opendatakit/aggregate-components
+    odk-httpclient-gae-4.5.2-1.jar
+    odk-tomcatutil-1.0.1.jar
+    See the ODK Aggregate (Components) README.txt
+    for how these are built.
+https://github.com/opendatakit/javarosa                  /Apache 2.0/
+modified from https://bitbucket.org/javarosa/javarosa/wiki/Home
+formerly at: https://bitbucket.org/m.sundt/javarosa/src/
+    opendatakit-javarosa.2.3.0.jar
+http://www.postgresql.org/   /Modified BSD / MIT Open Source License/
+    postgresql-9.4.1211.jre7.jar
+http://www.slf4j.org/                                   /MIT License/
+    slf4j-api-1.7.22.jar
+    slf4j-jcl-1.7.22.jar
+http://projects.spring.io/spring-framework/              /Apache 2.0/
+    spring-aop-4.3.4.RELEASE.jar
+    spring-aspects-4.3.4.RELEASE.jar
+    spring-beans-4.3.4.RELEASE.jar
+    spring-context-4.3.4.RELEASE.jar
+    spring-context-support-4.3.4.RELEASE.jar
+    spring-core-4.3.4.RELEASE.jar
+    spring-expression-4.3.4.RELEASE.jar
+    spring-instrument-4.3.4.RELEASE.jar
+    spring-instrument-tomcat-4.3.4.RELEASE.jar
+    spring-jdbc-4.3.4.RELEASE.jar
+    spring-tx-4.3.4.RELEASE.jar
+    spring-web-4.3.4.RELEASE.jar
+http://projects.spring.io/spring-security/               /Apache 2.0/
+    spring-security-config-4.2.0.RELEASE.jar
+    spring-security-core-4.2.0.RELEASE.jar
+    spring-security-crypto-4.2.0.RELEASE.jar
+    spring-security-web-4.2.0.RELEASE.jar
+https://github.com/codehaus/stax                         /Apache 2.0/
+    stax2-api-3.1.4.jar
+    stax-api-1.0-2.jar
+https://jcp.org/en/jsr/detail?id=907                       /CDDL 1.1/
+    transaction-api-1.1.jar
+http://wink.apache.org/                                  /Apache 2.0/
+    wink-common-1.4.jar
+    wink-server-1.4.jar
+https://github.com/FasterXML/woodstox                    /Apache 2.0/
+    woodstox-core-5.0.3.jar
+https://github.com/codehaus/woodstox                     /Apache 2.0/
+    woodstox-core-asl-4.4.1.jar

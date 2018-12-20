@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010 University of Washington
+ * Copyright (C) 2018 Nafundi
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,16 +16,26 @@
  */
 package org.opendatakit.aggregate.task;
 
+import org.opendatakit.aggregate.constants.BeanDefs;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.submission.SubmissionKey;
+import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * @author wbrunette@gmail.com
- * @author mitchellsundt@gmail.com
- */
-public interface FormDelete {
+public class FormDelete {
+  private static final Logger logger = LoggerFactory.getLogger(FormDelete.class);
 
-  public void createFormDeleteTask(IForm form, SubmissionKey miscTasksKey,
-                                   long attemptCount, CallingContext cc);
+  public void createFormDeleteTask(IForm form, SubmissionKey miscTasksKey, long attemptCount, CallingContext cc) {
+    Watchdog wd = (Watchdog) cc.getBean(BeanDefs.WATCHDOG);
+    FormDeleteWorkerImpl worker = new FormDeleteWorkerImpl(form, miscTasksKey, attemptCount, wd.getCallingContext());
+    AggregrateThreadExecutor.getAggregateThreadExecutor().execute(() -> {
+      try {
+        worker.deleteForm();
+      } catch (ODKDatastoreException e) {
+        logger.error("Error deleting form", e);
+      }
+    });
+  }
 }
