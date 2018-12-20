@@ -17,8 +17,6 @@
 package org.opendatakit.aggregate.constants.common;
 
 public class UIConsts {
-  public static final String VERSION_STRING = "v1.4.15 Production";
-
   public static final String KML_NONE_OPTION = "None";
   public static final String KML_NONE_ENCODE_KEY = "*NONE*";
 
