@@ -239,7 +239,7 @@ public class ResetUsersAndPermissionsServlet extends ServletUtilBase {
         csvContentReader = new StringReader(inputCsv);
         csvReader = new RFC4180CsvReader(csvContentReader);
 
-        // get the column headings -- these mimic those in Site Admin / Permissions table. 
+        // get the column headings -- these mimic those in Site Admin / Permissions table.
         // Order is irrelevant; no change-password column.
         //
         String[] columns;
@@ -439,7 +439,11 @@ public class ResetUsersAndPermissionsServlet extends ServletUtilBase {
             email = null;
             Email parsedValue = emails.iterator().next();
             if (parsedValue.getType() == Form.EMAIL) {
-              username = parsedValue.getEmail().substring(EmailParser.K_MAILTO.length());
+              logger.error("users and capabilities .csv upload - invalid csv file");
+              resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                  ErrorConsts.MISSING_PARAMS + "\nusers and capabilities invalid .csv -- username \'" +
+                      columns[idxUsername] + "\' You can't use an email as the account's username");
+              return;
             } else {
               username = parsedValue.getUsername();
             }
@@ -447,40 +451,11 @@ public class ResetUsersAndPermissionsServlet extends ServletUtilBase {
               fullname = parsedValue.getFullName();
             }
           } else if ("Google".equals(accType)) {
-            username = null;
-            Collection<Email> emails = EmailParser.parseEmails(columns[idxUsername]);
-
-            if (emails == null || emails.size() == 0) {
-              logger.error("users and capabilities .csv upload - invalid csv file");
-              resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                  ErrorConsts.MISSING_PARAMS + "\nusers and capabilities invalid .csv -- username \'" +
-                      columns[idxUsername] + "\' could not be parsed into valid e-mail");
-              return;
-            }
-
-            if (emails.size() != 1) {
-              logger.error("users and capabilities .csv upload - invalid csv file");
-              resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                  ErrorConsts.MISSING_PARAMS + "\nusers and capabilities invalid .csv -- username \'" +
-                      columns[idxUsername] + "\' could not be parsed into a valid e-mail");
-              return;
-            }
-
-            // will execute loop once
-            email = null;
-            for (Email e : emails) {
-              if (e.getType() != Email.Form.EMAIL) {
-                logger.error("users and capabilities .csv upload - invalid csv file");
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                    ErrorConsts.MISSING_PARAMS + "\nusers and capabilities invalid .csv -- username \'" +
-                        columns[idxUsername] + "\' could not be parsed into a valid e-mail");
-                return;
-              }
-              email = e.getEmail();
-              if (fullname == null) {
-                fullname = e.getFullName();
-              }
-            }
+            logger.error("users and capabilities .csv upload - invalid csv file");
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                ErrorConsts.MISSING_PARAMS + "\nusers and capabilities invalid .csv -- Account Type \'" +
+                    accType + "\' is not supported");
+            return;
           } else {
             logger.error("users and capabilities .csv upload - invalid csv file");
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
@@ -585,7 +560,7 @@ public class ResetUsersAndPermissionsServlet extends ServletUtilBase {
         }
 
         // and figure out whether the anonymousUser currently has ROLE_ATTACHMENT_VIEWER capabilities
-        // (these allow Google Earth to access the server). 
+        // (these allow Google Earth to access the server).
         //
         // If it does, preserve that capability.
         // To do this, fetch the existing info for anonymous...
