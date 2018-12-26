@@ -90,15 +90,7 @@ public class XmlMediaAttachmentFormatter implements ElementFormatter {
   }
 
   @Override
-  public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
-  }
-
-  @Override
   public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-  }
-
-  @Override
-  public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
   }
 
   @Override

@@ -68,16 +68,6 @@ public class LinkElementFormatter extends BasicElementFormatter {
   }
 
   @Override
-  public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    temporalConversion(date, JRTemporal::time, row);
-  }
-
-  @Override
-  public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
-    temporalConversion(date, JRTemporal::date, row);
-  }
-
-  @Override
   public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
     temporalConversion(date, JRTemporal::dateTime, row);
   }

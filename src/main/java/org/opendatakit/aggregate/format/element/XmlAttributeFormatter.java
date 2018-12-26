@@ -110,18 +110,8 @@ public class XmlAttributeFormatter implements ElementFormatter {
   }
 
   @Override
-  public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
-    addToXmlTemporal(date, JRTemporal::date, element, row);
-  }
-
-  @Override
   public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
     addToXmlTemporal(date, JRTemporal::dateTime, element, row);
-  }
-
-  @Override
-  public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    addToXmlTemporal(date, JRTemporal::time, element, row);
   }
 
   @Override

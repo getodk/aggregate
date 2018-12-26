@@ -97,16 +97,8 @@ public class BasicElementFormatter implements ElementFormatter {
     basicStringConversion(b.toString(), row);
   }
 
-  public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
-    rfc1123Conversion(date, JRTemporal::date, row);
-  }
-
   public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
     rfc1123Conversion(date, JRTemporal::dateTime, row);
-  }
-
-  public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    isoLocalTimeConversion(date, row);
   }
 
   public void formatDecimal(WrappedBigDecimal dub, FormElementModel element, String ordinalValue, Row row) {

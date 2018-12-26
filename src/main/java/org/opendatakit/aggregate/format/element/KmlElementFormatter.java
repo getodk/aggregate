@@ -110,18 +110,8 @@ public class KmlElementFormatter implements ElementFormatter {
   }
 
   @Override
-  public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
-    generateTemporalElement(date, JRTemporal::date, element, ordinalValue, row);
-  }
-
-  @Override
   public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
     generateTemporalElement(date, JRTemporal::dateTime, element, ordinalValue, row);
-  }
-
-  @Override
-  public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    generateTemporalElement(date, JRTemporal::time, element, ordinalValue, row);
   }
 
   @Override

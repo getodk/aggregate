@@ -215,18 +215,8 @@ public class JsonElementFormatter implements ElementFormatter {
   }
 
   @Override
-  public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
-    addToJsonTemporal(date, JRTemporal::date, element, row);
-  }
-
-  @Override
   public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
     addToJsonTemporal(date, JRTemporal::dateTime, element, row);
-  }
-
-  @Override
-  public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    addToJsonTemporal(date, JRTemporal::time, element, row);
   }
 
   @Override
