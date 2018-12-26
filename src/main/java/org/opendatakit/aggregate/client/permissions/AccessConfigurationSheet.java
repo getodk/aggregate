@@ -530,6 +530,11 @@ public class AccessConfigurationSheet extends Composite {
           return false;
         }
 
+        if (prospectiveValue.contains("@")) {
+          Window.alert("Usernames with '@' are not supported (email accounts are not supported)");
+          return false;
+        }
+
         // don't allow an edit to convert this name into an existing
         // one.
         for (UserSecurityInfo i : dataProvider.getList()) {
