@@ -38,6 +38,7 @@ import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.aggregate.server.UITrans;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
+import org.opendatakit.aggregate.submission.type.jr.JRTemporal;
 import org.opendatakit.common.datamodel.ODKEnumeratedElementException;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Query;
@@ -143,16 +144,13 @@ public class QueryByUIFilterGroup extends QueryBase {
             break;
           case JRDATETIME:
             compareValue = WebUtils.parseDate(value);
-            super.addFilterChildren(fem, column.getChildColumnCode(), op, compareValue);
-            continue;
+            break;
           case JRDATE:
             compareValue = WebUtils.parseDate(value);
-            super.addFilterChildren(fem, column.getChildColumnCode(), op, compareValue);
-            continue;
+            break;
           case JRTIME:
             compareValue = WebUtils.parseDate(value);
-            super.addFilterChildren(fem, column.getChildColumnCode(), op, compareValue);
-            continue;
+            break;
           case INTEGER:
             compareValue = Long.valueOf(value);
             break;
@@ -160,20 +158,50 @@ public class QueryByUIFilterGroup extends QueryBase {
             compareValue = new BigDecimal(value);
             break;
           case SELECT1:
+            compareValue = value;
+            break;
           case STRING:
             compareValue = value;
             break;
           case GEOPOINT:
             compareValue = new BigDecimal(value);
-            super.addFilterChildren(fem, column.getChildColumnCode(), op, compareValue);
-            continue;
-          default:
-            // e.g., SELECTN
-            // can't apply a filter to this type
-            continue;
+            break;
         }
 
-        super.addFilter(fem, op, compareValue);
+        switch (fem.getElementType()) {
+          case BOOLEAN:
+            super.addFilter(fem, op, compareValue);
+            break;
+          case JRDATETIME:
+            if (fem.getFormDataModel() == null && fem.getElementName().contains("meta-"))
+              super.addFilter(fem, op, compareValue);
+            else if (fem.getFormDataModel() != null)
+              super.addFilterChildren(fem, column.getChildColumnCode(), op, compareValue);
+            else
+              throw new IllegalArgumentException("Unrecognized dateTime field");
+            break;
+          case JRDATE:
+            super.addFilterChildren(fem, column.getChildColumnCode(), op, compareValue);
+            break;
+          case JRTIME:
+            super.addFilterChildren(fem, column.getChildColumnCode(), op, compareValue);
+            break;
+          case INTEGER:
+            super.addFilter(fem, op, compareValue);
+            break;
+          case DECIMAL:
+            super.addFilter(fem, op, compareValue);
+            break;
+          case SELECT1:
+            super.addFilter(fem, op, compareValue);
+            break;
+          case STRING:
+            super.addFilter(fem, op, compareValue);
+            break;
+          case GEOPOINT:
+            super.addFilterChildren(fem, column.getChildColumnCode(), op, compareValue);
+            break;
+        }
       }
     }
 
