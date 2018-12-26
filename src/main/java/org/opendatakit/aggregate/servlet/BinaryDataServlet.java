@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2009 Google Inc.
  * Copyright (C) 2010 University of Washington.
+ * Copyright (C) 2018 Nafundi
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,8 +18,13 @@
 
 package org.opendatakit.aggregate.servlet;
 
+import static java.time.ZoneId.systemDefault;
+import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
+
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -39,18 +45,11 @@ import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.util.ImageUtil;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
-import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.HtmlConsts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Servlet to display the binary data from a submission
- *
- * @author wbrunette@gmail.com
- * @author mitchellsundt@gmail.com
- */
 public class BinaryDataServlet extends ServletUtilBase {
 
   /**
@@ -266,10 +265,8 @@ public class BinaryDataServlet extends ServletUtilBase {
 
       if (previewSize) {
         // cache for 1 hour...
-        resp.setHeader("Expires:",
-            WebUtils.rfc1123Date(new Date(System.currentTimeMillis() + 3600000L)));
-        resp.setHeader("Last-Modified:",
-            WebUtils.rfc1123Date(lastUpdateDate));
+        resp.setHeader("Expires:", OffsetDateTime.now().plus(Duration.ofHours(1)).format(RFC_1123_DATE_TIME));
+        resp.setHeader("Last-Modified:", OffsetDateTime.ofInstant(lastUpdateDate.toInstant(), systemDefault()).format(RFC_1123_DATE_TIME));
         resp.setContentType(HtmlConsts.RESP_TYPE_IMAGE_JPEG);
         if (contentType.equals(HtmlConsts.RESP_TYPE_IMAGE_JPEG)) {
           // resize
@@ -281,8 +278,7 @@ public class BinaryDataServlet extends ServletUtilBase {
         }
         resp.setContentLength(imageBlob.length);
       } else {
-        resp.setHeader("Last-Modified:",
-            WebUtils.rfc1123Date(lastUpdateDate));
+        resp.setHeader("Last-Modified:", OffsetDateTime.ofInstant(lastUpdateDate.toInstant(), systemDefault()).format(RFC_1123_DATE_TIME));
         resp.setContentType(contentType);
         if (contentLength != null) {
           resp.setContentLength(contentLength.intValue());

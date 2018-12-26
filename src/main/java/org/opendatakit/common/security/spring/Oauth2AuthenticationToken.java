@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2012 University of Washington
+ * Copyright (C) 2018 Nafundi
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,18 +16,19 @@
  */
 package org.opendatakit.common.security.spring;
 
+import static java.time.ZoneId.systemDefault;
+import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import org.opendatakit.common.utils.WebUtils;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
 /**
  * Authentication that is returned by Oauth 2.0 processing.
  * Structure liberally copied from Spring OpenId and Oauth2 authentication token classes.
- *
- * @author mitchellsundt@gmail.com
  */
 public class Oauth2AuthenticationToken extends AbstractAuthenticationToken {
 
@@ -103,6 +105,6 @@ public class Oauth2AuthenticationToken extends AbstractAuthenticationToken {
   @Override
   public String toString() {
     return "[" + super.toString() + ", email : " + email +
-        ", expiration : " + WebUtils.iso8601Date(expiration) + "]";
+        ", expiration : " + OffsetDateTime.ofInstant(expiration.toInstant(), systemDefault()).format(ISO_OFFSET_DATE_TIME) + "]";
   }
 }

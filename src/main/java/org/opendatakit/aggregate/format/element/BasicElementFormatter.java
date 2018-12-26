@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010 University of Washington
+ * Copyright (C) 2018 Nafundi
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,9 +17,11 @@
 package org.opendatakit.aggregate.format.element;
 
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_TIME;
-import static org.opendatakit.common.utils.WebUtils.*;
+import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 
+import java.time.OffsetDateTime;
 import java.time.OffsetTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -32,14 +35,9 @@ import org.opendatakit.aggregate.submission.type.GeoPoint;
 import org.opendatakit.aggregate.submission.type.jr.JRTemporal;
 import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 
-/**
- * @author wbrunette@gmail.com
- * @author mitchellsundt@gmail.com
- */
 public class BasicElementFormatter implements ElementFormatter {
 
   /**
@@ -190,7 +188,10 @@ public class BasicElementFormatter implements ElementFormatter {
 
   private void rfc1123Conversion(Optional<JRTemporal> value, Row row) {
     basicStringConversion(value
-        .map(v -> rfc1123Date(v.getParsed()))
+        .map(v -> {
+          // TODO This may produce strange results with JRDate and JRTime objects. Also, RFC1123 dates require time
+          return OffsetDateTime.ofInstant(v.getParsed().toInstant(), ZoneId.systemDefault()).format(RFC_1123_DATE_TIME);
+        })
         .orElse(null), row);
   }
 

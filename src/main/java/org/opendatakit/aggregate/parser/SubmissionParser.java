@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2009 Google Inc.
  * Copyright (C) 2010 University of Washington.
+ * Copyright (C) 2018 Nafundi
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -46,6 +47,7 @@ import org.opendatakit.aggregate.submission.SubmissionField;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.type.BlobSubmissionType;
 import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
+import org.opendatakit.aggregate.submission.type.jr.JRTemporal;
 import org.opendatakit.common.datamodel.DeleteHelper;
 import org.opendatakit.common.datamodel.ODKEnumeratedElementException;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -67,12 +69,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-/**
- * Parsers submission xml and saves to datastore
- *
- * @author wbrunette@gmail.com
- * @author mitchellsundt@gmail.com
- */
 public class SubmissionParser {
 
   private static final String OPEN_ROSA_NAMESPACE_PRELIM = "http://openrosa.org/xforms/metadata";
@@ -251,14 +247,14 @@ public class SubmissionParser {
     Date submissionDate = new Date();
     String submissionDateString = root.getAttribute(ParserConsts.SUBMISSION_DATE_ATTRIBUTE_NAME);
     if (submissionDateString != null && submissionDateString.length() != 0) {
-      submissionDate = WebUtils.parseDate(submissionDateString);
+      submissionDate = JRTemporal.dateTime(submissionDateString).getParsed();
     }
 
     Date markedAsCompleteDate = new Date();
     String markedAsCompleteDateString = root
         .getAttribute(ParserConsts.MARKED_AS_COMPLETE_DATE_ATTRIBUTE_NAME);
     if (markedAsCompleteDateString != null && markedAsCompleteDateString.length() != 0) {
-      markedAsCompleteDate = WebUtils.parseDate(markedAsCompleteDateString);
+      markedAsCompleteDate = JRTemporal.dateTime(markedAsCompleteDateString).getParsed();
     }
 
     SubmissionLockTemplate modificationLock = new SubmissionLockTemplate(formId, instanceId, cc);

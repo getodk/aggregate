@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2009 Google Inc.
  * Copyright (C) 2010 University of Washington.
+ * Copyright (C) 2018 Nafundi
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,6 +17,8 @@
  */
 
 package org.opendatakit.aggregate.externalservice;
+
+import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -51,8 +54,8 @@ import com.google.api.services.sheets.v4.model.Spreadsheet;
 import com.google.api.services.sheets.v4.model.UpdateCellsRequest;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,10 +96,6 @@ import org.opendatakit.common.web.constants.HtmlConsts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * @author wbrunette@gmail.com
- * @author mitchellsundt@gmail.com
- */
 public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements ExternalService {
   private static final Logger logger = LoggerFactory.getLogger(GoogleSpreadsheet.class.getName());
 
@@ -198,7 +197,7 @@ public class GoogleSpreadsheet extends GoogleOauth2ExternalService implements Ex
 
       // create spreadsheet
       String spreadsheetName = getSpreadsheetName();
-      String spreadsheetDescription = spreadsheetName + " ODK Aggregate " + WebUtils.iso8601Date(new Date());
+      String spreadsheetDescription = spreadsheetName + " ODK Aggregate " + OffsetDateTime.now().format(ISO_OFFSET_DATE_TIME);
       // will hold doc id
       String spreadKey = null;
       try {

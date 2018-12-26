@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2012 University of Washington
+ * Copyright (C) 2018 Nafundi
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -38,6 +39,7 @@ import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.aggregate.server.UITrans;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
+import org.opendatakit.aggregate.submission.type.jr.JRTemporal;
 import org.opendatakit.common.datamodel.ODKEnumeratedElementException;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Query;
@@ -169,9 +171,11 @@ public class QueryByUIFilterGroup extends QueryBase {
       case BOOLEAN:
         return WebUtils.parseBoolean(value);
       case JRDATETIME:
+        return JRTemporal.dateTime(value).getParsed();
       case JRDATE:
+        return JRTemporal.date(value).getParsed();
       case JRTIME:
-        return WebUtils.parseDate(value);
+        return JRTemporal.time(value).getParsed();
       case INTEGER:
         return Long.valueOf(value);
       case DECIMAL:

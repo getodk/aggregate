@@ -15,27 +15,24 @@
  */
 package org.opendatakit.common.persistence;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.Date;
-import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
-import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
-import org.opendatakit.common.security.User;
-import org.opendatakit.common.utils.WebUtils;
-import org.opendatakit.common.web.CallingContext;
 
 class TestRow {
-    public final String stringField;
-    public final Integer integerField;
-    public final WrappedBigDecimal doubleField;
-    public final Date dateField;
-    public final Boolean booleanField;
+  public final String stringField;
+  public final Integer integerField;
+  public final WrappedBigDecimal doubleField;
+  public final Date dateField;
+  public final Boolean booleanField;
 
-    TestRow(String someString, Integer someInteger, Double someDouble, String someDate, Boolean someBoolean) {
-        stringField = someString;
-        integerField = someInteger;
-        doubleField = (someDouble == null) ? null : WrappedBigDecimal.fromDouble(someDouble);
-        dateField = WebUtils.parseDate(someDate);
-        booleanField = someBoolean;
-    }
+  TestRow(String someString, Integer someInteger, Double someDouble, String someDate, Boolean someBoolean) {
+    stringField = someString;
+    integerField = someInteger;
+    doubleField = (someDouble == null) ? null : WrappedBigDecimal.fromDouble(someDouble);
+    dateField = Date.from(LocalDate.parse(someDate).atStartOfDay().toInstant(OffsetDateTime.now().getOffset()));
+    booleanField = someBoolean;
+  }
 
 
 }
