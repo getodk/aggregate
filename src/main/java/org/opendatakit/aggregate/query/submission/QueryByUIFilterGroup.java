@@ -38,7 +38,6 @@ import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.aggregate.server.UITrans;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.aggregate.submission.SubmissionKey;
-import org.opendatakit.aggregate.submission.type.jr.JRTemporal;
 import org.opendatakit.common.datamodel.ODKEnumeratedElementException;
 import org.opendatakit.common.persistence.CommonFieldsBase;
 import org.opendatakit.common.persistence.Query;
@@ -136,37 +135,7 @@ public class QueryByUIFilterGroup extends QueryBase {
         FormElementModel fem = FormElementModel.retrieveFormElementModel(form, decodeKey);
         FilterOperation op = UITrans.convertFilterOperation(rf.getOperation(), rf.getVisibility());
 
-        String value = rf.getInput();
-        Object compareValue = null;
-        switch (fem.getElementType()) {
-          case BOOLEAN:
-            compareValue = WebUtils.parseBoolean(value);
-            break;
-          case JRDATETIME:
-            compareValue = WebUtils.parseDate(value);
-            break;
-          case JRDATE:
-            compareValue = WebUtils.parseDate(value);
-            break;
-          case JRTIME:
-            compareValue = WebUtils.parseDate(value);
-            break;
-          case INTEGER:
-            compareValue = Long.valueOf(value);
-            break;
-          case DECIMAL:
-            compareValue = new BigDecimal(value);
-            break;
-          case SELECT1:
-            compareValue = value;
-            break;
-          case STRING:
-            compareValue = value;
-            break;
-          case GEOPOINT:
-            compareValue = new BigDecimal(value);
-            break;
-        }
+        Object compareValue = getCompareValue(fem, rf.getInput());
 
         switch (fem.getElementType()) {
           case BOOLEAN:
@@ -205,6 +174,31 @@ public class QueryByUIFilterGroup extends QueryBase {
       }
     }
 
+  }
+
+  public Object getCompareValue(FormElementModel fem, String value) {
+    switch (fem.getElementType()) {
+      case BOOLEAN:
+        return WebUtils.parseBoolean(value);
+      case JRDATETIME:
+        return WebUtils.parseDate(value);
+      case JRDATE:
+        return WebUtils.parseDate(value);
+      case JRTIME:
+        return WebUtils.parseDate(value);
+      case INTEGER:
+        return Long.valueOf(value);
+      case DECIMAL:
+        return new BigDecimal(value);
+      case SELECT1:
+        return value;
+      case STRING:
+        return value;
+      case GEOPOINT:
+        return new BigDecimal(value);
+      default:
+        throw new IllegalArgumentException("Can't get the compare value for FormElementModel type " + fem.getElementType());
+    }
   }
 
   public void addFilterByPrimaryDate(Query.FilterOperation operation, Date dateToFilter) {
