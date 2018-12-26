@@ -15,7 +15,7 @@
  */
 package org.opendatakit.common.security;
 
-import org.opendatakit.aggregate.constants.common.UIConsts;
+import org.opendatakit.aggregate.buildconfig.BuildConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -48,10 +48,10 @@ public class Realm implements InitializingBean {
       throw new IllegalStateException("realmString (e.g., mydomain.org ODK Aggregate 1.0) must be specified");
     }
     Logger log = LoggerFactory.getLogger(Realm.class);
-    log.info("Version: " + UIConsts.VERSION_STRING);
+    log.info("Version: " + BuildConfig.VERSION);
     log.info("Hostname: " + hostname);
-    log.info("Port: " + Integer.toString(port));
-    log.info("SecurePort: " + Integer.toString(securePort));
+    log.info("Port: " + port);
+    log.info("SecurePort: " + securePort);
     log.info("SslIsRequired: " + (sslIsRequired ? "yes" : "no"));
     log.info("SslIsAvailable: " + (sslIsAvailable ? "yes" : "no"));
     log.info("ForceHttpsLinks: " + (forceHttpsLinks ? "yes" : "no"));
