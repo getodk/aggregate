@@ -54,22 +54,22 @@ public class LinkElementFormatter extends BasicElementFormatter {
   }
 
   @Override
-  public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue, Row row, CallingContext cc)
+  public void formatBinary(BlobSubmissionType value, FormElementModel element, String ordinalValue, Row row, CallingContext cc)
       throws ODKDatastoreException {
-    if (blobSubmission == null ||
-        (blobSubmission.getAttachmentCount(cc) == 0) ||
-        (blobSubmission.getContentHash(1, cc) == null)) {
+    if (value == null ||
+        (value.getAttachmentCount(cc) == 0) ||
+        (value.getContentHash(1, cc) == null)) {
       row.addFormattedValue(null);
       return;
     }
 
-    addFormattedLink(blobSubmission.getValue(), BinaryDataServlet.ADDR,
+    addFormattedLink(value.getValue(), BinaryDataServlet.ADDR,
         ServletConsts.BLOB_KEY, row);
   }
 
   @Override
-  public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    temporalConversion(date, JRTemporal::dateTime, row);
+  public void formatDateTime(Date value, FormElementModel element, String ordinalValue, Row row) {
+    temporalConversion(value, JRTemporal::dateTime, row);
   }
 
   @Override
@@ -113,6 +113,6 @@ public class LinkElementFormatter extends BasicElementFormatter {
   }
 
   private void temporalConversion(Optional<JRTemporal> value, Row row) {
-    basicStringConversion(value.map(JRTemporal::getRaw).orElse(null), row);
+    row.addFormattedValue(Optional.ofNullable((Object) value.map(JRTemporal::getRaw).orElse(null)).map(Object::toString).orElse(null));
   }
 }
