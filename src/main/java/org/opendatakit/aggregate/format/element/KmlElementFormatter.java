@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.constants.format.FormTableConsts;
@@ -111,7 +110,11 @@ public class KmlElementFormatter implements ElementFormatter {
 
   @Override
   public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    generateTemporalElement(date, JRTemporal::dateTime, element, ordinalValue, row);
+    generateDataElement(
+        Optional.ofNullable(date).map(JRTemporal::dateTime).map(JRTemporal::getRaw).orElse(null),
+        element + FormatConsts.HEADER_CONCAT + ordinalValue,
+        row
+    );
   }
 
   @Override
@@ -121,17 +124,29 @@ public class KmlElementFormatter implements ElementFormatter {
 
   @Override
   public void formatJRDate(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
-    generateTemporalElement(value, element, ordinalValue, row);
+    generateDataElement(
+        Optional.ofNullable(value).map(JRTemporal::getRaw).orElse(null),
+        element + FormatConsts.HEADER_CONCAT + ordinalValue,
+        row
+    );
   }
 
   @Override
   public void formatJRTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
-    generateTemporalElement(value, element, ordinalValue, row);
+    generateDataElement(
+        Optional.ofNullable(value).map(JRTemporal::getRaw).orElse(null),
+        element + FormatConsts.HEADER_CONCAT + ordinalValue,
+        row
+    );
   }
 
   @Override
   public void formatJRDateTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
-    generateTemporalElement(value, element, ordinalValue, row);
+    generateDataElement(
+        Optional.ofNullable(value).map(JRTemporal::getRaw).orElse(null),
+        element + FormatConsts.HEADER_CONCAT + ordinalValue,
+        row
+    );
   }
 
   @Override
@@ -160,22 +175,6 @@ public class KmlElementFormatter implements ElementFormatter {
   @Override
   public void formatString(String string, FormElementModel element, String ordinalValue, Row row) {
     generateDataElement(string, element.getGroupQualifiedElementName() + ordinalValue, row);
-  }
-
-  private void generateTemporalElement(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
-    generateTemporalElement(Optional.ofNullable(value), element, ordinalValue, row);
-  }
-
-  private void generateTemporalElement(Date value, Function<Date, JRTemporal> mapper, FormElementModel element, String ordinalValue, Row row) {
-    generateTemporalElement(Optional.ofNullable(value).map(mapper), element, ordinalValue, row);
-  }
-
-  private void generateTemporalElement(Optional<JRTemporal> value, FormElementModel element, String ordinalValue, Row row) {
-    generateDataElement(
-        value.map(JRTemporal::getRaw).orElse(null),
-        element + FormatConsts.HEADER_CONCAT + ordinalValue,
-        row
-    );
   }
 
   private void generateDataElement(Object value, String name, Row row) {

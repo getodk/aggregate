@@ -17,12 +17,9 @@
 package org.opendatakit.aggregate.format.element;
 
 import static java.lang.String.join;
-import static java.time.ZoneId.systemDefault;
-import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -44,10 +41,10 @@ public class BasicElementFormatter implements ElementFormatter {
   private boolean includeAltitude;
   private boolean includeAccuracy;
 
-  public BasicElementFormatter(boolean separateGpsCoordinates, boolean includeGpsAltitude, boolean includeGpsAccuracy) {
-    separateCoordinates = separateGpsCoordinates;
-    includeAltitude = includeGpsAltitude;
-    includeAccuracy = includeGpsAccuracy;
+  public BasicElementFormatter(boolean separateCoordinates, boolean includeAltitude, boolean includeAccuracy) {
+    this.separateCoordinates = separateCoordinates;
+    this.includeAltitude = includeAltitude;
+    this.includeAccuracy = includeAccuracy;
   }
 
   @Override
@@ -78,7 +75,8 @@ public class BasicElementFormatter implements ElementFormatter {
   @Override
   public void formatDateTime(Date value, FormElementModel element, String ordinalValue, Row row) {
     row.addFormattedValue(Optional.ofNullable(value)
-        .map(date -> OffsetDateTime.ofInstant(date.toInstant(), systemDefault()).format(RFC_1123_DATE_TIME))
+        .map(JRTemporal::dateTime)
+        .map(JRTemporal::getRaw)
         .orElse(null));
   }
 
@@ -106,7 +104,7 @@ public class BasicElementFormatter implements ElementFormatter {
   @Override
   public void formatJRDateTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
     row.addFormattedValue(Optional.ofNullable(value)
-        .map(dateTime -> OffsetDateTime.ofInstant(dateTime.getParsed().toInstant(), systemDefault()).format(RFC_1123_DATE_TIME))
+        .map(JRTemporal::getRaw)
         .orElse(null));
   }
 

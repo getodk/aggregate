@@ -19,7 +19,6 @@ package org.opendatakit.aggregate.format.element;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -103,7 +102,11 @@ public class XmlElementFormatter implements ElementFormatter {
 
   @Override
   public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    addToXmlTemporal(date, JRTemporal::dateTime, element, row);
+    addToXmlValueToRow(
+        Optional.ofNullable(date).map(JRTemporal::dateTime).map(JRTemporal::getRaw).orElse(null),
+        element.getElementName(),
+        row
+    );
   }
 
   @Override
@@ -113,17 +116,29 @@ public class XmlElementFormatter implements ElementFormatter {
 
   @Override
   public void formatJRDate(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
-    addToXmlTemporal(value, element, row);
+    addToXmlValueToRow(
+        Optional.ofNullable(value).map(JRTemporal::getRaw).orElse(null),
+        element.getElementName(),
+        row
+    );
   }
 
   @Override
   public void formatJRTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
-    addToXmlTemporal(value, element, row);
+    addToXmlValueToRow(
+        Optional.ofNullable(value).map(JRTemporal::getRaw).orElse(null),
+        element.getElementName(),
+        row
+    );
   }
 
   @Override
   public void formatJRDateTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
-    addToXmlTemporal(value, element, row);
+    addToXmlValueToRow(
+        Optional.ofNullable(value).map(JRTemporal::getRaw).orElse(null),
+        element.getElementName(),
+        row
+    );
   }
 
   @Override
@@ -155,19 +170,6 @@ public class XmlElementFormatter implements ElementFormatter {
 
   @Override
   public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row, CallingContext cc) {
-  }
-
-  private void addToXmlTemporal(Date value, Function<Date, JRTemporal> mapper, FormElementModel element, Row row) {
-    Optional<JRTemporal> jrTemporal = Optional.ofNullable(value).map(mapper);
-    addToXmlMapper(jrTemporal, element, row);
-  }
-
-  private void addToXmlTemporal(JRTemporal value, FormElementModel element, Row row) {
-    addToXmlMapper(Optional.ofNullable(value), element, row);
-  }
-
-  private void addToXmlMapper(Optional<JRTemporal> value, FormElementModel element, Row row) {
-    addToXmlValueToRow(value.map(JRTemporal::getRaw).orElse(null), element.getElementName(), row);
   }
 
   @Override
