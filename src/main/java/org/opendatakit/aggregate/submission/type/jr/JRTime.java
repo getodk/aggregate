@@ -16,7 +16,11 @@
 
 package org.opendatakit.aggregate.submission.type.jr;
 
+import static java.time.format.DateTimeFormatter.ofLocalizedTime;
+
+import java.time.LocalDate;
 import java.time.OffsetTime;
+import java.time.format.FormatStyle;
 import java.util.Date;
 
 public class JRTime implements JRTemporal<OffsetTime> {
@@ -43,5 +47,13 @@ public class JRTime implements JRTemporal<OffsetTime> {
   @Override
   public OffsetTime getValue() {
     return value;
+  }
+
+  @Override
+  public String humanFormat(FormatStyle style) {
+    return value
+        .atDate(LocalDate.now())
+        .toZonedDateTime()
+        .format(ofLocalizedTime(style));
   }
 }

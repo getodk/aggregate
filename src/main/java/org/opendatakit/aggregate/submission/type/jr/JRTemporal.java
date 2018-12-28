@@ -20,11 +20,13 @@ import static java.time.ZoneId.systemDefault;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
 import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 import static java.time.format.DateTimeFormatter.ISO_OFFSET_TIME;
+import static java.time.format.FormatStyle.LONG;
 import static java.util.Objects.requireNonNull;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
+import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.util.Date;
@@ -88,4 +90,10 @@ public interface JRTemporal<T extends Temporal> {
   String getRaw();
 
   T getValue();
+
+  default String humanFormat() {
+    return humanFormat(LONG);
+  }
+
+  String humanFormat(FormatStyle style);
 }

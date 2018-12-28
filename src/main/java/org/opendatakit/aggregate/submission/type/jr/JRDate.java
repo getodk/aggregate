@@ -16,8 +16,15 @@
 
 package org.opendatakit.aggregate.submission.type.jr;
 
+import static java.time.format.DateTimeFormatter.ofLocalizedDate;
+import static java.time.format.FormatStyle.LONG;
+import static java.util.Locale.ENGLISH;
+import static org.opendatakit.common.utils.LocaleUtils.withLocale;
+
 import java.time.LocalDate;
+import java.time.format.FormatStyle;
 import java.util.Date;
+import java.util.Locale;
 
 public class JRDate implements JRTemporal<LocalDate> {
   private final Date parsed;
@@ -43,5 +50,10 @@ public class JRDate implements JRTemporal<LocalDate> {
   @Override
   public LocalDate getValue() {
     return value;
+  }
+
+  @Override
+  public String humanFormat(FormatStyle style) {
+    return withLocale(ENGLISH, () -> value.format(ofLocalizedDate(style)));
   }
 }

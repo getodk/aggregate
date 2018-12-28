@@ -17,6 +17,7 @@
 package org.opendatakit.aggregate.format.element;
 
 import static java.lang.String.join;
+import static java.time.format.FormatStyle.MEDIUM;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 
@@ -76,7 +77,7 @@ public class BasicElementFormatter implements ElementFormatter {
   public void formatDateTime(Date value, FormElementModel element, String ordinalValue, Row row) {
     row.addFormattedValue(Optional.ofNullable(value)
         .map(JRTemporal::dateTime)
-        .map(JRTemporal::getRaw)
+        .map(jrt -> jrt.humanFormat(MEDIUM))
         .orElse(null));
   }
 
@@ -90,21 +91,21 @@ public class BasicElementFormatter implements ElementFormatter {
   @Override
   public void formatJRDate(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
     row.addFormattedValue(Optional.ofNullable(value)
-        .map(JRTemporal::getRaw)
+        .map(JRTemporal::humanFormat)
         .orElse(null));
   }
 
   @Override
   public void formatJRTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
     row.addFormattedValue(Optional.ofNullable(value)
-        .map(JRTemporal::getRaw)
+        .map(JRTemporal::humanFormat)
         .orElse(null));
   }
 
   @Override
   public void formatJRDateTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
     row.addFormattedValue(Optional.ofNullable(value)
-        .map(JRTemporal::getRaw)
+        .map(JRTemporal::humanFormat)
         .orElse(null));
   }
 
