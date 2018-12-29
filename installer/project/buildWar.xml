@@ -1,7 +1,7 @@
 <project>
   <shortName>ODKAggregate</shortName>
   <fullName>ODK Aggregate</fullName>
-  <version>1.4.15 Production</version>
+  <version>0.0.0</version>
   <licenseFile>files/LICENSE.txt</licenseFile>
   <leftImage>files/leftSide.png</leftImage>
   <logoImage>files/logo.png</logoImage>
