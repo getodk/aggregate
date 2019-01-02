@@ -135,48 +135,55 @@ public class QueryByUIFilterGroup extends QueryBase {
         FormElementModel fem = FormElementModel.retrieveFormElementModel(form, decodeKey);
         FilterOperation op = UITrans.convertFilterOperation(rf.getOperation(), rf.getVisibility());
 
-        String value = rf.getInput();
-        Object compareValue = null;
+        Object compareValue = getCompareValue(fem, rf.getInput());
+
         switch (fem.getElementType()) {
           case BOOLEAN:
-            compareValue = WebUtils.parseBoolean(value);
-            break;
-          case JRDATETIME:
-            compareValue = WebUtils.parseDate(value);
-            super.addFilterChildren(fem, column.getChildColumnCode(), op, compareValue);
-            continue;
-          case JRDATE:
-            compareValue = WebUtils.parseDate(value);
-            super.addFilterChildren(fem, column.getChildColumnCode(), op, compareValue);
-            continue;
-          case JRTIME:
-            compareValue = WebUtils.parseDate(value);
-            super.addFilterChildren(fem, column.getChildColumnCode(), op, compareValue);
-            continue;
           case INTEGER:
-            compareValue = Long.valueOf(value);
-            break;
           case DECIMAL:
-            compareValue = new BigDecimal(value);
-            break;
           case SELECT1:
           case STRING:
-            compareValue = value;
+            super.addFilter(fem, op, compareValue);
             break;
+          case JRDATETIME:
+            if (fem.getFormDataModel() == null && fem.getElementName().contains("meta-"))
+              super.addFilter(fem, op, compareValue);
+            else if (fem.getFormDataModel() != null)
+              super.addFilterChildren(fem, column.getChildColumnCode(), op, compareValue);
+            else
+              throw new IllegalArgumentException("Unrecognized dateTime field");
+            break;
+          case JRDATE:
+          case JRTIME:
           case GEOPOINT:
-            compareValue = new BigDecimal(value);
             super.addFilterChildren(fem, column.getChildColumnCode(), op, compareValue);
-            continue;
-          default:
-            // e.g., SELECTN
-            // can't apply a filter to this type
-            continue;
+            break;
         }
-
-        super.addFilter(fem, op, compareValue);
       }
     }
 
+  }
+
+  public Object getCompareValue(FormElementModel fem, String value) {
+    switch (fem.getElementType()) {
+      case BOOLEAN:
+        return WebUtils.parseBoolean(value);
+      case JRDATETIME:
+      case JRDATE:
+      case JRTIME:
+        return WebUtils.parseDate(value);
+      case INTEGER:
+        return Long.valueOf(value);
+      case DECIMAL:
+        return new BigDecimal(value);
+      case SELECT1:
+      case STRING:
+        return value;
+      case GEOPOINT:
+        return new BigDecimal(value);
+      default:
+        throw new IllegalArgumentException("Can't get the compare value for FormElementModel type " + fem.getElementType());
+    }
   }
 
   public void addFilterByPrimaryDate(Query.FilterOperation operation, Date dateToFilter) {
