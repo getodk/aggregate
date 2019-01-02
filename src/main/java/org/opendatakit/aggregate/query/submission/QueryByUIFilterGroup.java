@@ -139,6 +139,10 @@ public class QueryByUIFilterGroup extends QueryBase {
 
         switch (fem.getElementType()) {
           case BOOLEAN:
+          case INTEGER:
+          case DECIMAL:
+          case SELECT1:
+          case STRING:
             super.addFilter(fem, op, compareValue);
             break;
           case JRDATETIME:
@@ -150,23 +154,7 @@ public class QueryByUIFilterGroup extends QueryBase {
               throw new IllegalArgumentException("Unrecognized dateTime field");
             break;
           case JRDATE:
-            super.addFilterChildren(fem, column.getChildColumnCode(), op, compareValue);
-            break;
           case JRTIME:
-            super.addFilterChildren(fem, column.getChildColumnCode(), op, compareValue);
-            break;
-          case INTEGER:
-            super.addFilter(fem, op, compareValue);
-            break;
-          case DECIMAL:
-            super.addFilter(fem, op, compareValue);
-            break;
-          case SELECT1:
-            super.addFilter(fem, op, compareValue);
-            break;
-          case STRING:
-            super.addFilter(fem, op, compareValue);
-            break;
           case GEOPOINT:
             super.addFilterChildren(fem, column.getChildColumnCode(), op, compareValue);
             break;
@@ -181,9 +169,7 @@ public class QueryByUIFilterGroup extends QueryBase {
       case BOOLEAN:
         return WebUtils.parseBoolean(value);
       case JRDATETIME:
-        return WebUtils.parseDate(value);
       case JRDATE:
-        return WebUtils.parseDate(value);
       case JRTIME:
         return WebUtils.parseDate(value);
       case INTEGER:
@@ -191,7 +177,6 @@ public class QueryByUIFilterGroup extends QueryBase {
       case DECIMAL:
         return new BigDecimal(value);
       case SELECT1:
-        return value;
       case STRING:
         return value;
       case GEOPOINT:
