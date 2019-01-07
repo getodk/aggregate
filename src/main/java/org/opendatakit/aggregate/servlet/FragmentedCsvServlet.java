@@ -18,7 +18,6 @@
 
 package org.opendatakit.aggregate.servlet;
 
-import static org.opendatakit.aggregate.submission.type.jr.JRTemporal.fixOffset;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -45,7 +44,6 @@ import org.opendatakit.aggregate.submission.SubmissionKey;
 import org.opendatakit.aggregate.submission.SubmissionKeyPart;
 import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
-import org.opendatakit.aggregate.submission.type.jr.JRTemporal;
 import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
 import org.opendatakit.common.web.CallingContext;
@@ -265,7 +263,6 @@ public class FragmentedCsvServlet extends ServletUtilBase {
 
         if (!submissions.isEmpty()) {
           QueryResumePoint resumeCursor = query.getResumeCursor();
-          // TODO Remove coupling with JRTemporal.fixOffset(String)
           Date resumeDate = Date.from(OffsetDateTime.parse(fixOffset(resumeCursor.getValue())).toInstant());
           websafeCursorString = Long.toString(resumeDate.getTime())
               + " and " + resumeCursor.getUriLastReturnedValue();
@@ -296,4 +293,10 @@ public class FragmentedCsvServlet extends ServletUtilBase {
       errorRetreivingData(resp);
     }
   }
+
+  private static String fixOffset(String raw) {
+    char thirdCharFromTheEnd = raw.charAt(raw.length() - 3);
+    return thirdCharFromTheEnd == '+' || thirdCharFromTheEnd == '-' ? raw + ":00" : raw;
+  }
+
 }

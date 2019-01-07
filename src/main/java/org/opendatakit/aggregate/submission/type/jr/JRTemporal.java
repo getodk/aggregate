@@ -22,6 +22,7 @@ import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 import static java.time.format.DateTimeFormatter.ISO_OFFSET_TIME;
 import static java.time.format.FormatStyle.LONG;
 import static java.util.Objects.requireNonNull;
+import static org.opendatakit.aggregate.submission.type.jr.JRTemporalUtils.fixOffset;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -78,11 +79,6 @@ public interface JRTemporal<T extends Temporal> {
   static JRTemporal dateTime(Date parsed, String raw) {
     OffsetDateTime value = OffsetDateTime.parse(fixOffset(raw));
     return new JRDateTime(parsed, value, raw);
-  }
-
-  static String fixOffset(String raw) {
-    char thirdCharFromTheEnd = raw.charAt(raw.length() - 3);
-    return thirdCharFromTheEnd == '+' || thirdCharFromTheEnd == '-' ? raw + ":00" : raw;
   }
 
   Date getParsed();

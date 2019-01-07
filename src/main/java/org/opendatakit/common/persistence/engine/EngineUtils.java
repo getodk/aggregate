@@ -19,7 +19,6 @@ package org.opendatakit.common.persistence.engine;
 
 import static java.time.ZoneId.systemDefault;
 import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-import static org.opendatakit.aggregate.submission.type.jr.JRTemporal.fixOffset;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -193,7 +192,6 @@ public class EngineUtils {
         if (v == null) {
           value = null;
         } else {
-          // TODO Remove coupling with JRTemporal.fixOffset(String)
           value = Date.from(OffsetDateTime.parse(fixOffset(v)).toInstant());
         }
         break;
@@ -202,6 +200,11 @@ public class EngineUtils {
         throw new IllegalStateException("datatype not handled");
     }
     return value;
+  }
+
+  private static String fixOffset(String raw) {
+    char thirdCharFromTheEnd = raw.charAt(raw.length() - 3);
+    return thirdCharFromTheEnd == '+' || thirdCharFromTheEnd == '-' ? raw + ":00" : raw;
   }
 
 }

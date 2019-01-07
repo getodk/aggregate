@@ -23,7 +23,6 @@ import static org.opendatakit.aggregate.constants.ParserConsts.FORM_ID_ATTRIBUTE
 import static org.opendatakit.aggregate.constants.ParserConsts.FORWARD_SLASH;
 import static org.opendatakit.aggregate.constants.ParserConsts.FORWARD_SLASH_SUBSTITUTION;
 import static org.opendatakit.aggregate.constants.ParserConsts.NAMESPACE_ODK;
-import static org.opendatakit.aggregate.submission.type.jr.JRTemporal.fixOffset;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -413,7 +412,6 @@ public class BaseFormParserForJavaRosa {
         return new Date();
       ++endIdx;
       String timestamp = xml.substring(idx + ODK_TIMESTAMP_COMMENT.length(), endIdx);
-      // TODO Remove coupling with JRTemporal.fixOffset(String)
       Date d = Date.from(OffsetDateTime.parse(fixOffset(timestamp)).toInstant());
       if (d != null) {
         return d;
@@ -1052,4 +1050,10 @@ public class BaseFormParserForJavaRosa {
     // database schema
     XFORMS_MISSING_VERSION, XFORMS_EARLIER_VERSION
   }
+
+  private static String fixOffset(String raw) {
+    char thirdCharFromTheEnd = raw.charAt(raw.length() - 3);
+    return thirdCharFromTheEnd == '+' || thirdCharFromTheEnd == '-' ? raw + ":00" : raw;
+  }
+
 }
