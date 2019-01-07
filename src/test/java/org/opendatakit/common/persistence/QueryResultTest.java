@@ -42,7 +42,7 @@ public class QueryResultTest {
   private static final int SET_SIZE = 3;
   private static final String[] STRINGS = new String[]{"A", "B", "C"};
   private static final double[] DOUBLES = new double[]{0.9, 1.9, 2.9};
-  private static final String[] DATES = new String[]{"2009-01-30", "2009-02-30", "2009-03-30"};
+  private static final String[] DATES = new String[]{"2009-01-30", "2009-02-28", "2009-03-30"};
   private static final Boolean[] BOOLEANS = new Boolean[]{true, false, null};
   private static TestRow[] TEST_ROWS = new TestRow[STRINGS.length * SET_SIZE * DOUBLES.length * DATES.length * BOOLEANS.length];
 
