@@ -111,26 +111,22 @@ public class BasicElementFormatter implements ElementFormatter {
 
   @Override
   public void formatGeoPoint(GeoPoint value, FormElementModel element, String ordinalValue, Row row) {
+    if (value == null) {
+      row.addFormattedValue(null);
+      return;
+    }
+
     if (separateCoordinates) {
-      row.addFormattedValue(Optional.ofNullable(value)
-          .map(GeoPoint::getLatitude)
-          .map(WrappedBigDecimal::toString)
-          .orElse(null));
-      row.addFormattedValue(Optional.ofNullable(value)
-          .map(GeoPoint::getLongitude)
-          .map(WrappedBigDecimal::toString)
-          .orElse(null));
+      row.addFormattedValue(value.getLatitude().toString());
+      row.addFormattedValue(value.getLongitude().toString());
       if (includeAltitude)
-        row.addFormattedValue(Optional.ofNullable(value)
-            .map(GeoPoint::getAltitude)
-            .map(WrappedBigDecimal::toString)
-            .orElse(null));
+        row.addFormattedValue(value.getAltitude().toString());
       if (includeAccuracy)
-        row.addFormattedValue(Optional.ofNullable(value)
-            .map(GeoPoint::getAccuracy)
-            .map(WrappedBigDecimal::toString)
-            .orElse(null));
-    } else if (value.getLongitude() != null && value.getLatitude() != null) {
+        row.addFormattedValue(value.getAccuracy().toString());
+      return;
+    }
+
+    if (value.getLongitude() != null && value.getLatitude() != null) {
       List<WrappedBigDecimal> parts = new ArrayList<>();
       parts.add(value.getLatitude());
       parts.add(value.getLongitude());
@@ -139,8 +135,8 @@ public class BasicElementFormatter implements ElementFormatter {
       if (includeAccuracy)
         parts.add(value.getAccuracy());
       row.addFormattedValue(parts.stream().map(WrappedBigDecimal::toString).collect(joining(", ")));
-    } else
-      row.addFormattedValue(null);
+    }
+
   }
 
   @Override

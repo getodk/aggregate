@@ -31,4 +31,11 @@ public final class LocaleUtils {
     Locale.setDefault(backup);
     return t;
   }
+
+  public synchronized static void withLocale(Locale locale, Runnable supplier) {
+    Locale backup = Locale.getDefault();
+    Locale.setDefault(locale);
+    supplier.run();
+    Locale.setDefault(backup);
+  }
 }
