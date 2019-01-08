@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 University of Washington
+ * Copyright (C) 2018 Nafundi
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,6 +15,8 @@
  * the License.
  */
 package org.opendatakit.aggregate.task;
+
+import static org.opendatakit.aggregate.task.PurgeOlderSubmissions.*;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -40,7 +43,6 @@ import org.opendatakit.common.persistence.exception.ODKEntityPersistException;
 import org.opendatakit.common.persistence.exception.ODKOverQuotaException;
 import org.opendatakit.common.persistence.exception.ODKTaskLockException;
 import org.opendatakit.common.security.User;
-import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.slf4j.Logger;
@@ -49,9 +51,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Common worker implementation for the purging of all of a form's submissions
  * older than a given date.
- *
- * @author wbrunette@gmail.com
- * @author mitchellsundt@gmail.com
  */
 public class PurgeOlderSubmissionsWorkerImpl {
   private static final int MAX_QUERY_LIMIT = 100;
@@ -164,8 +163,8 @@ public class PurgeOlderSubmissionsWorkerImpl {
     Logger logger = LoggerFactory.getLogger(PurgeOlderSubmissionsWorkerImpl.class);
 
     Map<String, String> rp = t.getRequestParameters();
-    String purgeBeforeDateString = rp.get(PurgeOlderSubmissions.PURGE_DATE);
-    Date purgeBeforeDate = WebUtils.parsePurgeDateString(purgeBeforeDateString);
+    String purgeBeforeDateString = rp.get(PURGE_DATE);
+    Date purgeBeforeDate = parsePurgeDate(purgeBeforeDateString);
 
     logger.info("Submissions Purge: " + miscTasksKey.toString() + " form "
         + form.getFormId() + " doPurgeOlderSubmissions date: " + purgeBeforeDateString);

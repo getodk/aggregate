@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010 University of Washington
+ * Copyright (C) 2018 Nafundi
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,14 +16,15 @@
  */
 package org.opendatakit.aggregate.format.element;
 
-import static java.time.format.DateTimeFormatter.ISO_LOCAL_TIME;
-import static org.opendatakit.common.utils.WebUtils.*;
+import static java.lang.String.join;
+import static java.time.format.FormatStyle.MEDIUM;
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.joining;
 
-import java.time.OffsetTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
 import org.opendatakit.aggregate.format.Row;
 import org.opendatakit.aggregate.submission.SubmissionKey;
@@ -32,177 +34,129 @@ import org.opendatakit.aggregate.submission.type.GeoPoint;
 import org.opendatakit.aggregate.submission.type.jr.JRTemporal;
 import org.opendatakit.common.persistence.WrappedBigDecimal;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
-import org.opendatakit.common.web.constants.BasicConsts;
 
-/**
- * @author wbrunette@gmail.com
- * @author mitchellsundt@gmail.com
- */
 public class BasicElementFormatter implements ElementFormatter {
 
-  /**
-   * separate the GPS coordinates of latitude and longitude into columns
-   */
   private boolean separateCoordinates;
-
-  /**
-   * include GPS altitude data
-   */
   private boolean includeAltitude;
-
-  /**
-   * include GPS accuracy data
-   */
   private boolean includeAccuracy;
 
-  /**
-   * Construct a Basic Element Formatter
-   *
-   * @param separateGpsCoordinates separate the GPS coordinates of latitude and longitude into
-   *                               columns
-   * @param includeGpsAltitude     include GPS altitude data
-   * @param includeGpsAccuracy     include GPS accuracy data
-   */
-  public BasicElementFormatter(boolean separateGpsCoordinates, boolean includeGpsAltitude,
-                               boolean includeGpsAccuracy) {
-    separateCoordinates = separateGpsCoordinates;
-    includeAltitude = includeGpsAltitude;
-    includeAccuracy = includeGpsAccuracy;
+  public BasicElementFormatter(boolean separateCoordinates, boolean includeAltitude, boolean includeAccuracy) {
+    this.separateCoordinates = separateCoordinates;
+    this.includeAltitude = includeAltitude;
+    this.includeAccuracy = includeAccuracy;
   }
 
-  public void formatUid(String uri, String propertyName, Row row) {
-    basicStringConversion(uri, row);
+  @Override
+  public void formatUid(String value, String propertyName, Row row) {
+    row.addFormattedValue(Optional.ofNullable(value).orElse(null));
   }
 
-  public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue, Row row, CallingContext cc) throws ODKDatastoreException {
-    SubmissionKey key = blobSubmission.getValue();
-    basicStringConversion(key.toString(), row);
+  @Override
+  public void formatBinary(BlobSubmissionType value, FormElementModel element, String ordinalValue, Row row, CallingContext cc) throws ODKDatastoreException {
+    row.addFormattedValue(Optional.ofNullable(value)
+        .map(BlobSubmissionType::getValue)
+        .map(SubmissionKey::toString)
+        .orElse(null));
   }
 
-  public void formatBoolean(Boolean bool, FormElementModel element, String ordinalValue, Row row) {
-    basicStringConversion(bool, row);
+  @Override
+  public void formatBoolean(Boolean value, FormElementModel element, String ordinalValue, Row row) {
+    row.addFormattedValue(Optional.ofNullable(value)
+        .map(Object::toString)
+        .orElse(null));
   }
 
-  public void formatChoices(List<String> choices, FormElementModel element, String ordinalValue, Row row) {
-    StringBuilder b = new StringBuilder();
-
-    boolean first = true;
-    for (String s : choices) {
-      if (!first) {
-        b.append(BasicConsts.SPACE);
-      }
-      first = false;
-      b.append(s);
-    }
-    basicStringConversion(b.toString(), row);
+  @Override
+  public void formatChoices(List<String> values, FormElementModel element, String ordinalValue, Row row) {
+    row.addFormattedValue(join(" ", Optional.ofNullable(values).orElse(emptyList())));
   }
 
-  public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
-    rfc1123Conversion(date, JRTemporal::date, row);
+  @Override
+  public void formatDateTime(Date value, FormElementModel element, String ordinalValue, Row row) {
+    row.addFormattedValue(Optional.ofNullable(value)
+        .map(JRTemporal::dateTime)
+        .map(jrt -> jrt.humanFormat(MEDIUM))
+        .orElse(null));
   }
 
-  public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    rfc1123Conversion(date, JRTemporal::dateTime, row);
+  @Override
+  public void formatDecimal(WrappedBigDecimal value, FormElementModel element, String ordinalValue, Row row) {
+    row.addFormattedValue(Optional.ofNullable(value)
+        .map(WrappedBigDecimal::toString)
+        .orElse(null));
   }
 
-  public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    isoLocalTimeConversion(date, row);
-  }
-
-  public void formatDecimal(WrappedBigDecimal dub, FormElementModel element, String ordinalValue, Row row) {
-    formatBigDecimalToString(dub, row);
-  }
-
+  @Override
   public void formatJRDate(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
-    rfc1123Conversion(value, row);
+    row.addFormattedValue(Optional.ofNullable(value)
+        .map(JRTemporal::humanFormat)
+        .orElse(null));
   }
 
+  @Override
   public void formatJRTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
-    isoLocalTimeConversion(Optional.ofNullable(value), row);
+    row.addFormattedValue(Optional.ofNullable(value)
+        .map(JRTemporal::humanFormat)
+        .orElse(null));
   }
 
+  @Override
   public void formatJRDateTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
-    rfc1123Conversion(value, row);
+    row.addFormattedValue(Optional.ofNullable(value)
+        .map(JRTemporal::humanFormat)
+        .orElse(null));
   }
 
-  public void formatGeoPoint(GeoPoint coordinate, FormElementModel element, String ordinalValue, Row row) {
-    if (separateCoordinates) {
-      basicStringConversion(coordinate.getLatitude(), row);
-      basicStringConversion(coordinate.getLongitude(), row);
-
-      if (includeAltitude) {
-        basicStringConversion(coordinate.getAltitude(), row);
-      }
-
-      if (includeAccuracy) {
-        basicStringConversion(coordinate.getAccuracy(), row);
-      }
-    } else {
-      if (coordinate.getLongitude() != null && coordinate.getLatitude() != null) {
-        String coordVal = coordinate.getLatitude().toString() + BasicConsts.COMMA
-            + BasicConsts.SPACE + coordinate.getLongitude().toString();
-        if (includeAltitude) {
-          coordVal += BasicConsts.COMMA
-              + BasicConsts.SPACE + coordinate.getAltitude().toString();
-        }
-        if (includeAccuracy) {
-          coordVal += BasicConsts.COMMA
-              + BasicConsts.SPACE + coordinate.getAccuracy().toString();
-        }
-        row.addFormattedValue(coordVal);
-      } else {
-        row.addFormattedValue(null);
-      }
-    }
-  }
-
-  public void formatLong(Long longInt, FormElementModel element, String ordinalValue, Row row) {
-    basicStringConversion(longInt, row);
-  }
-
-  public void formatString(String string, FormElementModel element, String ordinalValue, Row row) {
-    basicStringConversion(string, row);
-  }
-
-  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row, CallingContext cc) {
-    basicStringConversion(repeat.getUniqueKeyStr(), row);
-  }
-
-  private void isoLocalTimeConversion(Date value, Row row) {
-    isoLocalTimeConversion(Optional.ofNullable(value).map(JRTemporal::time), row);
-  }
-
-  private void isoLocalTimeConversion(Optional<JRTemporal> value, Row row) {
-    basicStringConversion(value
-        .map(v -> OffsetTime.parse(v.getRaw()).format(ISO_LOCAL_TIME))
-        .orElse(null), row);
-  }
-
-  private void rfc1123Conversion(Date value, Function<Date, JRTemporal> mapper, Row row) {
-    rfc1123Conversion(Optional.ofNullable(value).map(mapper), row);
-  }
-
-  private void rfc1123Conversion(JRTemporal value, Row row) {
-    rfc1123Conversion(Optional.ofNullable(value), row);
-  }
-
-  private void rfc1123Conversion(Optional<JRTemporal> value, Row row) {
-    basicStringConversion(value
-        .map(v -> rfc1123Date(v.getParsed()))
-        .orElse(null), row);
-  }
-
-  void basicStringConversion(Object value, Row row) {
-    if (value != null) {
-      row.addFormattedValue(value.toString());
-    } else {
+  @Override
+  public void formatGeoPoint(GeoPoint value, FormElementModel element, String ordinalValue, Row row) {
+    if (value == null) {
       row.addFormattedValue(null);
+      return;
     }
+
+    if (separateCoordinates) {
+      row.addFormattedValue(value.getLatitude().toString());
+      row.addFormattedValue(value.getLongitude().toString());
+      if (includeAltitude)
+        row.addFormattedValue(value.getAltitude().toString());
+      if (includeAccuracy)
+        row.addFormattedValue(value.getAccuracy().toString());
+      return;
+    }
+
+    if (value.getLongitude() != null && value.getLatitude() != null) {
+      List<WrappedBigDecimal> parts = new ArrayList<>();
+      parts.add(value.getLatitude());
+      parts.add(value.getLongitude());
+      if (includeAltitude)
+        parts.add(value.getAltitude());
+      if (includeAccuracy)
+        parts.add(value.getAccuracy());
+      row.addFormattedValue(parts.stream().map(WrappedBigDecimal::toString).collect(joining(", ")));
+    }
+
   }
 
-  void formatBigDecimalToString(WrappedBigDecimal dub, Row row) {
-    basicStringConversion(dub, row);
+  @Override
+  public void formatLong(Long value, FormElementModel element, String ordinalValue, Row row) {
+    row.addFormattedValue(Optional.ofNullable(value)
+        .map(Object::toString)
+        .orElse(null));
+  }
+
+  @Override
+  public void formatString(String value, FormElementModel element, String ordinalValue, Row row) {
+    row.addFormattedValue(Optional.ofNullable(value)
+        .map(Object::toString)
+        .orElse(null));
+  }
+
+  @Override
+  public void formatRepeats(SubmissionRepeat repeat, FormElementModel repeatElement, Row row, CallingContext cc) {
+    row.addFormattedValue(Optional.ofNullable(repeat)
+        .map(SubmissionRepeat::getUniqueKeyStr)
+        .orElse(null));
   }
 }

@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2009 Google Inc.
  * Copyright (C) 2010 University of Washington.
+ * Copyright (C) 2018 Nafundi
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,8 +18,10 @@
 
 package org.opendatakit.aggregate.servlet;
 
+
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -43,17 +46,10 @@ import org.opendatakit.aggregate.submission.SubmissionSet;
 import org.opendatakit.aggregate.submission.type.RepeatSubmissionType;
 import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
 
-/**
- * Servlet to generate a CSV file for download, in parts!
- *
- * @author wbrunette@gmail.com
- * @author mitchellsundt@gmail.com
- */
 public class FragmentedCsvServlet extends ServletUtilBase {
 
   /**
@@ -267,7 +263,7 @@ public class FragmentedCsvServlet extends ServletUtilBase {
 
         if (!submissions.isEmpty()) {
           QueryResumePoint resumeCursor = query.getResumeCursor();
-          Date resumeDate = WebUtils.parseDate(resumeCursor.getValue());
+          Date resumeDate = Date.from(OffsetDateTime.parse(fixOffset(resumeCursor.getValue())).toInstant());
           websafeCursorString = Long.toString(resumeDate.getTime())
               + " and " + resumeCursor.getUriLastReturnedValue();
         } else {
@@ -297,4 +293,10 @@ public class FragmentedCsvServlet extends ServletUtilBase {
       errorRetreivingData(resp);
     }
   }
+
+  private static String fixOffset(String raw) {
+    char thirdCharFromTheEnd = raw.charAt(raw.length() - 3);
+    return thirdCharFromTheEnd == '+' || thirdCharFromTheEnd == '-' ? raw + ":00" : raw;
+  }
+
 }

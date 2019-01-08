@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010 University of Washington
+ * Copyright (C) 2018 Nafundi
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,10 +16,12 @@
  */
 package org.opendatakit.aggregate.servlet;
 
+import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
+
 import java.io.IOException;
 import java.io.StringWriter;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.TreeSet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,7 +37,6 @@ import org.opendatakit.common.security.client.UserSecurityInfo.UserType;
 import org.opendatakit.common.security.common.EmailParser;
 import org.opendatakit.common.security.common.GrantedAuthorityName;
 import org.opendatakit.common.security.server.SecurityServiceUtil;
-import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.HtmlConsts;
 import org.slf4j.Logger;
@@ -43,8 +45,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Servlet for downloading a .csv file containing a list of users and their privileges.
  * This must contain all the users and their privileges on the system.
- *
- * @author mitchellsundt@gmail.com
  */
 public class GetUsersAndPermissionsServlet extends ServletUtilBase {
 
@@ -121,8 +121,7 @@ public class GetUsersAndPermissionsServlet extends ServletUtilBase {
     resp.setHeader("Pragma:", "no-cache");
     resp.setHeader("Expires:", "0");
 
-    resp.setHeader("Last-Modified:",
-        WebUtils.rfc1123Date(new Date()));
+    resp.setHeader("Last-Modified:", OffsetDateTime.now().format(RFC_1123_DATE_TIME));
     resp.setContentType(HtmlConsts.RESP_TYPE_CSV);
     resp.addHeader(HtmlConsts.CONTENT_DISPOSITION, "attachment; filename=\"UsersAndCapabilities.csv\"");
     resp.setStatus(HttpServletResponse.SC_OK);

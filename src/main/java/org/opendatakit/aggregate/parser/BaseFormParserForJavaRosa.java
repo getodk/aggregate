@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2009 Google Inc.
  * Copyright (C) 2010 University of Washington.
+ * Copyright (C) 2018 Nafundi
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,6 +18,7 @@
 
 package org.opendatakit.aggregate.parser;
 
+import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 import static org.opendatakit.aggregate.constants.ParserConsts.FORM_ID_ATTRIBUTE_NAME;
 import static org.opendatakit.aggregate.constants.ParserConsts.FORWARD_SLASH;
 import static org.opendatakit.aggregate.constants.ParserConsts.FORWARD_SLASH_SUBSTITUTION;
@@ -24,6 +26,7 @@ import static org.opendatakit.aggregate.constants.ParserConsts.NAMESPACE_ODK;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -51,20 +54,12 @@ import org.kxml2.kdom.Node;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData.Reason;
 import org.opendatakit.aggregate.form.XFormParameters;
-import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-/**
- * Parses an XML definition of an XForm based on java rosa types
- *
- * @author wbrunette@gmail.com
- * @author mitchellsundt@gmail.com
- * @author chrislrobert@gmail.com
- */
 public class BaseFormParserForJavaRosa {
 
   private static final String LEADING_QUESTION_XML_PATTERN = "^[^<]*<\\s*\\?\\s*xml.*";
@@ -417,7 +412,7 @@ public class BaseFormParserForJavaRosa {
         return new Date();
       ++endIdx;
       String timestamp = xml.substring(idx + ODK_TIMESTAMP_COMMENT.length(), endIdx);
-      Date d = WebUtils.parseDate(timestamp);
+      Date d = Date.from(OffsetDateTime.parse(fixOffset(timestamp)).toInstant());
       if (d != null) {
         return d;
       } else {
@@ -432,7 +427,7 @@ public class BaseFormParserForJavaRosa {
     int idx = xmlInsertLocation(xmlWithoutTimestampComment);
 
     return xmlWithoutTimestampComment.substring(0, idx) + ODK_TIMESTAMP_COMMENT
-        + WebUtils.iso8601Date(new Date()) + " on " + serverUrl + " -->"
+        + OffsetDateTime.now().format(ISO_OFFSET_DATE_TIME) + " on " + serverUrl + " -->"
         + xmlWithoutTimestampComment.substring(idx);
   }
 
@@ -1055,4 +1050,10 @@ public class BaseFormParserForJavaRosa {
     // database schema
     XFORMS_MISSING_VERSION, XFORMS_EARLIER_VERSION
   }
+
+  private static String fixOffset(String raw) {
+    char thirdCharFromTheEnd = raw.charAt(raw.length() - 3);
+    return thirdCharFromTheEnd == '+' || thirdCharFromTheEnd == '-' ? raw + ":00" : raw;
+  }
+
 }

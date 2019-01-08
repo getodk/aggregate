@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -54,47 +53,37 @@ public class LinkElementFormatter extends BasicElementFormatter {
   }
 
   @Override
-  public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue, Row row, CallingContext cc)
+  public void formatBinary(BlobSubmissionType value, FormElementModel element, String ordinalValue, Row row, CallingContext cc)
       throws ODKDatastoreException {
-    if (blobSubmission == null ||
-        (blobSubmission.getAttachmentCount(cc) == 0) ||
-        (blobSubmission.getContentHash(1, cc) == null)) {
+    if (value == null ||
+        (value.getAttachmentCount(cc) == 0) ||
+        (value.getContentHash(1, cc) == null)) {
       row.addFormattedValue(null);
       return;
     }
 
-    addFormattedLink(blobSubmission.getValue(), BinaryDataServlet.ADDR,
+    addFormattedLink(value.getValue(), BinaryDataServlet.ADDR,
         ServletConsts.BLOB_KEY, row);
   }
 
   @Override
-  public void formatTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    temporalConversion(date, JRTemporal::time, row);
-  }
-
-  @Override
-  public void formatDate(Date date, FormElementModel element, String ordinalValue, Row row) {
-    temporalConversion(date, JRTemporal::date, row);
-  }
-
-  @Override
-  public void formatDateTime(Date date, FormElementModel element, String ordinalValue, Row row) {
-    temporalConversion(date, JRTemporal::dateTime, row);
+  public void formatDateTime(Date value, FormElementModel element, String ordinalValue, Row row) {
+    row.addFormattedValue(Optional.ofNullable(value).map(JRTemporal::dateTime).map(JRTemporal::getRaw).orElse(null));
   }
 
   @Override
   public void formatJRDate(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
-    temporalConversion(value, row);
+    row.addFormattedValue(Optional.ofNullable(value).map(JRTemporal::getRaw).orElse(null));
   }
 
   @Override
   public void formatJRTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
-    temporalConversion(value, row);
+    row.addFormattedValue(Optional.ofNullable(value).map(JRTemporal::getRaw).orElse(null));
   }
 
   @Override
   public void formatJRDateTime(JRTemporal value, FormElementModel element, String ordinalValue, Row row) {
-    temporalConversion(value, row);
+    row.addFormattedValue(Optional.ofNullable(value).map(JRTemporal::getRaw).orElse(null));
   }
 
   @Override
@@ -114,15 +103,4 @@ public class LinkElementFormatter extends BasicElementFormatter {
         ServletConsts.FORM_ID, row);
   }
 
-  private void temporalConversion(Date value, Function<Date, JRTemporal> mapper, Row row) {
-    temporalConversion(Optional.ofNullable(value).map(mapper), row);
-  }
-
-  private void temporalConversion(JRTemporal value, Row row) {
-    temporalConversion(Optional.ofNullable(value), row);
-  }
-
-  private void temporalConversion(Optional<JRTemporal> value, Row row) {
-    basicStringConversion(value.map(JRTemporal::getRaw).orElse(null), row);
-  }
 }

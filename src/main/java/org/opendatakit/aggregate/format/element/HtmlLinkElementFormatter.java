@@ -64,23 +64,23 @@ public class HtmlLinkElementFormatter extends BasicElementFormatter {
   }
 
   @Override
-  public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue, Row row, CallingContext cc) throws ODKDatastoreException {
-    if (blobSubmission == null ||
-        (blobSubmission.getAttachmentCount(cc) == 0) ||
-        (blobSubmission.getContentHash(1, cc) == null)) {
+  public void formatBinary(BlobSubmissionType value, FormElementModel element, String ordinalValue, Row row, CallingContext cc) throws ODKDatastoreException {
+    if (value == null ||
+        (value.getAttachmentCount(cc) == 0) ||
+        (value.getContentHash(1, cc) == null)) {
       row.addFormattedValue(null);
       return;
     }
 
-    SubmissionKey key = blobSubmission.getValue();
+    SubmissionKey key = value.getValue();
     String linkText;
     Map<String, String> properties = new HashMap<String, String>();
     properties.put(ServletConsts.BLOB_KEY, key.toString());
     if (binariesAsDownloadLink) {
       properties.put(ServletConsts.AS_ATTACHMENT, "yes");
       linkText = FormTableConsts.DOWNLOAD_LINK_TEXT;
-      if (blobSubmission.getAttachmentCount(cc) == 1) {
-        linkText = blobSubmission.getUnrootedFilename(1, cc);
+      if (value.getAttachmentCount(cc) == 1) {
+        linkText = value.getUnrootedFilename(1, cc);
         if (linkText == null || linkText.length() == 0) {
           linkText = FormTableConsts.DOWNLOAD_LINK_TEXT;
         }

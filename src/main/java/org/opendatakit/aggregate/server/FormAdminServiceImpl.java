@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2011 University of Washington
+ * Copyright (C) 2018 Nafundi
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -27,7 +28,7 @@ import static org.opendatakit.aggregate.form.MiscTasks.TaskType.DELETE_FORM;
 import static org.opendatakit.aggregate.form.MiscTasks.TaskType.PURGE_OLDER_SUBMISSIONS;
 import static org.opendatakit.aggregate.query.submission.QueryByUIFilterGroup.CompletionFlag.ONLY_INCOMPLETE_SUBMISSIONS;
 import static org.opendatakit.aggregate.task.PurgeOlderSubmissions.PURGE_DATE;
-import static org.opendatakit.common.utils.WebUtils.purgeDateString;
+import static org.opendatakit.aggregate.task.PurgeOlderSubmissions.formatPurgeDate;
 
 import com.google.gwt.user.server.rpc.XsrfProtectedServiceServlet;
 import java.util.ArrayList;
@@ -149,7 +150,7 @@ public class FormAdminServiceImpl extends XsrfProtectedServiceServlet implements
     // set up the purge request here...
     Map<String, String> parameters = new HashMap<>();
 
-    parameters.put(PURGE_DATE, purgeDateString(earliest));
+    parameters.put(PURGE_DATE, formatPurgeDate(earliest));
     IForm form;
     try {
       form = retrieveFormByFormId(fsc.getFormId(), cc);
@@ -427,7 +428,7 @@ public class FormAdminServiceImpl extends XsrfProtectedServiceServlet implements
     // set up the purge request here...
     Map<String, String> parameters = new HashMap<>();
 
-    parameters.put(PURGE_DATE, purgeDateString(value));
+    parameters.put(PURGE_DATE, PurgeOlderSubmissions.formatPurgeDate(value));
 
     MiscTasks m;
     try {

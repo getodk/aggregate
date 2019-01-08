@@ -17,6 +17,7 @@ package org.opendatakit.aggregate.format.element;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.opendatakit.aggregate.constants.HtmlUtil;
 import org.opendatakit.aggregate.constants.ServletConsts;
 import org.opendatakit.aggregate.datamodel.FormElementModel;
@@ -47,7 +48,7 @@ public class UiElementFormatter extends BasicElementFormatter {
   }
 
   @Override
-  public void formatGeoPoint(GeoPoint coordinate, FormElementModel element, String ordinalValue, Row row) {
+  public void formatGeoPoint(GeoPoint value, FormElementModel element, String ordinalValue, Row row) {
     GeopointHeaderIncludes gpsFormatter = null;
 
     if (gpsFormatters != null) {
@@ -55,39 +56,39 @@ public class UiElementFormatter extends BasicElementFormatter {
     }
 
     if (gpsFormatter == null) {
-      formatBigDecimalToString(coordinate.getLatitude(), row);
-      formatBigDecimalToString(coordinate.getLongitude(), row);
-      formatBigDecimalToString(coordinate.getAltitude(), row);
-      formatBigDecimalToString(coordinate.getAccuracy(), row);
+      row.addFormattedValue(Optional.ofNullable((Object) value.getLatitude()).map(Object::toString).orElse(null));
+      row.addFormattedValue(Optional.ofNullable((Object) value.getLongitude()).map(Object::toString).orElse(null));
+      row.addFormattedValue(Optional.ofNullable((Object) value.getAltitude()).map(Object::toString).orElse(null));
+      row.addFormattedValue(Optional.ofNullable((Object) value.getAccuracy()).map(Object::toString).orElse(null));
     } else {
       if (gpsFormatter.includeLatitude()) {
-        formatBigDecimalToString(coordinate.getLatitude(), row);
+        row.addFormattedValue(Optional.ofNullable((Object) value.getLatitude()).map(Object::toString).orElse(null));
       }
 
       if (gpsFormatter.includeLongitude()) {
-        formatBigDecimalToString(coordinate.getLongitude(), row);
+        row.addFormattedValue(Optional.ofNullable((Object) value.getLongitude()).map(Object::toString).orElse(null));
       }
 
       if (gpsFormatter.includeAltitude()) {
-        formatBigDecimalToString(coordinate.getAltitude(), row);
+        row.addFormattedValue(Optional.ofNullable((Object) value.getAltitude()).map(Object::toString).orElse(null));
       }
 
       if (gpsFormatter.includeAccuracy()) {
-        formatBigDecimalToString(coordinate.getAccuracy(), row);
+        row.addFormattedValue(Optional.ofNullable((Object) value.getAccuracy()).map(Object::toString).orElse(null));
       }
     }
   }
 
   @Override
-  public void formatBinary(BlobSubmissionType blobSubmission, FormElementModel element, String ordinalValue, Row row, CallingContext cc) throws ODKDatastoreException {
-    if (blobSubmission == null ||
-        (blobSubmission.getAttachmentCount(cc) == 0) ||
-        (blobSubmission.getContentHash(1, cc) == null)) {
+  public void formatBinary(BlobSubmissionType value, FormElementModel element, String ordinalValue, Row row, CallingContext cc) throws ODKDatastoreException {
+    if (value == null ||
+        (value.getAttachmentCount(cc) == 0) ||
+        (value.getContentHash(1, cc) == null)) {
       row.addFormattedValue(null);
       return;
     }
 
-    SubmissionKey key = blobSubmission.getValue();
+    SubmissionKey key = value.getValue();
     Map<String, String> properties = new HashMap<String, String>();
     properties.put(ServletConsts.BLOB_KEY, key.toString());
     String url = HtmlUtil.createLinkWithProperties(baseWebServerUrl + BasicConsts.FORWARDSLASH + BinaryDataServlet.ADDR, properties);

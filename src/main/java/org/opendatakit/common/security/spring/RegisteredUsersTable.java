@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010 University of Washington
+ * Copyright (C) 2018 Nafundi
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,9 +16,11 @@
  */
 package org.opendatakit.common.security.spring;
 
+import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+
 import java.security.NoSuchAlgorithmException;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.common.persistence.CommonFieldsBase;
@@ -38,7 +41,6 @@ import org.opendatakit.common.security.client.CredentialsInfo;
 import org.opendatakit.common.security.client.RealmSecurityInfo;
 import org.opendatakit.common.security.client.UserSecurityInfo;
 import org.opendatakit.common.security.common.EmailParser.Email;
-import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,8 +70,6 @@ import org.springframework.security.authentication.encoding.MessageDigestPasswor
  * IS_REMOVED = true. This allows audit tracking back to the username. Once
  * marked as IS_REMOVED, that row is never reinstated. The superuser must create
  * a new row for the user.
- *
- * @author mitchellsundt@gmail.com
  */
 public final class RegisteredUsersTable extends CommonFieldsBase {
 
@@ -81,8 +81,8 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
   // Unique key (disregarding removed) or null
   private static final DataField LOCAL_USERNAME = new DataField("LOCAL_USERNAME", DataField.DataType.STRING, true, 80L).setIndexable(IndexType.ORDERED);
   // Unique key (disregarding removed) or null
-  // NOTE: the column name in the database is not changed. This was 
-  // used for OpenID authentication originally, but now is used for 
+  // NOTE: the column name in the database is not changed. This was
+  // used for OpenID authentication originally, but now is used for
   // OAuth2 authentication.
   private static final DataField OAUTH2_EMAIL = new DataField("OPENID_EMAIL", DataField.DataType.STRING, true, 80L).setIndexable(IndexType.ORDERED);
   private static final DataField FULL_NAME = new DataField("FULL_NAME", DataField.DataType.STRING, true);
@@ -138,10 +138,10 @@ public final class RegisteredUsersTable extends CommonFieldsBase {
   public static final String generateUniqueUri(String username, String email) {
     String uri;
     if (username == null) {
-      uri = UID_PREFIX + email.substring(SecurityUtils.MAILTO_COLON.length()) + "|"
-          + WebUtils.iso8601Date(new Date());
+      // TODO Improve this SecurityUtils.MAILTO_COLON.length() business here
+      uri = UID_PREFIX + email.substring(SecurityUtils.MAILTO_COLON.length()) + "|" + OffsetDateTime.now().format(ISO_OFFSET_DATE_TIME);
     } else {
-      uri = UID_PREFIX + username + "|" + WebUtils.iso8601Date(new Date());
+      uri = UID_PREFIX + username + "|" + OffsetDateTime.now().format(ISO_OFFSET_DATE_TIME);
     }
     return uri;
   }

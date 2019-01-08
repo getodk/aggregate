@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010 University of Washington
+ * Copyright (C) 2018 Nafundi
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +16,10 @@
  */
 package org.opendatakit.aggregate.task;
 
+import static java.time.ZoneId.systemDefault;
+import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+
+import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -41,17 +46,10 @@ import org.opendatakit.aggregate.util.BackendActionsTable;
 import org.opendatakit.common.persistence.PersistConsts;
 import org.opendatakit.common.persistence.QueryResumePoint;
 import org.opendatakit.common.persistence.exception.ODKDatastoreException;
-import org.opendatakit.common.utils.WebUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Common worker implementation for restarting stalled tasks.
- *
- * @author wbrunette@gmail.com
- * @author mitchellsundt@gmail.com
- */
 public class WatchdogWorkerImpl {
 
   private Logger logger = LoggerFactory.getLogger(WatchdogWorkerImpl.class);
@@ -69,7 +67,7 @@ public class WatchdogWorkerImpl {
     // limitDate is the datastore's settle time into the past.
     Date limitDate = new Date(System.currentTimeMillis() - PersistConsts.MAX_SETTLE_MILLISECONDS);
     QueryResumePoint qrp = new QueryResumePoint(
-        TopLevelDynamicBase.FIELD_NAME_MARKED_AS_COMPLETE_DATE, WebUtils.iso8601Date(limitDate),
+        TopLevelDynamicBase.FIELD_NAME_MARKED_AS_COMPLETE_DATE, OffsetDateTime.ofInstant(limitDate.toInstant(), systemDefault()).format(ISO_OFFSET_DATE_TIME),
         null, false);
 
     FilterGroup filterGroup = new FilterGroup(UIConsts.FILTER_NONE, form.getFormId(), null);
