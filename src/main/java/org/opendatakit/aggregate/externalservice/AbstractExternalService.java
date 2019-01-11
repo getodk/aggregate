@@ -313,7 +313,7 @@ public abstract class AbstractExternalService implements ExternalService {
       UploadSubmissions uploadTask = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
       CallingContext ccDaemon = ContextFactory.duplicateContext(cc);
       ccDaemon.setAsDaemon(true);
-      uploadTask.createFormUploadTask(fsc, true, ccDaemon);
+      uploadTask.createFormUploadTask(fsc, ccDaemon);
     }
   }
 

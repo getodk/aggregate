@@ -37,7 +37,6 @@ import org.opendatakit.aggregate.constants.common.FormElementNamespace;
 import org.opendatakit.aggregate.constants.common.OperationalStatus;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.exception.ODKConversionException;
-import org.opendatakit.aggregate.exception.ODKExternalServiceException;
 import org.opendatakit.aggregate.exception.ODKFormNotFoundException;
 import org.opendatakit.aggregate.exception.ODKFormSubmissionsDisabledException;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
@@ -249,7 +248,7 @@ public class SubmissionServlet extends ServletUtilBase {
         for (ExternalService rs : tmp) {
           // only create upload tasks for active publishers
           if (rs.getFormServiceCursor().getOperationalStatus() == OperationalStatus.ACTIVE) {
-            uploadTask.createFormUploadTask(rs.getFormServiceCursor(), false, ccDaemon);
+            uploadTask.createFormUploadTask(rs.getFormServiceCursor(), ccDaemon);
           }
         }
       }

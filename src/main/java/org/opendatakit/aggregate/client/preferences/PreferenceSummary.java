@@ -30,8 +30,6 @@ public class PreferenceSummary implements Serializable {
 
   private String enketoApiToken;
 
-  private Boolean fasterBackgroundActionsDisabled;
-
   private Boolean skipMalformedSubmissions;
 
   public PreferenceSummary() {
@@ -40,12 +38,11 @@ public class PreferenceSummary implements Serializable {
 
   public PreferenceSummary(String googleSimpleApiKey, String googleApiClientId,
                            String enketoApiUrl, String enketoApiToken,
-                           Boolean fasterBackgroundActionsDisabled, Boolean skipMalformedSubmissions) {
+                           Boolean skipMalformedSubmissions) {
     this.googleSimpleApiKey = googleSimpleApiKey;
     this.googleApiClientId = googleApiClientId;
     this.enketoApiUrl = enketoApiUrl;
     this.enketoApiToken = enketoApiToken;
-    this.fasterBackgroundActionsDisabled = fasterBackgroundActionsDisabled;
     this.skipMalformedSubmissions = skipMalformedSubmissions;
   }
 
@@ -63,10 +60,6 @@ public class PreferenceSummary implements Serializable {
 
   public String getEnketoApiToken() {
     return enketoApiToken;
-  }
-
-  public Boolean getFasterBackgroundActionsDisabled() {
-    return fasterBackgroundActionsDisabled;
   }
 
   public Boolean getSkipMalformedSubmissions() {

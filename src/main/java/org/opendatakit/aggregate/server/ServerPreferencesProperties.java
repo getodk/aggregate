@@ -68,7 +68,7 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
 
   public static PreferenceSummary getPreferenceSummary(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
     return new PreferenceSummary(getGoogleSimpleApiKey(cc), getGoogleApiClientId(cc),
-        getEnketoApiUrl(cc), getEnketoApiToken(cc), true, getSkipMalformedSubmissions(cc));
+        getEnketoApiUrl(cc), getEnketoApiToken(cc), getSkipMalformedSubmissions(cc));
   }
 
   public static String getSiteKey(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {

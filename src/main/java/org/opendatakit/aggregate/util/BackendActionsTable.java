@@ -452,8 +452,7 @@ public class BackendActionsTable extends CommonFieldsBase {
    * effect, but is a suggested next start time, and only if the website is
    * active will it be honored.
    */
-  public static synchronized void rescheduleWatchdog(boolean hasActiveTasks,
-                                                     boolean cullThisWatchdog, CallingContext cc) {
+  public static synchronized void rescheduleWatchdog(boolean hasActiveTasks, CallingContext cc) {
 
     Watchdog wd = (Watchdog) cc.getBean(BeanDefs.WATCHDOG);
 

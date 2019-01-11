@@ -204,7 +204,7 @@ public class UploadSubmissionsWorkerImpl {
     if (reQueue) {
       // create another task to continue upload
       UploadSubmissions uploadSubmissionsBean = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
-      uploadSubmissionsBean.createFormUploadTask(formServiceCursor, false, cc);
+      uploadSubmissionsBean.createFormUploadTask(formServiceCursor, cc);
     }
   }
 
