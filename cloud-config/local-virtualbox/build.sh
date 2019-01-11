@@ -6,13 +6,11 @@ hostIp=${2:-$(hostname -I | awk '{print $1;}')}
 
 echo "Using ${hostIp} as this host's IP address"
 
-remoteImg="https://cloud-images.ubuntu.com/releases/cosmic/release/ubuntu-18.10-server-cloudimg-amd64.img"
-remoteTomcatTarball="http://www.apache.org/dist/tomcat/tomcat-8/v8.5.37/bin/apache-tomcat-8.5.37.tar.gz"
-localImg="ubuntu-18.10-server-cloudimg-amd64.img"
-localRaw="ubuntu-18.10-server-cloudimg-amd64.raw"
-localVdi="ubuntu-18.10-server-cloudimg-amd64.vdi"
+remoteImg="https://cloud-images.ubuntu.com/releases/bionic/release/ubuntu-18.04-server-cloudimg-amd64.img"
+localImg="ubuntu-18.04-server-cloudimg-amd64.img"
+localRaw="ubuntu-18.04-server-cloudimg-amd64.raw"
+localVdi="ubuntu-18.04-server-cloudimg-amd64.vdi"
 localAggregateWar="aggregate.war"
-localTomcatTarball="apache-tomcat-8.5.37.tar.gz"
 cloudConfigIso="my-seed.iso"
 vmName="aggregate-cloud"
 
@@ -24,10 +22,6 @@ vboxmanage unregistervm ${vmName} --delete
 if [[ ! -f ${localAggregateWar} ]]; then
   ../../gradlew -p ../..  clean build -xtest -PwarMode=complete
   cp ../../build/libs/*.war aggregate.war
-fi
-
-if [[ ! -f ${localTomcatTarball} ]]; then
-  wget -O ${localTomcatTarball} ${remoteTomcatTarball}
 fi
 
 if [[ ! -f ${localImg} ]]; then
@@ -43,15 +37,12 @@ if [[ ! -f ${localVdi}  ]]; then
   VBoxManage modifyhd ${localVdi} --resize 30000
 fi
 
-
-
 # Prepare the cloud-config volume
 cat ./cloud-config.yml.tpl | \
   sed -e 's/{{pubKey}}/'"${pubKeyEscaped}"'/g' | \
   sed -e 's/{{forceHttps}}/false/g' | \
   sed -e 's/{{domain}}/'"${hostIp}"'/g' | \
   sed -e 's/{{httpPort}}/10080/g' | \
-  sed -e 's/{{tomcatTarballUrl}}/http:\/\/'"${hostIp}"':8000\/apache-tomcat-8.5.37.tar.gz/g' | \
   sed -e 's/{{aggregateWarUrl}}/http:\/\/'"${hostIp}"':8000\/aggregate.war/g' \
   > cloud-config.yml
 cloud-localds ${cloudConfigIso} cloud-config.yml
