@@ -51,7 +51,6 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
   private static final String SITE_KEY = "SITE_KEY";
   private static final String LAST_KNOWN_REALM_STRING = "LAST_KNOWN_REALM_STRING";
   private static final String FASTER_WATCHDOG_CYCLE_ENABLED = "FASTER_WATCHDOG_CYCLE_ENABLED";
-  private static final String FASTER_BACKGROUND_ACTIONS_DISABLED = "FASTER_BACKGROUND_ACTIONS_DISABLED";
   private static final String SKIP_MALFORMED_SUBMISSIONS = "SKIP_MALFORMED_SUBMISSIONS";
 
   private static ServerPreferencesProperties relation = null;
