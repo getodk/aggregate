@@ -20,6 +20,7 @@ import static org.opendatakit.aggregate.client.security.SecurityUtils.secureRequ
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
@@ -51,12 +52,13 @@ public class ConfirmPurgeUpToDatePopup extends AbstractPopupBase {
     AggregateButton confirm = new AggregateButton(BUTTON_TXT, TOOLTIP_TXT, HELP_BALLOON_TXT);
     confirm.addClickHandler(new PurgeHandler());
 
+    String formattedDate = DateTimeFormat.getFormat("MMM dd, yyyy").format(earliest);
     FlexTable layout = new FlexTable();
     SafeHtml content = new SafeHtmlBuilder()
         .appendEscaped("Delete submissions data of ")
         .appendHtmlConstant("<b>" + summary.getTitle() + " [" + summary.getId() + "]</b>")
         .appendEscaped(" up through ")
-        .appendEscaped(earliest.toGMTString())
+        .appendEscaped(formattedDate)
         .appendEscaped(". Incomplete submissions will not be deleted.")
         .toSafeHtml();
     layout.setWidget(0, 0, new HTML(content));
@@ -72,11 +74,12 @@ public class ConfirmPurgeUpToDatePopup extends AbstractPopupBase {
           SecureGWT.getFormAdminService(),
           (rpc, sessionCookie, cb) -> rpc.purgeSubmissionsData(summary.getId(), earliest, cb),
           (Date result) -> {
+            String formattedDate = DateTimeFormat.getFormat("MMM dd, yyyy").format(result);
             Window.alert("" +
                 "Successful commencement of the purge of:\n" +
                 summary.getTitle() + " [" + summary.getId() + "].\n" +
                 "Deleting all submission data through\n  " +
-                result.toGMTString() + "\n" +
+                formattedDate + "\n" +
                 "Incomplete submissions will not be deleted.");
           },
           cause -> AggregateUI.getUI().reportError("Failed purge of submission data: ", cause)

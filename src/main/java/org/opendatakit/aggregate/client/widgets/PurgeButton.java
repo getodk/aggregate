@@ -18,6 +18,7 @@ package org.opendatakit.aggregate.client.widgets;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.Window;
 import java.util.Date;
@@ -83,9 +84,10 @@ public final class PurgeButton extends AggregateButton implements ClickHandler {
             .appendEscaped("not automatically ongoing.  You will need to periodically repeat this process.")
             .appendHtmlConstant("</p>");
       }
+      String formattedDateTime = DateTimeFormat.getFormat("MMM dd, yyyy HH:mm:ss a").format(earliest);
       b.appendEscaped("Click to confirm purge of ")
           .appendHtmlConstant("<b>").appendEscaped(formId).appendHtmlConstant("</b>")
-          .appendEscaped(" submissions older than " + earliest.toString());
+          .appendEscaped(" submissions older than " + formattedDateTime);
 
       // TODO: display pop-up with text from b...
       final ConfirmPurgePopup popup = new ConfirmPurgePopup(externServ, earliest, b.toSafeHtml());
