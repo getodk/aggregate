@@ -148,15 +148,13 @@ public class QueryByUIFilterGroup extends QueryBase {
             super.addFilter(fem, op, compareValue);
             break;
           case JRDATETIME:
-            if (fem.getFormDataModel() == null && fem.getElementName().contains("meta-"))
-              super.addFilter(fem, op, compareValue);
-            else if (fem.getFormDataModel() != null)
-              super.addFilterChildren(fem, column.getChildColumnCode(), op, compareValue);
-            else
-              throw new IllegalArgumentException("Unrecognized dateTime field");
-            break;
           case JRDATE:
           case JRTIME:
+            if (isLegacyTemporalField(fem))
+              super.addFilter(fem, op, compareValue);
+            else
+              super.addFilterChildren(fem, column.getChildColumnCode(), op, compareValue);
+            break;
           case GEOPOINT:
             super.addFilterChildren(fem, column.getChildColumnCode(), op, compareValue);
             break;
@@ -164,6 +162,11 @@ public class QueryByUIFilterGroup extends QueryBase {
       }
     }
 
+  }
+
+  private boolean isLegacyTemporalField(FormElementModel fem) {
+    return fem.getFormDataModel() == null && fem.getElementName().contains("meta-")
+        || fem.getFormDataModel().getChildren().isEmpty();
   }
 
   public Object getCompareValue(FormElementModel fem, String value) {
