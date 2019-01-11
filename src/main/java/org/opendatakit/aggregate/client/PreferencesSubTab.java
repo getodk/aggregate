@@ -24,7 +24,6 @@ import com.google.gwt.user.client.ui.Label;
 import org.opendatakit.aggregate.buildconfig.BuildConfig;
 import org.opendatakit.aggregate.client.preferences.Preferences;
 import org.opendatakit.aggregate.client.preferences.Preferences.PreferencesCompletionCallback;
-import org.opendatakit.aggregate.client.widgets.DisableFasterBackgroundActionsCheckbox;
 import org.opendatakit.aggregate.client.widgets.ServletPopupButton;
 import org.opendatakit.aggregate.client.widgets.SkipMalformedSubmissionsCheckbox;
 import org.opendatakit.aggregate.constants.common.HelpSliderConsts;
@@ -77,14 +76,12 @@ public class PreferencesSubTab extends AggregateSubTabBase {
 
   private Label enketoApiUrl;
   private Label enketoApiToken;
-  private DisableFasterBackgroundActionsCheckbox disableFasterBackgroundActions;
   private SkipMalformedSubmissionsCheckbox skipMalformedSubmissions;
 
   private PreferencesCompletionCallback settingsChange = new PreferencesCompletionCallback() {
     @Override
     public void refreshFromUpdatedPreferences() {
       setCredentialValues();
-      disableFasterBackgroundActions.updateValue(Preferences.getFasterBackgroundActionsDisabled());
       skipMalformedSubmissions.updateValue(Preferences.getSkipMalformedSubmissions());
     }
 
@@ -187,13 +184,6 @@ public class PreferencesSubTab extends AggregateSubTabBase {
 
     HTML features = new HTML(FEATURES_LABEL);
     add(features);
-
-    disableFasterBackgroundActions = new DisableFasterBackgroundActionsCheckbox(
-        Preferences.getFasterBackgroundActionsDisabled(), settingsChange);
-    add(disableFasterBackgroundActions);
-
-    HTML linebreak = new HTML("<br>");
-    add(linebreak);
 
     skipMalformedSubmissions = new SkipMalformedSubmissionsCheckbox(
         Preferences.getSkipMalformedSubmissions(), settingsChange);
