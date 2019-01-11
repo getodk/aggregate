@@ -324,7 +324,7 @@ public class Watchdog implements SmartLifecycle, InitializingBean,
         BackendActionsTable.FAST_PUBLISHING_RETRY_MILLISECONDS +
             lastFasterWatchdogCycleEnabledFlagFetch) {
       try {
-        boolean disabled = ServerPreferencesProperties.getFasterBackgroundActionsDisabled(cc);
+        boolean disabled = true;
         setFasterWatchdogCycleEnabled(!disabled && ServerPreferencesProperties.getFasterWatchdogCycleEnabled(cc));
       } catch (ODKEntityNotFoundException e) {
         e.printStackTrace();

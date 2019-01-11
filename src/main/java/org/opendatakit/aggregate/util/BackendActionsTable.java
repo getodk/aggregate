@@ -458,7 +458,7 @@ public class BackendActionsTable extends CommonFieldsBase {
     Watchdog wd = (Watchdog) cc.getBean(BeanDefs.WATCHDOG);
 
     try {
-      boolean disabled = ServerPreferencesProperties.getFasterBackgroundActionsDisabled(cc);
+      boolean disabled = true;
       boolean wasFastPublishing = ServerPreferencesProperties.getFasterWatchdogCycleEnabled(cc);
 
       if (!hasActiveTasks && wasFastPublishing) {

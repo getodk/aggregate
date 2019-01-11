@@ -68,7 +68,7 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
 
   public static PreferenceSummary getPreferenceSummary(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
     return new PreferenceSummary(getGoogleSimpleApiKey(cc), getGoogleApiClientId(cc),
-        getEnketoApiUrl(cc), getEnketoApiToken(cc), getFasterBackgroundActionsDisabled(cc), getSkipMalformedSubmissions(cc));
+        getEnketoApiUrl(cc), getEnketoApiToken(cc), true, getSkipMalformedSubmissions(cc));
   }
 
   public static String getSiteKey(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
@@ -137,10 +137,6 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
 
   public static void setFasterWatchdogCycleEnabled(CallingContext cc, Boolean enabled) throws ODKEntityNotFoundException, ODKOverQuotaException {
     setServerPreferencesProperty(cc, FASTER_WATCHDOG_CYCLE_ENABLED, enabled.toString());
-  }
-
-  public static Boolean getFasterBackgroundActionsDisabled(CallingContext cc) {
-    return true;
   }
 
   public static void setFasterBackgroundActionsDisabled(CallingContext cc, Boolean disabled) throws ODKEntityNotFoundException, ODKOverQuotaException {
