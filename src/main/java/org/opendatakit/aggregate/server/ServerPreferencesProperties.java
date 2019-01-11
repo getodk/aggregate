@@ -139,13 +139,8 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
     setServerPreferencesProperty(cc, FASTER_WATCHDOG_CYCLE_ENABLED, enabled.toString());
   }
 
-  public static Boolean getFasterBackgroundActionsDisabled(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
-    String value = getServerPreferencesProperty(cc, FASTER_BACKGROUND_ACTIONS_DISABLED);
-    if (value != null) {
-      return Boolean.valueOf(value);
-    }
-    // null value should be treated as false
-    return false;
+  public static Boolean getFasterBackgroundActionsDisabled(CallingContext cc) {
+    return true;
   }
 
   public static void setFasterBackgroundActionsDisabled(CallingContext cc, Boolean disabled) throws ODKEntityNotFoundException, ODKOverQuotaException {
