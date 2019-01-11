@@ -163,6 +163,18 @@ NOTE: If you want to use the Microsoft Azure SQL Server, you must configure Tomc
       </optionList>
     </choiceParameter>
     <linkParameter>
+      <name>infoUpgradingTov2</name>
+      <title>Pre-installation Requirements - Upgrading from Aggregate v1.x</title>
+      <description>https://docs.opendatakit.org/aggregate-upgrade</description>
+      <explanation>If you are upgrading from Aggregate v1.x and you are using Google account credentials, please migrate those credentials to ODK accounts before proceeding with the installation. Google credentials are no longer supported and cannot be used to log into Aggregate v2.x.</explanation>
+      <insertAfter>${platform}</insertAfter>
+      <clickedActionList>
+        <launchBrowser>
+          <url>https://docs.opendatakit.org/aggregate-upgrade</url>
+        </launchBrowser>
+      </clickedActionList>
+    </linkParameter>
+    <linkParameter>
       <name>infoTomcat</name>
       <title>Pre-installation Requirements - Apache Tomcat</title>
       <description>http://tomcat.apache.org/download-80.cgi</description>
@@ -173,7 +185,7 @@ Apache Tomcat 8 can be downloaded from the link below.
 If you modify any of the Apache Tomcat defaults, please make note of them.
 
 NOTE: If you want to use the Microsoft Azure SQL Server, you must configure Tomcat 8 to use Java 8.]]></explanation>
-      <insertAfter>${platform}</insertAfter>
+      <insertAfter>${infoUpgradingTov2}</insertAfter>
       <clickedActionList>
         <launchBrowser>
           <url>http://tomcat.apache.org/download-80.cgi</url>
