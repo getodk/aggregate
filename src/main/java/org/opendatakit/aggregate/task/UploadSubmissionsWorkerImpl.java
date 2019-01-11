@@ -204,15 +204,7 @@ public class UploadSubmissionsWorkerImpl {
     if (reQueue) {
       // create another task to continue upload
       UploadSubmissions uploadSubmissionsBean = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
-      // schedule it on the background thread only if we are not disabling
-      // background activities and it started on the background thread.
-      boolean disableFasterProcessing = true;
-      try {
-        disableFasterProcessing = true;
-      } catch (ODKOverQuotaException e) {
-        logger.warn("Quota exceeded.", e);
-      }
-      uploadSubmissionsBean.createFormUploadTask(formServiceCursor, useLargerBatchSize && !disableFasterProcessing, cc);
+      uploadSubmissionsBean.createFormUploadTask(formServiceCursor, false, cc);
     }
   }
 

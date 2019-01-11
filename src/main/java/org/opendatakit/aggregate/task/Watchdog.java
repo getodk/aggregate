@@ -323,14 +323,7 @@ public class Watchdog implements SmartLifecycle, InitializingBean,
     if (System.currentTimeMillis() >
         BackendActionsTable.FAST_PUBLISHING_RETRY_MILLISECONDS +
             lastFasterWatchdogCycleEnabledFlagFetch) {
-      try {
-        boolean disabled = true;
-        setFasterWatchdogCycleEnabled(!disabled && ServerPreferencesProperties.getFasterWatchdogCycleEnabled(cc));
-      } catch (ODKEntityNotFoundException e) {
-        e.printStackTrace();
-      } catch (ODKOverQuotaException e) {
-        e.printStackTrace();
-      }
+      setFasterWatchdogCycleEnabled(false);
     }
     return lastFasterWatchdogCycleEnabledFlag;
   }
