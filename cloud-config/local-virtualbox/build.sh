@@ -2,6 +2,7 @@
 
 pubKeyPath=$1
 pubKeyEscaped=$(cat ${pubKeyPath} | sed -e 's/\//\\\//g')
+aggregateVersion=$(git describe --tags --dirty --always)
 hostIp=${2:-$(hostname -I | awk '{print $1;}')}
 
 echo "Using ${hostIp} as this host's IP address"
@@ -38,8 +39,9 @@ if [[ ! -f ${localVdi}  ]]; then
 fi
 
 # Prepare the cloud-config volume
-cat ./cloud-config.yml.tpl | \
+cat ../assets/cloud-config.yml.tpl | \
   sed -e 's/{{pubKey}}/'"${pubKeyEscaped}"'/g' | \
+  sed -e 's/{{aggregateVersion}}/'"${aggregateVersion}"'/g' | \
   sed -e 's/{{forceHttps}}/false/g' | \
   sed -e 's/{{domain}}/'"${hostIp}"'/g' | \
   sed -e 's/{{httpPort}}/10080/g' | \
