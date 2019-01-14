@@ -120,7 +120,7 @@ public class WatchdogWorkerImpl {
     } finally {
       // NOTE: if the above threw an exception, we re-start the watchdog.
       // otherwise, we restart it only if there is work to be done.
-      BackendActionsTable.rescheduleWatchdog(activeTasks, cullThisWatchdog, cc);
+      BackendActionsTable.rescheduleWatchdog(activeTasks, cc);
       logger.info("---------------------END Watchdog");
     }
   }
@@ -215,7 +215,7 @@ public class WatchdogWorkerImpl {
           || lastUploadDate.compareTo(establishmentDate) < 0) {
         // there is still work to do
         activeTask = true;
-        uploadSubmissions.createFormUploadTask(fsc, true, cc);
+        uploadSubmissions.createFormUploadTask(fsc, cc);
       }
     }
     return activeTask;
@@ -264,7 +264,7 @@ public class WatchdogWorkerImpl {
 
     if (makeActive) {
       // there is work to do
-      uploadSubmissions.createFormUploadTask(fsc, false, cc);
+      uploadSubmissions.createFormUploadTask(fsc, cc);
       return true;
     }
 

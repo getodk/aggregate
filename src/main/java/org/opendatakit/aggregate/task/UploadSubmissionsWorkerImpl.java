@@ -30,7 +30,6 @@ import org.opendatakit.aggregate.externalservice.FormServiceCursor;
 import org.opendatakit.aggregate.form.FormFactory;
 import org.opendatakit.aggregate.form.IForm;
 import org.opendatakit.aggregate.query.submission.QueryByDateRange;
-import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.aggregate.submission.Submission;
 import org.opendatakit.common.persistence.Datastore;
 import org.opendatakit.common.persistence.TaskLock;
@@ -205,15 +204,7 @@ public class UploadSubmissionsWorkerImpl {
     if (reQueue) {
       // create another task to continue upload
       UploadSubmissions uploadSubmissionsBean = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
-      // schedule it on the background thread only if we are not disabling
-      // background activities and it started on the background thread.
-      boolean disableFasterProcessing = true;
-      try {
-        disableFasterProcessing = ServerPreferencesProperties.getFasterBackgroundActionsDisabled(cc);
-      } catch (ODKOverQuotaException e) {
-        logger.warn("Quota exceeded.", e);
-      }
-      uploadSubmissionsBean.createFormUploadTask(formServiceCursor, useLargerBatchSize && !disableFasterProcessing, cc);
+      uploadSubmissionsBean.createFormUploadTask(formServiceCursor, cc);
     }
   }
 

@@ -31,7 +31,6 @@ public class Preferences {
   private static String googleApiClientId;
   private static String enketoApiUrl;
   private static String enketoApiToken;
-  private static Boolean fasterBackgroundActionsDisabled;
   private static Boolean skipMalformedSubmissions;
   private static int nesting = 0;
   private static ArrayList<PreferencesCompletionCallback> userCallbacks = new ArrayList<PreferencesCompletionCallback>();
@@ -61,7 +60,6 @@ public class Preferences {
       googleApiClientId = summary.getGoogleApiClientId();
       enketoApiUrl = summary.getEnketoApiUrl();
       enketoApiToken = summary.getEnketoApiToken();
-      fasterBackgroundActionsDisabled = summary.getFasterBackgroundActionsDisabled();
       skipMalformedSubmissions = summary.getSkipMalformedSubmissions();
 
       --nesting;
@@ -118,13 +116,6 @@ public class Preferences {
       return enketoApiToken;
     }
     return "";
-  }
-
-  public static Boolean getFasterBackgroundActionsDisabled() {
-    if (fasterBackgroundActionsDisabled != null) {
-      return fasterBackgroundActionsDisabled;
-    }
-    return Boolean.FALSE;
   }
 
   public static Boolean getSkipMalformedSubmissions() {

@@ -452,13 +452,11 @@ public class BackendActionsTable extends CommonFieldsBase {
    * effect, but is a suggested next start time, and only if the website is
    * active will it be honored.
    */
-  public static synchronized void rescheduleWatchdog(boolean hasActiveTasks,
-                                                     boolean cullThisWatchdog, CallingContext cc) {
+  public static synchronized void rescheduleWatchdog(boolean hasActiveTasks, CallingContext cc) {
 
     Watchdog wd = (Watchdog) cc.getBean(BeanDefs.WATCHDOG);
 
     try {
-      boolean disabled = ServerPreferencesProperties.getFasterBackgroundActionsDisabled(cc);
       boolean wasFastPublishing = ServerPreferencesProperties.getFasterWatchdogCycleEnabled(cc);
 
       if (!hasActiveTasks && wasFastPublishing) {
@@ -467,24 +465,8 @@ public class BackendActionsTable extends CommonFieldsBase {
         wd.setFasterWatchdogCycleEnabled(false);
       }
 
-      if (hasActiveTasks) {
-        if (!disabled) {
-          if (!wasFastPublishing) {
-            // switch to the faster watchdog cycle
-            ServerPreferencesProperties.setFasterWatchdogCycleEnabled(cc, true);
-            wd.setFasterWatchdogCycleEnabled(true);
-          } else {
-            // schedule the next watchdog in the future.
-            // if we are culling the watchdog, then do not enqueue it.
-            if (!cullThisWatchdog) {
-              wd.onUsage(FAST_PUBLISHING_RETRY_MILLISECONDS, cc);
-            }
-          }
-        }
-        // and regardless, update the next-eligible-requeue time
-        // this is only used if fast publishing is disabled.
+      if (hasActiveTasks)
         scheduleFutureWatchdog(wd, FAST_PUBLISHING_RETRY_MILLISECONDS, cc);
-      }
     } catch (ODKEntityNotFoundException | ODKOverQuotaException e) {
       e.printStackTrace();
     }

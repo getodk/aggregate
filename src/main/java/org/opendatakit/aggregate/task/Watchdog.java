@@ -319,19 +319,8 @@ public class Watchdog implements SmartLifecycle, InitializingBean,
   }
 
   public boolean getFasterWatchdogCycleEnabled() {
-    CallingContext cc = getCallingContext();
-    if (System.currentTimeMillis() >
-        BackendActionsTable.FAST_PUBLISHING_RETRY_MILLISECONDS +
-            lastFasterWatchdogCycleEnabledFlagFetch) {
-      try {
-        boolean disabled = ServerPreferencesProperties.getFasterBackgroundActionsDisabled(cc);
-        setFasterWatchdogCycleEnabled(!disabled && ServerPreferencesProperties.getFasterWatchdogCycleEnabled(cc));
-      } catch (ODKEntityNotFoundException e) {
-        e.printStackTrace();
-      } catch (ODKOverQuotaException e) {
-        e.printStackTrace();
-      }
-    }
+    if (System.currentTimeMillis() > BackendActionsTable.FAST_PUBLISHING_RETRY_MILLISECONDS + lastFasterWatchdogCycleEnabledFlagFetch)
+      setFasterWatchdogCycleEnabled(false);
     return lastFasterWatchdogCycleEnabledFlag;
   }
 

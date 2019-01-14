@@ -33,8 +33,4 @@ public interface PreferenceService extends RemoteService {
 
   @XsrfProtect
   void setSkipMalformedSubmissions(Boolean skipMalformedSubmissions) throws RequestFailureException;
-
-  @XsrfProtect
-  void setFasterBackgroundActionsDisabled(Boolean disabled) throws RequestFailureException;
-
 }

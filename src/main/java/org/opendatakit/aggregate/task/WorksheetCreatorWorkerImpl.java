@@ -200,7 +200,7 @@ public class WorksheetCreatorWorkerImpl {
         // if we need to upload submissions, start a task to do so
         UploadSubmissions us = (UploadSubmissions) cc.getBean(BeanDefs.UPLOAD_TASK_BEAN);
         if (!esType.equals(ExternalServicePublicationOption.STREAM_ONLY)) {
-          us.createFormUploadTask(spreadsheet.getFormServiceCursor(), true, cc);
+          us.createFormUploadTask(spreadsheet.getFormServiceCursor(), cc);
         }
 
         doMarkAsComplete(r);

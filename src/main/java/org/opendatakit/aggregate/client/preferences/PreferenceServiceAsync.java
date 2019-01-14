@@ -22,8 +22,6 @@ public interface PreferenceServiceAsync {
 
   void getPreferences(AsyncCallback<PreferenceSummary> callback);
 
-  void setFasterBackgroundActionsDisabled(Boolean disabled, AsyncCallback<Void> callback);
-
   void setSkipMalformedSubmissions(Boolean skipMalformedSubmissions, AsyncCallback<Void> callback);
 
 }

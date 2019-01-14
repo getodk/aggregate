@@ -51,7 +51,6 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
   private static final String SITE_KEY = "SITE_KEY";
   private static final String LAST_KNOWN_REALM_STRING = "LAST_KNOWN_REALM_STRING";
   private static final String FASTER_WATCHDOG_CYCLE_ENABLED = "FASTER_WATCHDOG_CYCLE_ENABLED";
-  private static final String FASTER_BACKGROUND_ACTIONS_DISABLED = "FASTER_BACKGROUND_ACTIONS_DISABLED";
   private static final String SKIP_MALFORMED_SUBMISSIONS = "SKIP_MALFORMED_SUBMISSIONS";
 
   private static ServerPreferencesProperties relation = null;
@@ -68,7 +67,7 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
 
   public static PreferenceSummary getPreferenceSummary(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
     return new PreferenceSummary(getGoogleSimpleApiKey(cc), getGoogleApiClientId(cc),
-        getEnketoApiUrl(cc), getEnketoApiToken(cc), getFasterBackgroundActionsDisabled(cc), getSkipMalformedSubmissions(cc));
+        getEnketoApiUrl(cc), getEnketoApiToken(cc), getSkipMalformedSubmissions(cc));
   }
 
   public static String getSiteKey(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
@@ -137,19 +136,6 @@ public class ServerPreferencesProperties extends CommonFieldsBase {
 
   public static void setFasterWatchdogCycleEnabled(CallingContext cc, Boolean enabled) throws ODKEntityNotFoundException, ODKOverQuotaException {
     setServerPreferencesProperty(cc, FASTER_WATCHDOG_CYCLE_ENABLED, enabled.toString());
-  }
-
-  public static Boolean getFasterBackgroundActionsDisabled(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {
-    String value = getServerPreferencesProperty(cc, FASTER_BACKGROUND_ACTIONS_DISABLED);
-    if (value != null) {
-      return Boolean.valueOf(value);
-    }
-    // null value should be treated as false
-    return false;
-  }
-
-  public static void setFasterBackgroundActionsDisabled(CallingContext cc, Boolean disabled) throws ODKEntityNotFoundException, ODKOverQuotaException {
-    setServerPreferencesProperty(cc, FASTER_BACKGROUND_ACTIONS_DISABLED, disabled.toString());
   }
 
   public static Boolean getSkipMalformedSubmissions(CallingContext cc) throws ODKEntityNotFoundException, ODKOverQuotaException {

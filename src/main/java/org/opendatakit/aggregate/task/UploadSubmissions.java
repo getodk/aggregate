@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 public class UploadSubmissions {
   private static final Logger logger = LoggerFactory.getLogger(UploadSubmissions.class);
 
-  public void createFormUploadTask(FormServiceCursor fsc, boolean onBackground, CallingContext cc) {
+  public void createFormUploadTask(FormServiceCursor fsc, CallingContext cc) {
     Watchdog wd = (Watchdog) cc.getBean(BeanDefs.WATCHDOG);
     UploadSubmissionsWorkerImpl worker = new UploadSubmissionsWorkerImpl(fsc, wd.getFasterWatchdogCycleEnabled(), wd.getCallingContext());
     AggregrateThreadExecutor.getAggregateThreadExecutor().execute(() -> {
