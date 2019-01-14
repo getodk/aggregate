@@ -17,6 +17,7 @@
 package org.opendatakit.aggregate.client.table;
 
 import static org.opendatakit.aggregate.constants.common.ExternalServiceType.JSON_SERVER;
+import static org.opendatakit.common.utils.GwtShims.gwtFormatDateTimeHuman;
 
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.FlexTable;
@@ -91,8 +92,8 @@ public class PublishTable extends FlexTable {
       if (d == null) {
         d = e.getTimeLastUploadCursor();
       }
-      this.setText(i + STARTING_ROW, LAST_PUBLISHED, (d == null) ? "" : d.toString());
-      this.setText(i + STARTING_ROW, TIME_PUBLISH_START, e.getTimeEstablished().toString());
+      this.setText(i + STARTING_ROW, LAST_PUBLISHED, (d == null) ? "" : gwtFormatDateTimeHuman(d));
+      this.setText(i + STARTING_ROW, TIME_PUBLISH_START, gwtFormatDateTimeHuman(e.getTimeEstablished()));
       this.setText(i + STARTING_ROW, ACTION, e.getPublicationOption().getDescriptionOfOption());
       this.setText(i + STARTING_ROW, TYPE, e.getExternalServiceType().getName());
       this.setWidget(i + STARTING_ROW, OWNERSHIP, new HTML(new SafeHtmlBuilder().appendEscaped(e.getOwnership()).toSafeHtml()));

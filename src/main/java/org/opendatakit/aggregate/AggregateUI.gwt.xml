@@ -13,6 +13,9 @@
   <inherits name='com.google.gwt.maps.Maps'/>
   <!--  v2 <inherits name='com.google.gwt.maps.GoogleMaps' />  -->
   <inherits name='com.google.gwt.visualization.Visualization'/>
+
+  <inherits name='org.opendatakit.common.utils.Utils'/>
+
   <!-- Generic extended widget classes -->
   <inherits name='org.opendatakit.common.web.Web'/>
 

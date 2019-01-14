@@ -31,6 +31,7 @@ import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.form.FormSummary;
 import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
+import org.opendatakit.common.utils.GwtShims;
 
 public class ConfirmPurgeUpToDatePopup extends AbstractPopupBase {
 
@@ -56,7 +57,7 @@ public class ConfirmPurgeUpToDatePopup extends AbstractPopupBase {
         .appendEscaped("Delete submissions data of ")
         .appendHtmlConstant("<b>" + summary.getTitle() + " [" + summary.getId() + "]</b>")
         .appendEscaped(" up through ")
-        .appendEscaped(earliest.toGMTString())
+        .appendEscaped(GwtShims.gwtFormatDateHuman(earliest))
         .appendEscaped(". Incomplete submissions will not be deleted.")
         .toSafeHtml();
     layout.setWidget(0, 0, new HTML(content));
@@ -76,7 +77,7 @@ public class ConfirmPurgeUpToDatePopup extends AbstractPopupBase {
                 "Successful commencement of the purge of:\n" +
                 summary.getTitle() + " [" + summary.getId() + "].\n" +
                 "Deleting all submission data through\n  " +
-                result.toGMTString() + "\n" +
+                GwtShims.gwtFormatDateHuman(result) + "\n" +
                 "Incomplete submissions will not be deleted.");
           },
           cause -> AggregateUI.getUI().reportError("Failed purge of submission data: ", cause)

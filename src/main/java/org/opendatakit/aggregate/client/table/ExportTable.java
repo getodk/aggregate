@@ -16,6 +16,8 @@
 
 package org.opendatakit.aggregate.client.table;
 
+import static org.opendatakit.common.utils.GwtShims.gwtFormatDateTimeHuman;
+
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
@@ -61,7 +63,7 @@ public class ExportTable extends FlexTable {
         this.setText(i + STARTING_ROW, FILE_TYPE, e.getFileType().getDisplayText());
       }
       if (e.getTimeCompleted() != null) {
-        this.setText(i + STARTING_ROW, TIME_COMPLETED, e.getTimeCompleted().toString());
+        this.setText(i + STARTING_ROW, TIME_COMPLETED, gwtFormatDateTimeHuman(e.getTimeCompleted()));
       }
 
       if (e.getStatus() != null) {

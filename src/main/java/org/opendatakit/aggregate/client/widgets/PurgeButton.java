@@ -24,6 +24,7 @@ import java.util.Date;
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.client.popups.ConfirmPurgePopup;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
+import org.opendatakit.common.utils.GwtShims;
 
 public final class PurgeButton extends AggregateButton implements ClickHandler {
 
@@ -85,11 +86,12 @@ public final class PurgeButton extends AggregateButton implements ClickHandler {
       }
       b.appendEscaped("Click to confirm purge of ")
           .appendHtmlConstant("<b>").appendEscaped(formId).appendHtmlConstant("</b>")
-          .appendEscaped(" submissions older than " + earliest.toString());
+          .appendEscaped(" submissions older than " + GwtShims.gwtFormatDateTimeHuman(earliest));
 
       // TODO: display pop-up with text from b...
       final ConfirmPurgePopup popup = new ConfirmPurgePopup(externServ, earliest, b.toSafeHtml());
       popup.setPopupPositionAndShow(popup.getPositionCallBack());
     }
   }
+
 }
