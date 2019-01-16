@@ -2,10 +2,12 @@
 
 pubKeyPath=$1;
 domain=$2;
+aggregateVersion=$3
 pubKeyEscaped=$(cat ${pubKeyPath} | sed -e 's/\//\\\//g')
 
 cat ../assets/cloud-config.yml.tpl | \
   sed -e 's/{{pubKey}}/'"${pubKeyEscaped}"'/g' | \
+  sed -e 's/{{aggregateVersion}}/'"${aggregateVersion}"'/g' | \
   sed -e 's/{{forceHttps}}/true/g' | \
   sed -e 's/{{domain}}/'"${domain}"'/g' | \
   sed -e 's/{{httpPort}}/80/g' | \

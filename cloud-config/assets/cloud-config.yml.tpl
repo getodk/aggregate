@@ -129,17 +129,13 @@ write_files:
       }
 
 runcmd:
+  - service nginx stop
+  - service tomcat8 stop
+
   - sed -i -e '/^PermitRootLogin/s/^.*$/PermitRootLogin no/' /etc/ssh/sshd_config
   - sed -i -e '$aAllowUsers odk' /etc/ssh/sshd_config
   - service ssh restart
 
-  - su postgres -c "psql -c \"CREATE ROLE odk WITH LOGIN PASSWORD 'odk'\""
-  - su postgres -c "psql -c \"CREATE DATABASE odk WITH OWNER odk\""
-  - su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE odk TO odk\""
-  - su postgres -c "psql -c \"CREATE SCHEMA aggregate\" odk"
-  - su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON SCHEMA aggregate TO odk\" odk"
-
-  - service tomcat8 stop
   - apt-get -y remove openjdk-11-jre-headless
   - wget -O /tmp/aggregate.war {{aggregateWarUrl}}
   - rm -r /var/lib/tomcat8/webapps/ROOT/*
@@ -147,16 +143,23 @@ runcmd:
   - mv /tmp/jdbc.properties /var/lib/tomcat8/webapps/ROOT/WEB-INF/classes/jdbc.properties
   - mv /tmp/security.properties /var/lib/tomcat8/webapps/ROOT/WEB-INF/classes/security.properties
   - chown -R tomcat8:tomcat8 /var/lib/tomcat8/webapps
-  - service tomcat8 start
 
-  - service nginx stop
   - rm /etc/nginx/sites-enabled/default
   - mv /tmp/10-aggregate /etc/nginx/sites-available/10-aggregate
   - ln -s /etc/nginx/sites-available/10-aggregate ../etc/nginx/sites-enabled/10-aggregate
-  - service nginx start
 
   - add-apt-repository -y universe
   - add-apt-repository -y ppa:certbot/certbot
   - apt-get -y update
   - apt-get -y install python-certbot-nginx
+
   - rm /tmp/aggregate.war
+
+  - su postgres -c "psql -c \"CREATE ROLE odk WITH LOGIN PASSWORD 'odk'\""
+  - su postgres -c "psql -c \"CREATE DATABASE odk WITH OWNER odk\""
+  - su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE odk TO odk\""
+  - su postgres -c "psql -c \"CREATE SCHEMA aggregate\" odk"
+  - su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON SCHEMA aggregate TO odk\" odk"
+
+  - service tomcat8 start
+  - service nginx start
