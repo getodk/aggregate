@@ -48,8 +48,6 @@ The variables you need to replace follow the format `{{name}}` and are:
 - Head to https://www.digitalocean.com and log in.
 
 - Start the process to create a new Droplet
-
-  ![Digital Ocean - Empty dashboard](README_assets/DO_dashboard_empty.png)
   
 - Select the distribution for your new Droplet: Select the option `18.04` from the Ubuntu box.
 
