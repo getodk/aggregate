@@ -59,6 +59,7 @@ vboxmanage modifyvm ${vmName} --acpi on
 vboxmanage modifyvm ${vmName} --nic1 nat
 vboxmanage modifyvm ${vmName} --natpf1 "ssh,tcp,,10022,,22"
 vboxmanage modifyvm ${vmName} --natpf1 "nginx,tcp,,10080,,80"
+vboxmanage modifyvm ${vmName} --natpf1 "psql,tcp,,15432,,5432"
 vboxmanage modifyvm ${vmName} --uart1 0x3F8 4
 vboxmanage modifyvm ${vmName} --uartmode1 server my.ttyS0
 vboxmanage storagectl ${vmName} --name "IDE_0"  --add ide
