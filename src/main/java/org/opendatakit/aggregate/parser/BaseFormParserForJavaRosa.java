@@ -23,6 +23,7 @@ import static org.opendatakit.aggregate.constants.ParserConsts.FORM_ID_ATTRIBUTE
 import static org.opendatakit.aggregate.constants.ParserConsts.FORWARD_SLASH;
 import static org.opendatakit.aggregate.constants.ParserConsts.FORWARD_SLASH_SUBSTITUTION;
 import static org.opendatakit.aggregate.constants.ParserConsts.NAMESPACE_ODK;
+import static org.opendatakit.aggregate.submission.type.jr.JRTemporalUtils.parseDate;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -412,7 +413,7 @@ public class BaseFormParserForJavaRosa {
         return new Date();
       ++endIdx;
       String timestamp = xml.substring(idx + ODK_TIMESTAMP_COMMENT.length(), endIdx);
-      Date d = Date.from(OffsetDateTime.parse(fixOffset(timestamp.trim())).toInstant());
+      Date d = parseDate(timestamp);
       if (d != null) {
         return d;
       } else {
@@ -1049,18 +1050,6 @@ public class BaseFormParserForJavaRosa {
     XFORMS_DIFFERENT, // instances differ significantly enough to affect
     // database schema
     XFORMS_MISSING_VERSION, XFORMS_EARLIER_VERSION
-  }
-
-  static String fixOffset(String raw) {
-    // Offsets can come in +00 or -00 format. They need to be converted to +00:00 and -00:00
-    char thirdCharFromTheEnd = raw.charAt(raw.length() - 3);
-    if (thirdCharFromTheEnd == '+' || thirdCharFromTheEnd == '-')
-      return raw + ":00";
-    // Offsets can come in +0000 or -0000 format. They need to be converted to +00:00 and -00:00
-    char fifthCharFromTheEnd = raw.charAt(raw.length() - 5);
-    if (fifthCharFromTheEnd == '+' || fifthCharFromTheEnd == '-')
-      return raw.substring(0, raw.length() - 2) + ":" + raw.substring(raw.length() - 2);
-    return raw;
   }
 
 }

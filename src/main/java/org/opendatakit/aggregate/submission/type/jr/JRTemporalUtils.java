@@ -16,13 +16,29 @@
 
 package org.opendatakit.aggregate.submission.type.jr;
 
-final class JRTemporalUtils {
+import java.time.OffsetDateTime;
+import java.util.Date;
+
+public final class JRTemporalUtils {
   private JRTemporalUtils() {
     // Prevent instantiation of this class
   }
 
-  static String fixOffset(String raw) {
+  public static String fixOffset(String raw) {
+    // Trim the input string to prevent errors from leading or trailing spaces that might be present
+    raw = raw.trim();
+    // Offsets can come in +00 or -00 format. They need to be converted to +00:00 and -00:00
     char thirdCharFromTheEnd = raw.charAt(raw.length() - 3);
-    return thirdCharFromTheEnd == '+' || thirdCharFromTheEnd == '-' ? raw + ":00" : raw;
+    if (thirdCharFromTheEnd == '+' || thirdCharFromTheEnd == '-')
+      return raw + ":00";
+    // Offsets can come in +0000 or -0000 format. They need to be converted to +00:00 and -00:00
+    char fifthCharFromTheEnd = raw.charAt(raw.length() - 5);
+    if (fifthCharFromTheEnd == '+' || fifthCharFromTheEnd == '-')
+      return raw.substring(0, raw.length() - 2) + ":" + raw.substring(raw.length() - 2);
+    return raw;
+  }
+
+  public static Date parseDate(String raw) {
+    return Date.from(OffsetDateTime.parse(fixOffset(raw)).toInstant());
   }
 }

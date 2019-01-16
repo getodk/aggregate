@@ -14,15 +14,15 @@
  * the License.
  */
 
-package org.opendatakit.aggregate.parser;
+package org.opendatakit.aggregate.submission.type.jr;
 
 import static org.junit.Assert.assertThat;
-import static org.opendatakit.aggregate.parser.BaseFormParserForJavaRosa.fixOffset;
+import static org.opendatakit.aggregate.submission.type.jr.JRTemporalUtils.fixOffset;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
-public class BaseFormParserForJavaRosaTest {
+public class JRTemporalUtilsTest {
 
   @Test
   public void fixes_wrong_offsets_in_iso8601_datetimes() {
