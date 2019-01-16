@@ -82,7 +82,6 @@ In the meantime, you can continue with the next steps.
 
 Open a web browser, and check periodically the domain you've configured until you see the ODK Aggregate website showing up.
 
-
 ### 4 - Enable SSL
 
 - SSH into your Droplet using `ssh odk@your.domain.com`
