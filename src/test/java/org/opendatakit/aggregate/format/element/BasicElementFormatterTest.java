@@ -28,6 +28,7 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.TimeZone;
 import org.junit.Test;
 import org.opendatakit.aggregate.format.Row;
@@ -107,11 +108,13 @@ public class BasicElementFormatterTest {
   @Test
   public void formatsgeopoints() {
     assertThat(format(null, false, false), is(nullValue()));
+    assertThat(format(geopoint(1, 2, null, null), true, true), is("1.0, 2.0"));
     assertThat(format(geopoint(1, 2, 3, 4), false, false), is("1.0, 2.0"));
     assertThat(format(geopoint(1, 2, 3, 4), true, false), is("1.0, 2.0, 3.0"));
     assertThat(format(geopoint(1, 2, 3, 4), false, true), is("1.0, 2.0, 4.0")); // Oopsie, this doesn't make much sense...
     assertThat(format(geopoint(1, 2, 3, 4), true, true), is("1.0, 2.0, 3.0, 4.0"));
     assertThat(formatSeparated(null, false, false), contains(nullValue()));
+    assertThat(formatSeparated(geopoint(1, 2, null, null), true, true), contains("1.0", "2.0", null, null));
     assertThat(formatSeparated(geopoint(1, 2, 3, 4), false, false), contains("1.0", "2.0"));
     assertThat(formatSeparated(geopoint(1, 2, 3, 4), true, false), contains("1.0", "2.0", "3.0"));
     assertThat(formatSeparated(geopoint(1, 2, 3, 4), false, true), contains("1.0", "2.0", "4.0")); // Oopsie, this doesn't make much sense...
@@ -132,10 +135,10 @@ public class BasicElementFormatterTest {
 
   private GeoPoint geopoint(Number lat, Number lon, Number alt, Number acc) {
     return new GeoPoint(
-        WrappedBigDecimal.fromDouble(lat.doubleValue()),
-        WrappedBigDecimal.fromDouble(lon.doubleValue()),
-        WrappedBigDecimal.fromDouble(alt.doubleValue()),
-        WrappedBigDecimal.fromDouble(acc.doubleValue())
+        Optional.ofNullable(lat).map(Number::doubleValue).map(WrappedBigDecimal::fromDouble).orElse(null),
+        Optional.ofNullable(lon).map(Number::doubleValue).map(WrappedBigDecimal::fromDouble).orElse(null),
+        Optional.ofNullable(alt).map(Number::doubleValue).map(WrappedBigDecimal::fromDouble).orElse(null),
+        Optional.ofNullable(acc).map(Number::doubleValue).map(WrappedBigDecimal::fromDouble).orElse(null)
     );
   }
 
