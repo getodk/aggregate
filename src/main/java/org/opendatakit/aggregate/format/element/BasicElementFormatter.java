@@ -116,25 +116,30 @@ public class BasicElementFormatter implements ElementFormatter {
       return;
     }
 
+    Optional<String> maybeLatitude = Optional.ofNullable(value).map(GeoPoint::getLatitude).map(WrappedBigDecimal::toString);
+    Optional<String> maybeLongitude = Optional.ofNullable(value).map(GeoPoint::getLongitude).map(WrappedBigDecimal::toString);
+    Optional<String> maybeAltitude = Optional.ofNullable(value).map(GeoPoint::getAltitude).map(WrappedBigDecimal::toString);
+    Optional<String> maybeAccuracy = Optional.ofNullable(value).map(GeoPoint::getAccuracy).map(WrappedBigDecimal::toString);
+
     if (separateCoordinates) {
-      row.addFormattedValue(value.getLatitude().toString());
-      row.addFormattedValue(value.getLongitude().toString());
+      row.addFormattedValue(maybeLatitude.orElse(null));
+      row.addFormattedValue(maybeLongitude.orElse(null));
       if (includeAltitude)
-        row.addFormattedValue(value.getAltitude().toString());
+        row.addFormattedValue(maybeAltitude.orElse(null));
       if (includeAccuracy)
-        row.addFormattedValue(value.getAccuracy().toString());
+        row.addFormattedValue(maybeAccuracy.orElse(null));
       return;
     }
 
-    if (value.getLongitude() != null && value.getLatitude() != null) {
-      List<WrappedBigDecimal> parts = new ArrayList<>();
-      parts.add(value.getLatitude());
-      parts.add(value.getLongitude());
-      if (includeAltitude)
-        parts.add(value.getAltitude());
-      if (includeAccuracy)
-        parts.add(value.getAccuracy());
-      row.addFormattedValue(parts.stream().map(WrappedBigDecimal::toString).collect(joining(", ")));
+    if (maybeLongitude.isPresent() && maybeLatitude.isPresent()) {
+      List<String> parts = new ArrayList<>();
+      parts.add(maybeLatitude.orElse(""));
+      parts.add(maybeLongitude.orElse(""));
+      if (includeAltitude && maybeAltitude.isPresent())
+        parts.add(maybeAltitude.orElse(""));
+      if (includeAccuracy && maybeAccuracy.isPresent())
+        parts.add(maybeAccuracy.orElse(""));
+      row.addFormattedValue(String.join(", ", parts));
     }
 
   }
