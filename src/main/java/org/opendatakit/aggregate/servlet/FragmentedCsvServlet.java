@@ -18,10 +18,10 @@
 
 package org.opendatakit.aggregate.servlet;
 
+import static org.opendatakit.aggregate.submission.type.jr.JRTemporalUtils.parseDate;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -263,7 +263,7 @@ public class FragmentedCsvServlet extends ServletUtilBase {
 
         if (!submissions.isEmpty()) {
           QueryResumePoint resumeCursor = query.getResumeCursor();
-          Date resumeDate = Date.from(OffsetDateTime.parse(fixOffset(resumeCursor.getValue())).toInstant());
+          Date resumeDate = parseDate(resumeCursor.getValue());
           websafeCursorString = Long.toString(resumeDate.getTime())
               + " and " + resumeCursor.getUriLastReturnedValue();
         } else {
@@ -293,10 +293,4 @@ public class FragmentedCsvServlet extends ServletUtilBase {
       errorRetreivingData(resp);
     }
   }
-
-  private static String fixOffset(String raw) {
-    char thirdCharFromTheEnd = raw.charAt(raw.length() - 3);
-    return thirdCharFromTheEnd == '+' || thirdCharFromTheEnd == '-' ? raw + ":00" : raw;
-  }
-
 }
