@@ -30,6 +30,7 @@ import org.opendatakit.aggregate.client.SecureGWT;
 import org.opendatakit.aggregate.client.externalserv.ExternServSummary;
 import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
+import org.opendatakit.common.utils.GwtShims;
 
 public class ConfirmPurgePopup extends AbstractPopupBase {
 
@@ -62,7 +63,9 @@ public class ConfirmPurgePopup extends AbstractPopupBase {
       secureRequest(
           SecureGWT.getFormAdminService(),
           (rpc, sessionCookie, cb) -> rpc.purgePublishedData(uri, earliest, cb),
-          (Date result) -> Window.alert("Successful commencement of the purge of\nall data published as of " + result.toString()),
+          (Date result) -> {
+            Window.alert("Successful commencement of the purge of\nall data published as of " + GwtShims.gwtFormatDateHuman(result));
+          },
           cause -> AggregateUI.getUI().reportError("Failed purge of published data: ", cause)
       );
       hide();
