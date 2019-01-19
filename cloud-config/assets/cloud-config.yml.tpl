@@ -97,6 +97,7 @@ runcmd:
   - add-apt-repository -y ppa:certbot/certbot
   - apt-get -y update
   - apt-get -y install python-certbot-nginx
+  - (crontab -l 2>/dev/null; echo "0 0 1 * * /usr/bin/certbot renew > /var/log/letsencrypt/letsencrypt.log") | crontab -
 
   - rm /tmp/aggregate.war
 
