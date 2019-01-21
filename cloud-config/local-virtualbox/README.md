@@ -26,7 +26,7 @@ This CloudConfig setup is intended for development and testing purposes by deplo
   
   This command will build a fresh Aggregate WAR, which will be deployed into the VM
   
-- Browse Aggregate at http://{HOST_IP}:10080. In the last example above, this would be [http://192.168.1.129:10080](http://192.168.1.129:10080)
+- Browse Aggregate at http://{HOST_IP}:10080. In the example above, this would be [http://192.168.1.129:10080](http://192.168.1.129:10080)
 
 ## To do
 
