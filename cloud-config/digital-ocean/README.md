@@ -5,13 +5,6 @@ This CloudConfig setup is intended to be used with Ubuntu 18.04 droplets in [Dig
 - Select the Ubuntu 18.04 distribution for your new Droplet
 - Be able to link a domain name to the Droplet's IP address
 
-## What is included
-
-- Apache Tomcat 8.5
-- PostgreSQL 10
-- Aggregate [latest release](https://github.com/opendatakit/aggregate/releases)
-- HTTPS support with LetsEncrypt and automatic renewal
-  
 ## Instructions
 
 ### 1 - Get your custom CloudConfig script
