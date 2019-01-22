@@ -1,0 +1,6 @@
+*.img
+*.raw
+*.vdi
+*.war
+*.tar.gz
+cloud-config.yml
