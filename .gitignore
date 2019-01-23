@@ -5,10 +5,12 @@ target
 build
 war
 .gradle
-gradle.properties
 logs
 .settings
+gradle.properties
 jdbc.properties
+security.properties
+odk-settings.xml
 packer/build/*
 packer/packer
 packer/packer_cache

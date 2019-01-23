@@ -1,8 +1,4 @@
-warMode=complete
-
-# Aggregate needs Java 8 to compile. Set the path below to a Java 8 install if you run Java 9.
-# org.gradle.java.home=/Library/Java/JavaVirtualMachines/jdk1.8.0_162.jdk/Contents/Home
-
-# Packer binary comes in a ZIP and can be downloaded from https://releases.hashicorp.com/packer
-# You need to set this variable to the corresponding version of your OS
-packerZip=https://releases.hashicorp.com/packer/1.2.1/packer_1.2.1_linux_amd64.zip
+#Uncomment the line that corresponds to your computer's operating system
+#packerZip=https://releases.hashicorp.com/packer/1.2.1/packer_1.2.1_linux_amd64.zip
+#packerZip=https://releases.hashicorp.com/packer/1.2.1/packer_1.2.1_windows_amd64.zip
+#packerZip=https://releases.hashicorp.com/packer/1.2.1/packer_1.2.1_darwin_amd64.zip

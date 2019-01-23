@@ -1,0 +1,6 @@
+jdbc.driverClassName=org.postgresql.Driver
+jdbc.resourceName=jdbc/odk_aggregate
+jdbc.url=jdbc:postgresql://127.0.0.1/odk?autoDeserialize=true
+jdbc.username=odk
+jdbc.password=odk
+jdbc.schema=aggregate

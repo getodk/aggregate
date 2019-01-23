@@ -53,7 +53,7 @@
   <bean id="user_service" class="org.opendatakit.common.security.spring.UserServiceImpl">
     <property name="datastore" ref="datastore"/>
     <property name="realm" ref="realm"/>
-    <property name="superUserEmail" value="${security.server.superUser}"/>
+    <property name="superUserEmail" value=""/>
     <property name="superUserUsername" value="${security.server.superUserUsername}"/>
   </bean>
 

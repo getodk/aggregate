@@ -38,17 +38,15 @@ write_files:
       jdbc.schema=aggregate
   - path: /tmp/security.properties
     content: |
-      security.server.deviceAuthentication=basic
+      security.server.deviceAuthentication=digest
       security.server.secureChannelType=REQUIRES_INSECURE_CHANNEL
       security.server.channelType=REQUIRES_INSECURE_CHANNEL
       security.server.forceHttpsLinks={{forceHttps}}
       security.server.hostname=
       security.server.port={{httpPort}}
       security.server.securePort=443
-      wink.handlersFactoryClass=org.opendatakit.aggregate.odktables.impl.api.wink.AppEngineHandlersFactory
-      security.server.superUser=
       security.server.superUserUsername=administrator
-      security.server.realm.realmString=example ODK Aggregate
+      security.server.realm.realmString=ODK Aggregate
   - path: /tmp/10-aggregate
     content: |
       server {

@@ -1,0 +1,9 @@
+security.server.deviceAuthentication=digest
+security.server.secureChannelType=REQUIRES_INSECURE_CHANNEL
+security.server.channelType=REQUIRES_INSECURE_CHANNEL
+security.server.forceHttpsLinks=false
+security.server.hostname=
+security.server.port=8080
+security.server.securePort=8443
+security.server.superUserUsername=administrator
+security.server.realm.realmString=ODK Aggregate
