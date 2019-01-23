@@ -5,7 +5,7 @@ This is a living document. If you see something that could be improved, edit thi
 ## Submitting a pull request
 To contribute code to ODK Aggregate, you will need to open a [pull request](https://help.github.com/articles/about-pull-requests/) which will be reviewed by the community and then merged into the core project.
 
-1. [Set up your development environment](https://github.com/opendatakit/aggregate#setting-up-your-development-environment). 
+1. [Set up your development environment](README.md#import). 
 
 1. To make sure you have the latest version of the code, set up this repository as [a remote for your fork](https://help.github.com/articles/configuring-a-remote-for-a-fork/) and then [sync your fork](https://help.github.com/articles/syncing-a-fork/).
 

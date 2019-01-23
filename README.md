@@ -4,138 +4,87 @@
 [![Build status](https://circleci.com/gh/opendatakit/aggregate.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/opendatakit/aggregate)
 [![Slack status](http://slack.opendatakit.org/badge.svg)](http://slack.opendatakit.org)
  
-ODK Aggregate provides a ready-to-deploy server and data repository to:
+ODK Aggregate provides a ready-to-deploy server and database to:
 
-- provide blank forms to ODK Collect (or other OpenRosa clients),
-- accept finalized forms (submissions) from ODK Collect and manage collected data,
-- visualize the collected data using maps and simple graphs,
-- export data (e.g., as CSV files for spreadsheets, or as KML files for Google Earth), and
-- publish data to external systems (e.g., Google Spreadsheets or Google Fusion Tables).
+- provide blank forms to ODK Collect (or other OpenRosa clients)
+- accept submissions (finalized forms) from ODK Collect and manage collected data
+- visualize the collected data using maps and simple graphs
+- export submissions in CSV, KML, and JSON format
+- publish submissions to external systems like Google Spreadsheets
 
-ODK Aggregate can be deployed on a Tomcat server (or any servlet 2.5-compatible (or higher) web container) backed with a PostgreSQL or a MySQL database server.
+ODK Aggregate can be deployed on an Apache Tomcat server, or any servlet 2.5-compatible (or higher) web container, backed with a PostgreSQL or a MySQL database server.
 
 * ODK website: [https://opendatakit.org](https://opendatakit.org)
-* ODK Aggregate usage instructions: [https://opendatakit.org/use/aggregate/](https://opendatakit.org/use/aggregate/)
+* ODK Aggregate usage instructions: [https://docs.opendatakit.org/aggregate-intro/](https://docs.opendatakit.org/aggregate-intro/)
 * ODK forum: [https://forum.opendatakit.org](https://forum.opendatakit.org)
 * ODK developer Slack chat: [http://slack.opendatakit.org](http://slack.opendatakit.org) 
-* ODK developer Slack archive: [http://opendatakit.slackarchive.io](http://opendatakit.slackarchive.io) 
-* ODK developer wiki: [https://github.com/opendatakit/opendatakit/wiki](https://github.com/opendatakit/opendatakit/wiki)
 
 ## Getting the code
 
 1. Fork the Aggregate project ([why and how to fork](https://help.github.com/articles/fork-a-repo/))
 
-1. Install [Git LFS](https://git-lfs.github.com/)
+2. Install [Git LFS](https://git-lfs.github.com/)
 
-1. Clone your fork of the project locally. At the command line:
+3. Clone your fork of the project locally. At the command line:
 
-        git clone https://github.com/YOUR-GITHUB-USERNAME/aggregate
+    `git clone https://github.com/YOUR-GITHUB-USERNAME/aggregate`
 
 ## Setting up the database
 
-Aggregate supports a variety of DBs, but we strongly recommend you use PostgreSQL first to ensure everything is working. If you wish to use another DB (e.g., MySQL, or SQLServer databases) after that see [database configurations](docs/database-configurations.md).
-
+Aggregate supports a variety of database engines, but we strongly recommend PostgreSQL. If you wish to use MySQL, see the [database configurations](docs/database-configurations.md) guide.
+ 
 ### PostgreSQL with Docker
 
 1. Install [Docker](https://www.docker.com) and [Docker Compose](https://docs.docker.com/compose)
 
-1. To start the development server run the gradle task `postgresqlComposeUp` with the command: `./gradlew postgresqlComposeUp`
-    * Make sure port **5432** is not used by any other service in your computer. You can change this editing the `ports` section of the `db/postgresql/docker-compose.yml` configuration file. Be sure to check the documentation: [Compose file version 3 reference - Ports section](https://docs.docker.com/compose/compose-file/#ports).
+2. Start the development server with `./gradlew postgresqlComposeUp`
 
-1. To stop the server run the gradle task `postgresqlComposeDown` with the command: `./gradlew postgresqlComposeDown`.
+    Check that the port number **5432** is not used by any other service in your computer. You can change this editing the `ports` section of the `db/postgresql/docker-compose.yml` configuration file. Be sure to check the documentation: [Compose file version 3 reference - Ports section](https://docs.docker.com/compose/compose-file/#ports).
 
-Alternatively, you can use the `docker-compose` command line tool to start & stop the development server. All configuration files regarding the development server are at `db/postgresql` path. Check the [online documentation](https://docs.docker.com/compose).   
+3. Stop the server with `./gradlew postgresqlComposeDown`
 
 ### Local PostgreSQL server
 
-1. Download and install [PostgreSQL 9](https://www.postgresql.org/download) or later.
-    * If you are a macOS user, we recommend [Postgres.app](http://postgresapp.com/). If you are a Windows user, we recommend [BigSQL](https://www.openscg.com/bigsql/postgresql/installers.jsp).
+1. Download and install [PostgreSQL 9](https://www.postgresql.org/download) or later
 
-1. In the command-line interface connect to the database. Assuming the user is postgres and the server is installed on your local machine, the command will be: `psql -U postgres -h localhost`.
+    - If you are a macOS user, we recommend [Postgres.app](http://postgresapp.com/)
+    - If you are a Windows user, we recommend [BigSQL](https://www.openscg.com/bigsql/postgresql/installers.jsp)
 
-1. Setup your database with these commands. You must use `psql` or the `\connect` command will not work.
+2. In a command.line terminal, run the following commands to set up a database for Aggregate:
 
-    ```sql
-    CREATE USER "odk_unit" WITH PASSWORD 'test';
-    CREATE DATABASE odk_db WITH OWNER odk_unit;
-    GRANT ALL PRIVILEGES ON DATABASE odk_db TO odk_unit;
-    \connect odk_db;
-    CREATE SCHEMA odk_db;
-    GRANT ALL PRIVILEGES ON SCHEMA odk_db TO odk_unit;
+    (Linux and macOS)
+    ```bash
+    sudo su postgres -c "psql -c \"CREATE ROLE odk WITH LOGIN PASSWORD 'odk'\""
+    sudo su postgres -c "psql -c \"CREATE DATABASE odk WITH OWNER odk\""
+    sudo su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE odk TO odk\""
+    sudo su postgres -c "psql -c \"CREATE SCHEMA aggregate\" odk"
+    sudo su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON SCHEMA aggregate TO odk\" odk"
+    ```
+    
+    (Windows)
+    ```powershell
+    psql.exe -c "CREATE ROLE odk WITH LOGIN PASSWORD 'odk'"
+    psql.exe -c "CREATE DATABASE odk WITH OWNER odk"
+    psql.exe -c "GRANT ALL PRIVILEGES ON DATABASE odk TO odk"
+    psql.exe -c "CREATE SCHEMA aggregate" odk
+    psql.exe -c "GRANT ALL PRIVILEGES ON SCHEMA aggregate TO odk" odk
     ```
 
-## Running the project
-Aggregate is built using Gradle and Gretty, but we strongly recommend you use [IntelliJ IDEA](https://www.jetbrains.com/idea/) first to ensure everything is working. If you wish to use another development environment after that, run `./gradlew tasks` to get a sense of your options.
+## Building and Running the project
 
-### Import 
+- Copy the `jdbc.properties.example`, `odk-settings.xml.example`, and `security.properties.example` files at `/src/main/resources` to the same location, removing the `.example` extension.
 
-1. On the welcome screen, click `Import Project`, navigate to your aggregate folder, and select the `build.gradle` file. 
+  If you have followed the database configuration steps above, you don't need to make any change in these files. Otherwise, head to the [Aggregate configuration guide](docs/aggregate-config.md) and make the required changes for your environment.
+  
+- Start a local development Aggregate server with `./gradlew appRunWar`
 
-1. Make sure you check `Use auto-import` option in the `Import Project from Gradle` dialog 
+  Gradle will compile the project and start the server, which can take some time.
+  
+  Eventually, you will see a "Press any key to stop the server" message. At this point, you can browse http://localhost:8080 to use Aggregate.
 
-1. Once the project is imported, IntelliJ may ask you configure any detected GWT, Spring or web Facets, you can ignore these messages
+- Stop the server pressing any key in the terminal where you started the server
 
-### Configure
-
-1. If you are running Java 9, make sure you also have Java 8 installed. Aggregate will not compile with Java 9.
-
-1. Copy `gradle.properties.example` to a `gradle.properties` file at the root of the project and fill in your setup configuration
-
-    | Key | Valid values | Description |
-    | --- | ------------ | ----------- |
-    | `warMode` | `complete` or `installer` | Use `installer` if you are going to produce an installer with the resulting WAR artifact and `complete` otherwise |
-    | `org.gradle.java.home` |  | Set path to a Java 8 install. This is only required if you have Java 9 installed.  |
-
-    - Any property can be overwritten by passing `-Pkey=value` arguments to any Gradle task. 
-    
-### Run
-
-1. In the `Run` menu, select `Edit Configurations...`
-
-1. Press the + button to add a `Gradle` configuration
-
-    * Name: `appStartWar` (or whatever you'd like)
-    * Gradle project: `odk-aggregate`
-    * Tasks: `appStartWar`
-
-1. Press `OK`
-
-1. To run Aggregate, go to the `Run` menu, then to `Run...` and `Run` the `appStartWar` configuration. This will start Aggregate. 
-
-1. You should now be able to browse [http://localhost:8080](http://localhost:8080)
-
-### Run the tests
-
-1. Copy one of the example `jdbc.properties.example_*` and `odk-settings.xml.example_*` files on `src/test/resources/` into the same place removing the `.example_*` extension. Choose the variant corresponding to your test database engine.
-
-1. Make sure your jdbc settings are correct. The examples use the default database name, user and password settings.
-
-1. Right click on the `src/test/java` folder on IntelliJ and select `Run all Tests` option.
-
-### Debug
-
-1. In the `Run` menu, select `Edit Configurations...`
-
-1. Press the + button to add a `Gradle` configuration
-
-     * Name: `appStartWarDebug` (or whatever you'd like)
-     * Gradle project: `odk-aggregate`
-     * Tasks: `appStartWarDebug`
-
-1. Press `Apply` and then press the + button to add a `Remote` configuration
-
-     * Name: `appServer` (or whatever you'd like)
-     * Host: `localhost`
-     * Port: `5005`
-     * Search sources using module's classpath: `aggregate`
-
-1. Press `OK`
-
-1. To debug Aggregate, go to the `Run` menu, then to `Run...` and `Run` (not Debug!) the `appStartWarDebug` configuration. This will start Aggregate in debug mode and wait for a debugging session to be connected to the server's debugging listener.
-
-1. Now, go to the `Run` menu, then to `Run...` and `Debug` the `appServer`. This will connect the debugger. 
-
-1. You should now be able to browse [http://localhost:8080](http://localhost:8080) and debug
+If you have more than one Java version installed in your computer, you can ensure that Java 8 will be used when running Gradle tasks from the command-line by adding `-Porg.gradle.java.home={PATH_TO_JAVA8_HOME}` to the task.
 
 ### Connect from an external device
 
@@ -144,13 +93,63 @@ By default, Gretty will launch a server using a `localhost` address which will n
 - In `src/main/resources/security.properties`, change `security.server.hostname` to the address
 - In `build.gradle`, inside the `gretty` block, change `host` to the same address
 
+## Setting up your development environment
+
+These instructions are for [IntelliJ IDEA Community edition](https://www.jetbrains.com/idea/), which is the (free) Java IDE we use for all the ODK toolsuite, but you don't really need any specific IDE to work with this codebase. Any Java IDE will support any of the steps we will be describing.
+
+### Import 
+
+- On the welcome screen, click `Import Project`, navigate to your aggregate folder, and select the `build.gradle` file. 
+
+  Make sure you check `Use auto-import` option in the `Import Project from Gradle` dialog. 
+
+  Ignore any message about any detected GWT, Spring or web facets.
+
+- Make sure you set Java 8 as the project's selected SDK
+    
+### Run
+
+1. Show the Gradle tool window by selecting the menu option at **View** > **Tool Windows** > **Gradle**
+
+    You will see a new panel on the right side with all the Gradle task groups
+  
+2. Double click the `appRunWar` Gradle task under the `gretty` task group
+
+    A new `Run` bottom panel will pop up.
+  
+    Gradle will compile the project and start the server, which can take some time.
+    
+    Eventually, you will see a "Press any key to stop the server" message. At this point, you can browse http://localhost:8080 to use Aggregate.
+  
+You can stop the server by pressing any key in the `Run` panel.
+       
+### Debug
+
+1. In the `Run` menu, select `Edit Configurations...`
+
+2. Press the + button to add a `Remote` configuration
+
+    - Name: `Debug Aggregate` (or whatever you'd like)
+    - Host: `localhost`
+    - Port: `5005`
+    - Search sources using module's classpath: `aggregate`
+
+3. Press `OK`
+
+4. Run Aggregate with the `appRunWarDebug` task (double click it on the Gradle panel at the right side)
+
+5. Run the `Debug Aggregate` run configuration you've created (use the debug button, not the play button, which should be disabled)
+
+Eventually, the compilation will finish and the server will be ready for you to browse [http://localhost:8080](http://localhost:8080)
+
+To stop the debugging session, press any key in the `Run` bottom panel. This will close your debug process in the `Debug` bottom panel as well.
+
 ## Extended topics
 
 There is a [`/docs`](https://github.com/opendatakit/aggregate/tree/master/docs) directory in the repo with more documentation files that expand on certain topics:
 
 - [Configuration files](./docs/aggregate-config.md)
 - [Supported database configurations](./docs/database-configurations.md)
-- [IntelliJ Setup](./docs/intellij-setup.md)
 - [Build the Installer app](docs/build-the-installer-app.md)
 - [Build and run a Docker image](docs/build-and-run-a-docker-image.md)
 - [Build and run with Docker Compose](docs/build-and-run-with-docker-compose.md)
