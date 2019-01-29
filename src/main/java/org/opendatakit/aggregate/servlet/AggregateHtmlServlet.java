@@ -22,6 +22,7 @@ import java.net.URL;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.HttpUtils;
 import org.opendatakit.aggregate.constants.common.UIConsts;
 import org.opendatakit.aggregate.server.ServerPreferencesProperties;
 import org.opendatakit.common.persistence.Datastore;
@@ -105,7 +106,7 @@ public class AggregateHtmlServlet extends ServletUtilBase {
     if (!url.getHost().equalsIgnoreCase(req.getServerName())) {
       // we should redirect over to the proper fully-formed URL.
       logger.info("Incoming servername: " + req.getServerName() + " expected: " + url.getHost() + " -- redirecting.");
-      resp.sendRedirect(newUrl);
+      HttpUtils.redirect(resp, newUrl);
       return;
     }
 
@@ -139,7 +140,7 @@ public class AggregateHtmlServlet extends ServletUtilBase {
       if (directToConfigTab) {
         newUrl += "#admin/permission///";
         logger.info("Redirect to configuration tab: " + newUrl);
-        resp.sendRedirect(newUrl);
+        HttpUtils.redirect(resp, newUrl);
         return;
       }
     }

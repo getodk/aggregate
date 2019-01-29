@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.HttpUtils;
 import org.opendatakit.common.security.UserService;
 import org.opendatakit.common.web.CallingContext;
 
@@ -62,17 +63,17 @@ public class ClearSessionThenLoginServlet extends ServletUtilBase {
     String newUrl;
     if (isAnon) {
       // anonymous user -- go to the login page...
-      newUrl = cc.getWebApplicationURL("multimode_login.html");
+      newUrl = "/multimode_login.html";
     } else {
       // we are logged in via token-based or basic or digest auth.
       // redirect to Spring's logout url...
-      newUrl = cc.getWebApplicationURL(cc.getUserService().createLogoutURL());
+      newUrl = "/" + cc.getUserService().createLogoutURL();
     }
     // preserve the query string (helps with GWT debugging)
     String query = req.getQueryString();
     if (query != null && query.length() != 0) {
       newUrl += "?" + query;
     }
-    resp.sendRedirect(newUrl);
+    HttpUtils.redirect(resp, newUrl);
   }
 }
