@@ -111,8 +111,7 @@ public class SecurityServiceImpl extends RemoteServiceServlet implements
       throw new DatastoreFailureException("Unable to access datastore");
     }
     // User interface layer uses this URL to submit password changes securely
-    r.setChangeUserPasswordURL(cc.getSecureServerURL() + BasicConsts.FORWARDSLASH
-        + UserManagePasswordsServlet.ADDR);
+    r.setChangeUserPasswordURL("/" + UserManagePasswordsServlet.ADDR);
     return r;
   }
 }

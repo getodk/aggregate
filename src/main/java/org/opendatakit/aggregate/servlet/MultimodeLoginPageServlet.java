@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.opendatakit.aggregate.ContextFactory;
+import org.opendatakit.aggregate.HttpUtils;
 import org.opendatakit.common.web.CallingContext;
 import org.opendatakit.common.web.constants.BasicConsts;
 import org.opendatakit.common.web.constants.HtmlConsts;
@@ -71,7 +72,7 @@ public class MultimodeLoginPageServlet extends ServletUtilBase {
         e.printStackTrace();
       }
       // go to the proper page (we'll most likely be redirected back to here for authentication)
-      resp.sendRedirect(newUrl);
+      HttpUtils.redirect(resp, newUrl);
       return;
     }
 
@@ -89,7 +90,7 @@ public class MultimodeLoginPageServlet extends ServletUtilBase {
     }
 
     // check for XSS attacks. The redirect string is emitted within single and double
-    // quotes. It is a URL with :, /, ? and # characters. But it should not contain 
+    // quotes. It is a URL with :, /, ? and # characters. But it should not contain
     // quotes, parentheses or semicolons.
     String cleanString = redirectParamString.replaceAll(BAD_PARAMETER_CHARACTERS, "");
     if (!cleanString.equals(redirectParamString)) {
