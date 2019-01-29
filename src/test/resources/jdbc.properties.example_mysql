@@ -1,6 +1,0 @@
-jdbc.driverClassName=com.mysql.jdbc.Driver
-jdbc.resourceName=jdbc/odk_aggregate
-jdbc.url=jdbc:mysql://localhost/odk_db
-jdbc.username=odk_unit
-jdbc.password=test
-jdbc.schema=odk_db

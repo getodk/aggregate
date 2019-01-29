@@ -16,13 +16,12 @@ task dockerPrepare(dependsOn: [dockerClean], type: Copy) {
   }
 
   doLast {
-    setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/jdbc.properties", "jdbc.url", "jdbc:postgresql://127.0.0.1/odk_db?autoDeserialize=true")
-    setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/jdbc.properties", "jdbc.username", "odk_unit")
-    setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/jdbc.properties", "jdbc.password", "test")
-    setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/jdbc.properties", "jdbc.schema", "odk_db")
+    setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/jdbc.properties", "jdbc.url", "jdbc:postgresql://127.0.0.1/odk?autoDeserialize=true")
+    setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/jdbc.properties", "jdbc.username", "odk")
+    setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/jdbc.properties", "jdbc.password", "odk")
+    setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/jdbc.properties", "jdbc.schema", "aggregate")
     setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/security.properties", "security.server.realm.realmString", "ODK Aggregate")
     setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/security.properties", "security.server.channelType", "ANY_CHANNEL")
-    setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/security.properties", "wink.handlersFactoryClass", "org.opendatakit.aggregate.odktables.impl.api.wink.AppEngineHandlersFactory")
     setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/security.properties", "security.server.superUserUsername", "administrator")
     setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/security.properties", "security.server.superUser", "")
     setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/security.properties", "security.server.port", "8080")

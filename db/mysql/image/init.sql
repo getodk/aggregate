@@ -1,4 +1,4 @@
-CREATE DATABASE `odk_db`;
-CREATE USER 'odk_unit'@'%' IDENTIFIED BY 'test';
-GRANT ALL ON `odk_db`.* TO 'odk_unit'@'%' IDENTIFIED BY 'test';
+CREATE DATABASE odk;
+CREATE USER odk@'%' IDENTIFIED BY 'odk';
+GRANT ALL ON odk.* TO odk@'%' IDENTIFIED BY 'odk';
 FLUSH PRIVILEGES;

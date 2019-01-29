@@ -25,8 +25,14 @@ jobs:
           name: Setup database
           command: psql --host localhost --file db/test/postgresql/init.sql
       - run:
-          name: Configure build
-          command: cp gradle.properties.example gradle.properties
+          name: Configure build - jdbc conf file
+          command: cp src/main/resources/jdbc.properties.example src/main/resources/jdbc.properties
+      - run:
+          name: Configure build - security conf file
+          command: cp src/main/resources/security.properties.example src/main/resources/security.properties
+      - run:
+          name: Configure build - odk-settings conf file
+          command: cp src/main/resources/odk-settings.xml.example src/main/resources/odk-settings.xml
       # breaking up the commands prevents out of memory errors on CircleCI
       - run: ./gradlew check
       - run: ./gradlew war

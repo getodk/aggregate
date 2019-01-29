@@ -1,14 +1,10 @@
 # ODK Aggregate - Supported database configurations
 
-## Disclaimer
-
-Currently we only test PostgreSQL support. We need feedback and help to follow supporting other database backends.
+Although we only test actively the integration with PostgreSQL, Aggregate also support the MySQL and SQLServer database engines.
 
 # Database configuration
 
-Properly configured `jdbc.properties` and `odk-settings.xml` files must exist inside the WAR artifact.
-
-You can find these files in `src/main/resources` directories on each submodule.
+Configuring the database backend involves the files `jdbc.properties` and `odk-settings.xml` which are located at `src/main/resources` in this codebase, or at `WEB-INF/classes` in an exploded WAR webapp.
 
 ## `jdbc.properties`
 
@@ -17,10 +13,10 @@ All three supported RDBs use the same configuration file structure. This is an e
 ```properties
 jdbc.driverClassName=org.postgresql.Driver
 jdbc.resourceName=jdbc/odk_aggregate
-jdbc.url=jdbc:postgresql://127.0.0.1/odk_db?autoDeserialize=true
-jdbc.username=odk_unit
-jdbc.password=test
-jdbc.schema=odk_db
+jdbc.url=jdbc:postgresql://127.0.0.1/odk?autoDeserialize=true
+jdbc.username=odk
+jdbc.password=odk
+jdbc.schema=aggregate
 ```
 
 Driver class names are:
@@ -33,11 +29,11 @@ Driver class names are:
 
 ## `odk-settings.xml`
 
-You have to make sure that the `datastore` bean has the right class configured:
+Set the `class` attribute of the `datastore` bean with the value that corresponds to the database engine you're using:
 
 ```xml
 <bean id="datastore" class="org.opendatakit.common.persistence.engine.pgres.DatastoreImpl">
-  <!-- ... -->
+  ...
 </bean>
 ```
 
@@ -56,20 +52,20 @@ Run the following SQL scripts to create and prepare a database to be used by Agg
 **PostgreSQL**
 
 ```sql
-CREATE USER "odk_unit" WITH PASSWORD 'test';
-CREATE DATABASE odk_db WITH OWNER odk_unit;
-GRANT ALL PRIVILEGES ON DATABASE odk_db TO odk_unit;
-\connect odk_db;
-CREATE SCHEMA odk_db;
-GRANT ALL PRIVILEGES ON SCHEMA odk_db TO odk_unit;
+CREATE USER odk WITH PASSWORD 'odk';
+CREATE DATABASE odk WITH OWNER odk;
+GRANT ALL PRIVILEGES ON DATABASE odk TO odk;
+\connect odk;
+CREATE SCHEMA aggregate;
+GRANT ALL PRIVILEGES ON SCHEMA aggregate TO odk;
 ```
 
 **MySQL**
 
 ```sql
-CREATE DATABASE `odk_db`;
-CREATE USER 'odk_unit'@'localhost' IDENTIFIED BY 'test';
-GRANT ALL ON `odk_db`.* TO 'odk_unit'@'localhost' IDENTIFIED BY 'test';
+CREATE DATABASE odk;
+CREATE USER odk@'%' IDENTIFIED BY 'odk';
+GRANT ALL ON odk.* TO odk@'%' IDENTIFIED BY 'odk';
 FLUSH PRIVILEGES;
 ```
 
@@ -78,11 +74,11 @@ FLUSH PRIVILEGES;
 ```sql
 USE master;
 go
-CREATE DATABASE odk_unit;
+CREATE DATABASE odk;
 go
-USE odk_unit;
+USE odk;
 go
-CREATE SCHEMA odk_schema;
+CREATE SCHEMA aggregate;
 go
 ```
 

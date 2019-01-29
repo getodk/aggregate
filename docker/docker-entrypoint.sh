@@ -7,10 +7,10 @@ TOMCAT_CONF=/usr/local/tomcat/conf/server.xml
 AGGREGATE_HOST=${AGGREGATE_HOST:-""}
 DB_HOST=${DB_HOST:-localhost}
 DB_PORT=${DB_PORT:-"5432"}
-DB_NAME=${DB_NAME:-"aggregate"}
+DB_NAME=${DB_NAME:-"odk"}
 DB_SCHEMA=${DB_SCHEMA:-"aggregate"}
-DB_USERNAME=${DB_USERNAME:-"aggregate"}
-DB_PASSWORD=${DB_PASSWORD:-"aggregate"}
+DB_USERNAME=${DB_USERNAME:-"odk"}
+DB_PASSWORD=${DB_PASSWORD:-"odk"}
 
 replace() {
 	declare file="$1" s="$2" r="$3"

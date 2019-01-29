@@ -30,13 +30,12 @@ task packerPrepareProject(dependsOn: [packerClean, packerDownloadPacker], type: 
 
   doLast {
     new File("${buildDir}/packer/ansible/roles/aggregate/files/aggregate-version").text = getVersionName()
-    setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/jdbc.properties", "jdbc.url", "jdbc:postgresql:///aggregate?autoDeserialize=true")
-    setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/jdbc.properties", "jdbc.username", "aggregate")
-    setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/jdbc.properties", "jdbc.password", "aggregate")
+    setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/jdbc.properties", "jdbc.url", "jdbc:postgresql:///odk?autoDeserialize=true")
+    setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/jdbc.properties", "jdbc.username", "odk")
+    setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/jdbc.properties", "jdbc.password", "odk")
     setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/jdbc.properties", "jdbc.schema", "aggregate")
-    setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/security.properties", "security.server.realm.realmString", "ODK Aggregate VM")
+    setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/security.properties", "security.server.realm.realmString", "ODK Aggregate")
     setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/security.properties", "security.server.channelType", "ANY_CHANNEL")
-    setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/security.properties", "wink.handlersFactoryClass", "org.opendatakit.aggregate.odktables.impl.api.wink.AppEngineHandlersFactory")
     setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/security.properties", "security.server.superUserUsername", "administrator")
     setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/security.properties", "security.server.superUser", "")
     setPropertiesValue("${buildDir}/packer/ansible/roles/aggregate/files/ROOT/WEB-INF/classes/security.properties", "security.server.port", "10080")

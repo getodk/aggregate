@@ -40,4 +40,10 @@ class Util {
     else
       "git describe --tags --dirty --always".execute().text.trim()
   }
+
+  static String getValue(obj, String key, String defaultValue) {
+    if (obj.hasProperty(key))
+      return obj.getProperty(key)
+    return defaultValue
+  }
 }
