@@ -1,5 +1,13 @@
 #cloud-config
 
+users:
+  - name: odk
+    ssh-authorized-keys:
+      - {{pubKey}}
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    groups: sudo
+    shell: /bin/bash
+
 packages:
   - tar
   - zip
@@ -15,7 +23,6 @@ packages:
   - postgresql-10
   - openjdk-8-jdk-headless
   - nginx
-  - software-properties-common
 
 write_files:
   - path: /root/aggregate-config.json
@@ -31,8 +38,8 @@ write_files:
           "password": "aggregate"
         },
         "security": {
-          "forceHttpsLinks": true,
-          "port": 80,
+          "forceHttpsLinks": false,
+          "port": 10080,
           "securePort": 443
         },
         "tomcat": {
@@ -45,7 +52,7 @@ write_files:
     content: |
       server {
           client_max_body_size 100m;
-          server_name foo.bar;
+          server_name {{hostIp}};
 
           location / {
               proxy_pass http://127.0.0.1:8080;
@@ -73,13 +80,6 @@ runcmd:
 
   - rm /etc/nginx/sites-enabled/default
   - mv /tmp/nginx-aggregate /etc/nginx/sites-enabled/aggregate
-  - sed -i -e 's/server_name foo\.bar;/server_name '"$(curl http://169.254.169.254/metadata/v1/hostname)"';/' /etc/nginx/sites-enabled/aggregate
-
-  - add-apt-repository -y universe
-  - add-apt-repository -y ppa:certbot/certbot
-  - apt-get -y update
-  - apt-get -y install python-certbot-nginx
-  - (crontab -l 2>/dev/null; echo "0 0 1 * * /usr/bin/certbot renew > /var/log/letsencrypt/letsencrypt.log") | crontab -
 
   - su postgres -c "psql -c \"CREATE ROLE aggregate WITH LOGIN PASSWORD 'aggregate'\""
   - su postgres -c "psql -c \"CREATE DATABASE aggregate WITH OWNER aggregate\""
