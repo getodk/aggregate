@@ -21,9 +21,9 @@ This Cloud-Config stack should be used with Ubuntu 18.04. It includes the follow
 
 **Access to the machine and users**
 - The stack only exposes the standard SSH port (22) and the standard HTTP/HTTPS ports (80/443).
-- You can log into the machine using SSH and the user `odk`.
-  - The `odk` user has your SSH public key installed, which grants you the ability to log into the machine without using passwords.
-  - If you prefer to log in using a password, run the `passwd` command in your first SSH session to give the `odk` user a password.
+- You can log into the machine using SSH and the user `aggregate`.
+  - The `aggregate` user has your SSH public key installed, which grants you the ability to log into the machine without using passwords.
+  - If you prefer to log in using a password, run the `passwd` command in your first SSH session to give the `aggregate` user a password.
 
 **Access to ODK Aggregate**
 - ODK Aggregate is the only webapp deployed in Apache Tomcat (in the ROOT webapp folder).
@@ -56,7 +56,7 @@ The stack includes the `aggregate-updater` command that will help you update to 
 **Backups**
 - We strongly recommend you backup your forms and submissions using [ODK Briefcase](https://docs.opendatakit.org/briefcase-intro/).
 - Doing database backups is also recommended.
-  - You can produce a backup with `pg_dump odk > odk-aggregate.sql`.
+  - You can produce a backup with `pg_dump aggregate > odk-aggregate.sql`.
 
 **Log files**
 - ODK Aggregate logs into `/var/log/tomcat8/catalina.out`.
