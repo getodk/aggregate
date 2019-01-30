@@ -1,11 +1,4 @@
 #cloud-config
-users:
-  - name: odk
-    ssh-authorized-keys:
-      - {{pubKey}}
-    sudo: ['ALL=(ALL) NOPASSWD:ALL']
-    groups: sudo
-    shell: /bin/bash
 
 packages:
   - tar
@@ -57,7 +50,7 @@ write_files:
               proxy_pass http://127.0.0.1:8080;
           }
       }
-  - path: /home/odk/bin/download-aggregate-updater
+  - path: /usr/local/bin/download-aggregate-updater
     permissions: '0755'
     content: |
       #!/bin/sh
@@ -67,17 +60,12 @@ write_files:
       | tr -d \" \
       | wget -O /tmp/aggregate-updater.zip -qi -
 
-      mkdir -p /home/odk/bin
       unzip /tmp/aggregate-updater.zip -d /usr/local/bin
       chmod +x /usr/local/bin/aggregate-updater
 
 runcmd:
   - service nginx stop
   - service tomcat8 stop
-
-  - sed -i -e '/^PermitRootLogin/s/^.*$/PermitRootLogin no/' /etc/ssh/sshd_config
-  - sed -i -e '$aAllowUsers odk' /etc/ssh/sshd_config
-  - service ssh restart
 
   - apt-get -y remove openjdk-11-jre-headless
   - wget -O /tmp/aggregate.war {{aggregateWarUrl}}
@@ -108,6 +96,4 @@ runcmd:
   - service tomcat8 start
   - service nginx start
 
-  - /home/odk/bin/download-aggregate-updater
-  - chown -R odk:odk /home/odk
-
+  - download-aggregate-updater
