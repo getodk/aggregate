@@ -3,7 +3,7 @@
 ## Supported providers
 
 - [Digital Ocean](digital-ocean)
-- [Local VirtualBox for development and testing](local-virtualbox)
+- [VirtualBox](virtualbox) (for development and testing)
 
 ## What's included in the stack
 
