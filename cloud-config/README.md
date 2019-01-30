@@ -56,7 +56,7 @@ The stack includes the `aggregate-updater` command that will help you update to 
 **Backups**
 - We strongly recommend you backup your forms and submissions using [ODK Briefcase](https://docs.opendatakit.org/briefcase-intro/).
 - Doing database backups is also recommended.
-  - You can produce a backup with `pg_dump aggregate > odk-aggregate.sql`.
+  - You can produce a backup with `pg_dump aggregate > aggregate.sql`.
 
 **Log files**
 - ODK Aggregate logs into `/var/log/tomcat8/catalina.out`.

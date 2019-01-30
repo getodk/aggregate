@@ -32,9 +32,9 @@ write_files:
     content: |
       jdbc.driverClassName=org.postgresql.Driver
       jdbc.resourceName=jdbc/odk_aggregate
-      jdbc.url=jdbc:postgresql://127.0.0.1/odk?autoDeserialize=true
-      jdbc.username=odk
-      jdbc.password=odk
+      jdbc.url=jdbc:postgresql://127.0.0.1/aggregate?autoDeserialize=true
+      jdbc.username=aggregate
+      jdbc.password=aggregate
       jdbc.schema=aggregate
   - path: /tmp/security.properties
     content: |
@@ -99,11 +99,11 @@ runcmd:
 
   - rm /tmp/aggregate.war
 
-  - su postgres -c "psql -c \"CREATE ROLE odk WITH LOGIN PASSWORD 'odk'\""
-  - su postgres -c "psql -c \"CREATE DATABASE odk WITH OWNER odk\""
-  - su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE odk TO odk\""
-  - su postgres -c "psql -c \"CREATE SCHEMA aggregate\" odk"
-  - su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON SCHEMA aggregate TO odk\" odk"
+  - su postgres -c "psql -c \"CREATE ROLE aggregate WITH LOGIN PASSWORD 'aggregate'\""
+  - su postgres -c "psql -c \"CREATE DATABASE aggregate WITH OWNER aggregate\""
+  - su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE aggregate TO aggregate\""
+  - su postgres -c "psql -c \"CREATE SCHEMA aggregate\" aggregate"
+  - su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON SCHEMA aggregate TO aggregate\" aggregate"
 
   - service tomcat8 start
   - service nginx start
