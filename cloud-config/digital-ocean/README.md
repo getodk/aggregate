@@ -4,6 +4,10 @@ This Cloud-Config setup is intended to be used with Ubuntu 18.04 droplets in [Di
 
 #### Create your Droplet
 
+If you haven't already created an account, use this link to do so: https://m.do.co/c/39937689124c
+
+DigitalOcean will give you $100 of credit to spend during the first 60 days so that you can try things out and select what better fits to your workload.
+
 1. Log into https://www.digitalocean.com and create a new Droplet.
   
 1. Select the distribution for your new Droplet: Select the option `18.04 x64` from the Ubuntu box.
