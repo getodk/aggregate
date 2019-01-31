@@ -1,72 +1,58 @@
-This Cloud-Config setup is intended to be used with Ubuntu 18.04 droplets in [Digital Ocean](https://cloud.digitalocean.com)
+This Cloud-Config setup is intended to be used with Ubuntu 18.04 droplets in [Digital Ocean](https://cloud.digitalocean.com).
 
-## Requirements
+**To use this setup, you must able to link a domain name to the Droplet's IP address. If you don't own a domain, services such as [FreeDNS](https://freedns.afraid.org) offer free sub-domains under a range of domains.**
 
-- Select the Ubuntu 18.04 distribution for your new Droplet
-- Be able to link a domain name to the Droplet's IP address
+#### Create your Droplet
 
-## Instructions
-
-### 1 - Create your Droplet  
-
-- Head to https://www.digitalocean.com and log in.
-
-- Start the process to create a new Droplet
+1. Log into https://www.digitalocean.com and create a new Droplet.
   
-- Select the distribution for your new Droplet: Select the option `18.04` from the Ubuntu box.
+1. Select the distribution for your new Droplet: Select the option `18.04 x64` from the Ubuntu box.
 
-  ![Digital Ocean - Selecting the Droplet's distribution](README_assets/DO_ubuntu_distribution_selection.png)
+	![Digital Ocean - Selecting the Droplet's distribution](assets/DO_ubuntu_distribution_selection.png)
   
-- Choose a size fit for your intended usage. The standard $5 droplet size should be enough for light ODK Aggregate operations, although you might need to choose bigger sizes for extra storage, or if you expect a more intensive usage.
+1. Choose a size fit for your intended usage.
+	* The `$5 Standard Droplet` should be enough for light ODK Aggregate use. If you find yourself needing more, Digital Ocean makes it easy to resize to a bigger Droplet.
 
-  ODK Aggregate will exclusively use the storage built into your droplet. Don't enable any extra block storage.
+1. If you would like automatic weekly backups, enable them.
 
-- Choose a datacenter region close to where data collection is going to happen.  
+1. You will not need block storage.
+
+1. Choose a datacenter region physically close to where data collection is going to happen.
   
-- Check the `User Data` checkbox under the `Select additional options` section.
+1. Under `Select additional options`, check the `User data` checkbox.
+	* Copy and paste the contents of the Cloud-Config script at [cloud-config/assets/cloud-config.yml](https://raw.githubusercontent.com/opendatakit/aggregate/master/cloud-config/assets/cloud-config.yml):
+	![Digital Ocean - Inserting Cloud-Config script under User Data section](assets/DO_user_data_and_cloud_config.png)
 
-- Copy the contents of the Cloud-Config script at [cloud-config/assets/cloud-config.yml](cloud-config/assets/cloud-config.yml):
+1. In the `Choose a hostname` section, enter the domain name (e.g., aggregate.example.com).
+	* **This hostname will be used by the Cloud-Config script to configure your server's domain name. You must enter the same domain name to enable HTTPS**.
+
+1. You will not need to add public SSH keys (unless you know what that is and you want to).
+
+1. Click on the `Create` button.
+	* The Droplet takes a few seconds, the actual ODK Aggregate installation will take up to 10 minutes to complete.
+
+#### Set up your domain
+
+1. Once the Droplet is running, take note of its public IP address (e.g., 12.34.56.79) and set a *DNS A record* pointing to it.
+	* If you own a domain, check your domain registrar's instructions.
+	* If you don't own a domain, we recommend using [FreeDNS](https://freedns.afraid.org).
+
+1. Your domain's *TTL* setting will affect to how much time you will have to wait until you can proceed to the next step.
+	* A TTL value of 3600 means that a change will take up to one hour (3,600 seconds) to propagate.
+	* If your provider gives you the option of setting a TTL, use the lowest value you can.
+
+1. Open a web browser, and periodically check the domain until you see the ODK Aggregate website.
+	* **You won't be able to continue the install until you see the website**.
+
+#### Enable HTTPS
+
+1. SSH into your Droplet using `ssh root@your.domain`
+	* Your password will be the root password that Digital Ocean emailed you.
+	* If you entered your public SSH keys when creating the Droplet, login with your private key.
+1. Run the command: `certbot run --nginx --non-interactive --agree-tos -m {YOUR_EMAIL} --redirect -d {YOUR_DOMAIN}`
+	* Lets Encrypt uses the email you provide to send notifications about expiration of certificates.
   
-  ![Digital Ocean - Inserting Cloud-Config script under User Data section](README_assets/DO_user_data_and_cloud_config.png)
+#### Log into Aggregate
 
-- Use the domain you want to use as the Droplet's name on the `Choose a hostname` section.
-
-  **Important**: This data will be used by the Cloud-Config script to configure your server's domain name. You have to use the same domain to enable SSL in step 4.
-
-- Click on the `create` button
-
-Although the creation of the Droplet itself takes just some seconds to complete, **the actual ODK Aggregate installation will take up to 10 minutes to complete**.
-  
-In the meantime, you can continue with the next steps.
-
-### 2 - Set up your domain
-
-Once the Droplet is running, take note of its public IP address and set a *DNS A record* pointing to it:
-
-- DigitalOcean [How to manage DNS records - A records](https://www.digitalocean.com/docs/networking/dns/how-to/manage-records/#a-records).
-
-- Check your provider's instructions if your domain is not hosted or managed by DigitalOcean.
-
-- If you don't own a domain, services such as [FreeDNS](https://freedns.afraid.org) offer creating subdomains under a range of domains for free.
-
-- Your domain's TTL setting (which oftentimes is fixed by your provider) will affect to how much time you will have to wait until you can proceed to step 5. A TTL value of `3600` means that a change will take up to one hour (3 600 seconds) to propagate.
-
-  If your provider gives you the option of setting a TTL, use the lowest value you can.
-
-**You won't be able to continue the installation process until the changes to the domain have been propagated**
-
-### 3 - Wait until the installation of ODK Aggregate is completed
-
-Open a web browser, and check periodically the domain you've configured until you see the ODK Aggregate website showing up.
-
-### 4 - Enable SSL
-
-- SSH into your Droplet using `ssh root@your.domain.com`
-- Run the command: `certbot run --nginx --non-interactive --agree-tos -m {YOUR_EMAIL} --redirect -d {THE_DOMAIN}`
-
-  Be sure to replace `{YOUR_EMAIL}` and `{THE_DOMAIN}` with the actual values you want to use. LetsEncrypt uses the email you provide to send notifications about expiration of certificates.
-  
-### 5 - Check Aggregate
-
-- Go to https::{THE_DOMAIN} and check that Aggregate is running.
-- **Don't forget to change the administrator account's password**
+1. Go to https::{YOUR_DOMAIN} and check that Aggregate is running.
+	* **Login and change the administrator account's password!**.

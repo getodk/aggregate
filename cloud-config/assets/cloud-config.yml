@@ -51,23 +51,23 @@ write_files:
               proxy_pass http://127.0.0.1:8080;
           }
       }
-  - path: /usr/local/bin/download-aggregate-updater
+  - path: /usr/local/bin/download-aggregate-cli
     permissions: '0755'
     content: |
       #!/bin/sh
-      curl -s https://api.github.com/repos/opendatakit/aggregate-updater/releases/latest \
-      | grep "aggregate-updater.zip" \
+      curl -s https://api.github.com/repos/opendatakit/aggregate-cli/releases/latest \
+      | grep "aggregate-cli.zip" \
       | cut -d: -f 2,3 \
       | tr -d \" \
-      | wget -O /tmp/aggregate-updater.zip -qi -
+      | wget -O /tmp/aggregate-cli.zip -qi -
 
-      unzip /tmp/aggregate-updater.zip -d /usr/local/bin
-      chmod +x /usr/local/bin/aggregate-updater
+      unzip /tmp/aggregate-cli.zip -d /usr/local/bin
+      chmod +x /usr/local/bin/aggregate-cli
 
 runcmd:
   - service nginx stop
 
-  - download-aggregate-updater
+  - download-aggregate-cli
 
   - apt-get -y remove openjdk-11-jre-headless
 
@@ -87,6 +87,6 @@ runcmd:
   - su postgres -c "psql -c \"CREATE SCHEMA aggregate\" aggregate"
   - su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON SCHEMA aggregate TO aggregate\" aggregate"
 
-  - aggregate-updater -i -ip -c /root/aggregate-config.json
+  - aggregate-cli -i -ip -c /root/aggregate-config.json
 
   - service nginx start
