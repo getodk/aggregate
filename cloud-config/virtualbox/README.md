@@ -1,4 +1,4 @@
-This CloudConfig setup is intended for development and testing purposes by deploying Aggregate locally using VirtualBox
+This Cloud-Config setup is intended for development and testing purposes by deploying Aggregate locally using VirtualBox
 
 ## Prerequisites
 
@@ -11,6 +11,12 @@ This CloudConfig setup is intended for development and testing purposes by deplo
   - cloud-utils
   
   `sudo apt-get install socat qemu-utils genisoimage cloud-utils`
+
+## Differences with the standard cloud Cloud-Config stack
+
+- This stack doesn't include certbot (no SSL support)
+- This stack will install a fresh build of Aggregate, instead of the latest available release
+- You need to use the `odk` user to log into the machine (this user is not present in the standard stack) 
 
 ## Instructions
 
