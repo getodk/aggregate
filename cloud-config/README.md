@@ -12,7 +12,7 @@ This Cloud-Config stack should be used with Ubuntu 18.04. It includes the follow
 - Apache Tomcat 8.5
 - NGINX 1.14 HTTP server
 - Certbot 0.28
-  - LetsEncrypt SSL certificates with automatic monthly renewal
+  - Lets Encrypt SSL certificates with automatic monthly renewal
 - PostgreSQL 10.6
 - ODK Aggregate v2.0 (or greater)
   - ODK Aggregate CLI tool
@@ -22,8 +22,6 @@ This Cloud-Config stack should be used with Ubuntu 18.04. It includes the follow
 **Access to the machine and users**
 - The stack only exposes the standard SSH port (22) and the standard HTTP/HTTPS ports (80/443).
 - You can log into the machine using SSH and the user `root`.
-  - The `root` user has your SSH public key installed, which grants you the ability to log into the machine without using passwords.
-  - If you prefer to log in using a password, run the `passwd` command in your first SSH session to give the `root` user a password.
 
 **Access to ODK Aggregate**
 - ODK Aggregate is the only webapp deployed in Apache Tomcat (in the ROOT webapp folder).
