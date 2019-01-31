@@ -13,9 +13,9 @@ All three supported RDBs use the same configuration file structure. This is an e
 ```properties
 jdbc.driverClassName=org.postgresql.Driver
 jdbc.resourceName=jdbc/odk_aggregate
-jdbc.url=jdbc:postgresql://127.0.0.1/odk?autoDeserialize=true
-jdbc.username=odk
-jdbc.password=odk
+jdbc.url=jdbc:postgresql://127.0.0.1/aggregate?autoDeserialize=true
+jdbc.username=aggregate
+jdbc.password=aggregate
 jdbc.schema=aggregate
 ```
 

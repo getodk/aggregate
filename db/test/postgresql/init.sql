@@ -1,6 +1,6 @@
-CREATE USER odk WITH PASSWORD 'odk';
-CREATE DATABASE odk WITH OWNER odk;
-GRANT ALL PRIVILEGES ON DATABASE odk TO odk;
-\connect odk;
+CREATE USER aggregate WITH PASSWORD 'aggregate';
+CREATE DATABASE aggregate WITH OWNER aggregate;
+GRANT ALL PRIVILEGES ON DATABASE aggregate TO aggregate;
+\connect aggregate;
 CREATE SCHEMA aggregate;
-GRANT ALL PRIVILEGES ON SCHEMA aggregate TO odk;
+GRANT ALL PRIVILEGES ON SCHEMA aggregate TO aggregate;

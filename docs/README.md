@@ -11,6 +11,6 @@
 - [Build and run a Virtual Machine](build-and-run-a-virtual-machine.md)
 
 **Deployment**
-- [CloudConfig stack](../cloud-config/README.md)
+- [Cloud-Config setups](../cloud-config/README.md)
   - [DigitalOcean](../cloud-config/digital-ocean/README.md)
   - [Local (VirtualBox)](../cloud-config/local-virtualbox/README.md)

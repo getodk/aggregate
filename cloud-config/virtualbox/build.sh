@@ -39,13 +39,10 @@ if [[ ! -f ${localVdi}  ]]; then
 fi
 
 # Prepare the cloud-config volume
-cat ../assets/cloud-config.yml.tpl | \
-  sed -e 's/{{pubKey}}/'"${pubKeyEscaped}"'/g' | \
-  sed -e 's/{{aggregateVersion}}/'"${aggregateVersion}"'/g' | \
-  sed -e 's/{{forceHttps}}/false/g' | \
-  sed -e 's/{{domain}}/'"${hostIp}"'/g' | \
-  sed -e 's/{{httpPort}}/10080/g' | \
-  sed -e 's/{{aggregateWarUrl}}/http:\/\/'"${hostIp}"':8000\/aggregate.war/g' \
+cat cloud-config.tpl.yml \
+  | sed -e 's/{{pubKey}}/'"${pubKeyEscaped}"'/g' \
+  | sed -e 's/{{aggregateVersion}}/'"${aggregateVersion}"'/g' \
+  | sed -e 's/{{hostIp}}/'"${hostIp}"'/g' \
   > cloud-config.yml
 cloud-localds ${cloudConfigIso} cloud-config.yml
 
@@ -75,6 +72,8 @@ echo "- You don't need to stop the VM to relaunch it"
 echo
 echo "In another terminal, you can:"
 echo "- SSH into the machine with: ssh -p 10022 odk@localhost"
+echo "- You might need to remove the fingerprint from previous attempts with:"
+echo "  ssh-keygen -f ~/.ssh/known_hosts -R \"[localhost]:10022\""
 echo
 
 # Serve assets locally

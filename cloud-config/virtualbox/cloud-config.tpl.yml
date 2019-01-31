@@ -1,0 +1,92 @@
+#cloud-config
+
+users:
+  - name: odk
+    ssh-authorized-keys:
+      - {{pubKey}}
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    groups: sudo
+    shell: /bin/bash
+
+packages:
+  - tar
+  - zip
+  - unzip
+  - vim
+  - wget
+  - curl
+  - tree
+  - tomcat8
+  - tomcat8-common
+  - tomcat8-admin
+  - tomcat8-user
+  - postgresql-10
+  - openjdk-8-jdk-headless
+  - nginx
+
+write_files:
+  - path: /root/aggregate-config.json
+    content: |
+      {
+        "home": "/root",
+        "jdbc": {
+          "host": "127.0.0.1",
+          "port": 5432,
+          "db": "aggregate",
+          "schema": "aggregate",
+          "user": "aggregate",
+          "password": "aggregate"
+        },
+        "security": {
+          "forceHttpsLinks": false,
+          "port": 10080,
+          "securePort": 443
+        },
+        "tomcat": {
+          "uid": "tomcat8",
+          "gid": "tomcat8",
+          "webappsPath": "/var/lib/tomcat8/webapps"
+        }
+      }
+  - path: /tmp/nginx-aggregate
+    content: |
+      server {
+          client_max_body_size 100m;
+          server_name {{hostIp}};
+
+          location / {
+              proxy_pass http://127.0.0.1:8080;
+          }
+      }
+  - path: /usr/local/bin/download-aggregate-updater
+    permissions: '0755'
+    content: |
+      #!/bin/sh
+      curl -s https://api.github.com/repos/opendatakit/aggregate-updater/releases/latest \
+      | grep "aggregate-updater.zip" \
+      | cut -d: -f 2,3 \
+      | tr -d \" \
+      | wget -O /tmp/aggregate-updater.zip -qi -
+
+      unzip /tmp/aggregate-updater.zip -d /usr/local/bin
+      chmod +x /usr/local/bin/aggregate-updater
+
+runcmd:
+  - service nginx stop
+
+  - download-aggregate-updater
+
+  - apt-get -y remove openjdk-11-jre-headless
+
+  - rm /etc/nginx/sites-enabled/default
+  - mv /tmp/nginx-aggregate /etc/nginx/sites-enabled/aggregate
+
+  - su postgres -c "psql -c \"CREATE ROLE aggregate WITH LOGIN PASSWORD 'aggregate'\""
+  - su postgres -c "psql -c \"CREATE DATABASE aggregate WITH OWNER aggregate\""
+  - su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE aggregate TO aggregate\""
+  - su postgres -c "psql -c \"CREATE SCHEMA aggregate\" aggregate"
+  - su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON SCHEMA aggregate TO aggregate\" aggregate"
+
+  - aggregate-updater -i -ip -c /root/aggregate-config.json
+
+  - service nginx start

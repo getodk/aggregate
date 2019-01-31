@@ -6,4 +6,4 @@ db:
     - 3306:3306
   restart: always
   environment:
-    MYSQL_ROOT_PASSWORD: odk
+    MYSQL_ROOT_PASSWORD: aggregate

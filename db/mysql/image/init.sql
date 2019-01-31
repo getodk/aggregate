@@ -1,4 +1,4 @@
-CREATE DATABASE odk;
-CREATE USER odk@'%' IDENTIFIED BY 'odk';
-GRANT ALL ON odk.* TO odk@'%' IDENTIFIED BY 'odk';
+CREATE DATABASE aggregate;
+CREATE USER aggregate@'%' IDENTIFIED BY 'aggregate';
+GRANT ALL ON aggregate.* TO aggregate@'%' IDENTIFIED BY 'aggregate';
 FLUSH PRIVILEGES;

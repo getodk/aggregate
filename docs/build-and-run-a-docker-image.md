@@ -71,10 +71,10 @@ You can set the following environment variables when running the Aggregate Docke
 | AGGREGATE_HOST | localhost | Value of the `security.server.hostname` conf parameter. Set to `auto` for FQDN auto-discovery |
 | DB_HOST | localhost | Value used to build the `jdbc.url` conf parameter |
 | DB_PORT | 5432 | Value used to build the `jdbc.url` conf parameter |
-| DB_NAME | odk | Value used to build the `jdbc.url` conf parameter |
+| DB_NAME | aggregate | Value used to build the `jdbc.url` conf parameter |
 | DB_SCHEMA | aggregate | Value of the `jdbc.schema` conf parameter |
-| DB_USERNAME | odk | Value of the `jdbc.username` conf parameter |
-| DB_PASSWORD | odk | Value of the `jdbc.password` conf parameter |
+| DB_USERNAME | aggregate | Value of the `jdbc.username` conf parameter |
+| DB_PASSWORD | aggregate | Value of the `jdbc.password` conf parameter |
 
   These variables can be set by adding `--env VARIABLE_NAME=VALUE` arguments when running the Aggregate Docker image ([more info in the docs](https://docs.docker.com/docker-cloud/getting-started/deploy-app/6_define_environment_variables/#python-quickstart)). Example:
   
