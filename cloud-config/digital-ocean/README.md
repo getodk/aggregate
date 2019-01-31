@@ -15,7 +15,7 @@ This Cloud-Config setup is intended to be used with Ubuntu 18.04 droplets in [Di
   
 - Select the distribution for your new Droplet: Select the option `18.04` from the Ubuntu box.
 
-  ![Digital Ocean - Selecting the Droplet's distribution](README_assets/DO_ubuntu_distribution_selection.png)
+  ![Digital Ocean - Selecting the Droplet's distribution](assets/DO_ubuntu_distribution_selection.png)
   
 - Choose a size fit for your intended usage. The standard $5 droplet size should be enough for light ODK Aggregate operations, although you might need to choose bigger sizes for extra storage, or if you expect a more intensive usage.
 
@@ -27,7 +27,7 @@ This Cloud-Config setup is intended to be used with Ubuntu 18.04 droplets in [Di
 
 - Copy the contents of the Cloud-Config script at [cloud-config/assets/cloud-config.yml](cloud-config/assets/cloud-config.yml):
   
-  ![Digital Ocean - Inserting Cloud-Config script under User Data section](README_assets/DO_user_data_and_cloud_config.png)
+  ![Digital Ocean - Inserting Cloud-Config script under User Data section](assets/DO_user_data_and_cloud_config.png)
 
 - Use the domain you want to use as the Droplet's name on the `Choose a hostname` section.
 
