@@ -65,8 +65,6 @@ write_files:
       chmod +x /usr/local/bin/aggregate-cli
 
 runcmd:
-  - service nginx stop
-
   - download-aggregate-cli
 
   - apt-get -y remove openjdk-11-jre-headless
@@ -87,6 +85,6 @@ runcmd:
   - su postgres -c "psql -c \"CREATE SCHEMA aggregate\" aggregate"
   - su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON SCHEMA aggregate TO aggregate\" aggregate"
 
-  - aggregate-cli -i -ip -c /root/aggregate-config.json
+  - aggregate-cli -i -ip -y -c /root/aggregate-config.json
 
-  - service nginx start
+  - service nginx restart
