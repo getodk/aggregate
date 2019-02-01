@@ -54,20 +54,20 @@ Aggregate supports a variety of database engines, but we strongly recommend Post
 
     (Linux and macOS)
     ```bash
-    sudo su postgres -c "psql -c \"CREATE ROLE odk WITH LOGIN PASSWORD 'odk'\""
-    sudo su postgres -c "psql -c \"CREATE DATABASE odk WITH OWNER odk\""
-    sudo su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE odk TO odk\""
-    sudo su postgres -c "psql -c \"CREATE SCHEMA aggregate\" odk"
-    sudo su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON SCHEMA aggregate TO odk\" odk"
+    sudo su postgres -c "psql -c \"CREATE ROLE aggregate WITH LOGIN PASSWORD 'aggregate'\""
+    sudo su postgres -c "psql -c \"CREATE DATABASE aggregate WITH OWNER aggregate\""
+    sudo su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE aggregate TO aggregate\""
+    sudo su postgres -c "psql -c \"CREATE SCHEMA aggregate\" aggregate"
+    sudo su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON SCHEMA aggregate TO aggregate\" aggregate"
     ```
     
     (Windows)
     ```powershell
-    psql.exe -c "CREATE ROLE odk WITH LOGIN PASSWORD 'odk'"
-    psql.exe -c "CREATE DATABASE odk WITH OWNER odk"
-    psql.exe -c "GRANT ALL PRIVILEGES ON DATABASE odk TO odk"
-    psql.exe -c "CREATE SCHEMA aggregate" odk
-    psql.exe -c "GRANT ALL PRIVILEGES ON SCHEMA aggregate TO odk" odk
+    psql.exe -c "CREATE ROLE aggregate WITH LOGIN PASSWORD 'aggregate'"
+    psql.exe -c "CREATE DATABASE aggregate WITH OWNER aggregate"
+    psql.exe -c "GRANT ALL PRIVILEGES ON DATABASE aggregate TO aggregate"
+    psql.exe -c "CREATE SCHEMA aggregate" aggregate
+    psql.exe -c "GRANT ALL PRIVILEGES ON SCHEMA aggregate TO aggregate" aggregate
     ```
 
 ## Building and Running the project
