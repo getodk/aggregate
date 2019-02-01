@@ -39,14 +39,14 @@ DigitalOcean will give you $100 of credit to spend during the first 60 days so t
 
 1. Once the Droplet is running, take note of its public IP address (e.g., 12.34.56.79) and set a *DNS A record* pointing to it.
 	* If you own a domain, check your domain registrar's instructions.
-	* If you don't own a domain, we recommend using [FreeDNS](https://freedns.afraid.org).
+	* If you don't own a domain, we recommend using [FreeDNS](https://freedns.afraid.org) to get a free sub-domain.
 
 1. Your domain's *TTL* setting will affect to how much time you will have to wait until you can proceed to the next step.
 	* A TTL value of 3600 means that a change will take up to one hour (3,600 seconds) to propagate.
 	* If your provider gives you the option of setting a TTL, use the lowest value you can.
 
 1. Open a web browser, and periodically check the domain until you see the ODK Aggregate website.
-	* **You won't be able to continue the install until you see the website**.
+	* **You won't be able to continue the install until you see the website load**.
 
 #### Enable HTTPS
 
@@ -59,4 +59,4 @@ DigitalOcean will give you $100 of credit to spend during the first 60 days so t
 #### Log into Aggregate
 
 1. Go to https::{YOUR_DOMAIN} and check that Aggregate is running.
-	* **Login and change the administrator account's password!**.
+	* **Login and change the administrator account's password!**
