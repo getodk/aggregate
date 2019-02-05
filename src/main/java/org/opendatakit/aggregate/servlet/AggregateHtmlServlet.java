@@ -94,20 +94,22 @@ public class AggregateHtmlServlet extends ServletUtilBase {
     User user = cc.getCurrentUser();
     UserService userService = cc.getUserService();
 
-    // Check to make sure we are using the canonical server name.
-    // If not, redirect to that name.  This ensures that authentication
-    // cookies will have the proper realm(s) established for them.
     String newUrl = cc.getServerURL() + BasicConsts.FORWARDSLASH + ADDR;
     String query = req.getQueryString();
     if (query != null && query.length() != 0) {
       newUrl += "?" + query;
     }
-    URL url = new URL(newUrl);
-    if (!url.getHost().equalsIgnoreCase(req.getServerName())) {
-      // we should redirect over to the proper fully-formed URL.
-      logger.info("Incoming servername: " + req.getServerName() + " expected: " + url.getHost() + " -- redirecting.");
-      HttpUtils.redirect(resp, newUrl);
-      return;
+    if (userService.getCurrentRealm().getCheckHostnames()) {
+      // Check to make sure we are using the canonical server name.
+      // If not, redirect to that name.  This ensures that authentication
+      // cookies will have the proper realm(s) established for them.
+      URL url = new URL(newUrl);
+      if (!url.getHost().equalsIgnoreCase(req.getServerName())) {
+        // we should redirect over to the proper fully-formed URL.
+        logger.info("Incoming servername: " + req.getServerName() + " expected: " + url.getHost() + " -- redirecting.");
+        HttpUtils.redirect(resp, newUrl);
+        return;
+      }
     }
 
     // OK. We are using the canonical server name.
