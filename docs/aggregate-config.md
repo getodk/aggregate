@@ -68,6 +68,15 @@ This file supports the following configuration settings:
   
   Set this to the security realm you want your users to see when logging into Aggregate   
 
+**security.server.checkHostnames*
+- Accepted values: `true`, `false`
+- Default value: `true`
+  
+  Set to `false` if you're running Aggregate behind a proxy or a load balancer to avoid infinite redirects.
+  
+  When set to `true`, Aggregate will always check the request's hostname and redirect to the configured or detected hostname (`security.server.hostname`) if they don't match.
+
+
 ## Database configuration
 
 Please refer to [Database configurations](database-configurations.md) document where this is covered in detail.

@@ -33,7 +33,8 @@ write_files:
         "security": {
           "forceHttpsLinks": true,
           "port": 80,
-          "securePort": 443
+          "securePort": 443,
+          "checkHostnames": false
         },
         "tomcat": {
           "uid": "tomcat8",

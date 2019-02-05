@@ -38,6 +38,7 @@ public class Realm implements InitializingBean {
   private String hostname;
   private String realmString;
   private boolean isGaeEnvironment = false;
+  private boolean checkHostnames = true;
 
   public Realm() {
   }
@@ -57,6 +58,7 @@ public class Realm implements InitializingBean {
     log.info("ForceHttpsLinks: " + (forceHttpsLinks ? "yes" : "no"));
     log.info("RealmString: " + realmString);
     log.info("isGaeEnvironment: " + (isGaeEnvironment ? "yes" : "no"));
+    log.info("CheckHostnames: " + (checkHostnames ? "yes" : "no"));
     log.info("java.library.path: " + System.getProperty("java.library.path"));
   }
 
@@ -128,4 +130,11 @@ public class Realm implements InitializingBean {
     this.forceHttpsLinks = forceHttpsLinks;
   }
 
+  public boolean getCheckHostnames() {
+    return checkHostnames;
+  }
+
+  public void setCheckHostnames(boolean checkHostnames) {
+    this.checkHostnames = checkHostnames;
+  }
 }
