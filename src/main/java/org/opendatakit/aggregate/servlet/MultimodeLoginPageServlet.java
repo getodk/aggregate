@@ -51,29 +51,31 @@ public class MultimodeLoginPageServlet extends ServletUtilBase {
       IOException {
     CallingContext cc = ContextFactory.getCallingContext(this, req);
 
-    // Check to make sure we are using the canonical server name.
-    // If not, redirect to that name.  This ensures that authentication
-    // cookies will have the proper realm(s) established for them.
-    String newUrl = cc.getServerURL() + BasicConsts.FORWARDSLASH + ADDR;
-    String query = req.getQueryString();
-    if (query != null && query.length() != 0) {
-      newUrl += "?" + query;
-    }
-    URL url = new URL(newUrl);
-    if (!url.getHost().equalsIgnoreCase(req.getServerName())) {
-      logger.info("Incoming servername: " + req.getServerName() + " expected: " + url.getHost() + " -- redirecting.");
-      // try to get original destination URL from Spring...
-      String redirectUrl = getRedirectUrl(req, ADDR);
-      try {
-        URI uriChangeable = new URI(redirectUrl);
-        URI newUri = new URI(url.getProtocol(), null, url.getHost(), url.getPort(), uriChangeable.getPath(), uriChangeable.getQuery(), uriChangeable.getFragment());
-        newUrl = newUri.toString();
-      } catch (URISyntaxException e) {
-        e.printStackTrace();
+    if (cc.getUserService().getCurrentRealm().getCheckHostnames()) {
+      // Check to make sure we are using the canonical server name.
+      // If not, redirect to that name.  This ensures that authentication
+      // cookies will have the proper realm(s) established for them.
+      String newUrl = cc.getServerURL() + BasicConsts.FORWARDSLASH + ADDR;
+      String query = req.getQueryString();
+      if (query != null && query.length() != 0) {
+        newUrl += "?" + query;
       }
-      // go to the proper page (we'll most likely be redirected back to here for authentication)
-      HttpUtils.redirect(resp, newUrl);
-      return;
+      URL url = new URL(newUrl);
+      if (!url.getHost().equalsIgnoreCase(req.getServerName())) {
+        logger.info("Incoming servername: " + req.getServerName() + " expected: " + url.getHost() + " -- redirecting.");
+        // try to get original destination URL from Spring...
+        String redirectUrl = getRedirectUrl(req, ADDR);
+        try {
+          URI uriChangeable = new URI(redirectUrl);
+          URI newUri = new URI(url.getProtocol(), null, url.getHost(), url.getPort(), uriChangeable.getPath(), uriChangeable.getQuery(), uriChangeable.getFragment());
+          newUrl = newUri.toString();
+        } catch (URISyntaxException e) {
+          e.printStackTrace();
+        }
+        // go to the proper page (we'll most likely be redirected back to here for authentication)
+        HttpUtils.redirect(resp, newUrl);
+        return;
+      }
     }
 
     // OK. We are using the canonical server name.

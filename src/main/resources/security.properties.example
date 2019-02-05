@@ -7,3 +7,4 @@ security.server.port=8080
 security.server.securePort=8443
 security.server.superUserUsername=administrator
 security.server.realm.realmString=ODK Aggregate
+security.server.checkHostnames=true
