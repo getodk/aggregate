@@ -38,6 +38,7 @@ write_files:
           "password": "aggregate"
         },
         "security": {
+          "hostname": "{{hostIp}}",
           "forceHttpsLinks": false,
           "port": 10080,
           "securePort": 443,
