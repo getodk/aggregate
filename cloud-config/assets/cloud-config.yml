@@ -86,6 +86,6 @@ runcmd:
   - su postgres -c "psql -c \"CREATE SCHEMA aggregate\" aggregate"
   - su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON SCHEMA aggregate TO aggregate\" aggregate"
 
-  - aggregate-cli -i -ip -y -c /root/aggregate-config.json
+  - aggregate-cli -i -y -c /root/aggregate-config.json
 
   - service nginx restart
