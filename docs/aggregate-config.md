@@ -24,7 +24,7 @@ This file supports the following configuration settings:
   
   The `REQUIRES_SECURE_CHANNEL` requires to set up SSL in your server.
     
-**security.server.forceHttpsLinks*
+**security.server.forceHttpsLinks**
 - Accepted values: `true`, `false`
 - Default value: `false`
   
@@ -68,7 +68,7 @@ This file supports the following configuration settings:
   
   Set this to the security realm you want your users to see when logging into Aggregate   
 
-**security.server.checkHostnames*
+**security.server.checkHostnames**
 - Accepted values: `true`, `false`
 - Default value: `true`
   
