@@ -9,13 +9,10 @@ users:
     shell: /bin/bash
 
 packages:
-  - tar
   - zip
   - unzip
-  - vim
   - wget
   - curl
-  - tree
   - tomcat8
   - tomcat8-common
   - tomcat8-admin
