@@ -57,7 +57,7 @@ write_files:
     permissions: '0755'
     content: |
       #!/bin/sh
-      curl -s https://api.github.com/repos/opendatakit/aggregate-cli/releases/latest \
+      curl -sS https://api.github.com/repos/opendatakit/aggregate-cli/releases/latest \
       | grep "aggregate-cli.zip" \
       | cut -d: -f 2,3 \
       | tr -d \" \
@@ -86,8 +86,8 @@ runcmd:
   - su postgres -c "psql -c \"CREATE SCHEMA aggregate\" aggregate"
   - su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON SCHEMA aggregate TO aggregate\" aggregate"
 
-  - sed -i -e 's/foo\.bar/'"$(curl http://169.254.169.254/metadata/v1/hostname)"'/' /root/aggregate-config.json
-  - sed -i -e 's/foo\.bar/'"$(curl http://169.254.169.254/metadata/v1/hostname)"'/' /etc/nginx/sites-enabled/aggregate
+  - sed -i -e 's/foo\.bar/'"$(curl -s http://169.254.169.254/metadata/v1/hostname)"'/' /root/aggregate-config.json
+  - sed -i -e 's/foo\.bar/'"$(curl -s http://169.254.169.254/metadata/v1/hostname)"'/' /etc/nginx/sites-enabled/aggregate
 
   - aggregate-cli -i -y -c /root/aggregate-config.json
 
