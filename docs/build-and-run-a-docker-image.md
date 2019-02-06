@@ -20,12 +20,12 @@ This Aggregate Docker image works by using an external running PostgreSQL 9.6 da
 - Create a database and a schema by running this SQL script:
 
   ```sql
-  CREATE USER odk WITH PASSWORD 'odk';
-  CREATE DATABASE odk WITH OWNER odk;
-  GRANT ALL PRIVILEGES ON DATABASE odk TO odk;
+  CREATE USER aggregate WITH PASSWORD 'aggregate';
+  CREATE DATABASE aggregate WITH OWNER aggregate;
+  GRANT ALL PRIVILEGES ON DATABASE aggregate TO aggregate;
   \connect odk;
   CREATE SCHEMA aggregate;
-  GRANT ALL PRIVILEGES ON SCHEMA aggregate TO odk;
+  GRANT ALL PRIVILEGES ON SCHEMA aggregate TO aggregate;
   ```
   
   **We strongly advice to use a stronger password on the first line of the script.**

@@ -12,7 +12,7 @@ All three supported RDBs use the same configuration file structure. This is an e
 
 ```properties
 jdbc.driverClassName=org.postgresql.Driver
-jdbc.resourceName=jdbc/odk_aggregate
+jdbc.resourceName=jdbc/aggregate
 jdbc.url=jdbc:postgresql://127.0.0.1/aggregate?autoDeserialize=true
 jdbc.username=aggregate
 jdbc.password=aggregate
@@ -52,20 +52,20 @@ Run the following SQL scripts to create and prepare a database to be used by Agg
 **PostgreSQL**
 
 ```sql
-CREATE USER odk WITH PASSWORD 'odk';
-CREATE DATABASE odk WITH OWNER odk;
-GRANT ALL PRIVILEGES ON DATABASE odk TO odk;
-\connect odk;
+CREATE USER aggregate WITH PASSWORD 'aggregate';
+CREATE DATABASE aggregate WITH OWNER aggregate;
+GRANT ALL PRIVILEGES ON DATABASE aggregate TO aggregate;
+\connect aggregate;
 CREATE SCHEMA aggregate;
-GRANT ALL PRIVILEGES ON SCHEMA aggregate TO odk;
+GRANT ALL PRIVILEGES ON SCHEMA aggregate TO aggregate;
 ```
 
 **MySQL**
 
 ```sql
-CREATE DATABASE odk;
-CREATE USER odk@'%' IDENTIFIED BY 'odk';
-GRANT ALL ON odk.* TO odk@'%' IDENTIFIED BY 'odk';
+CREATE DATABASE aggregate;
+CREATE USER aggregate@'%' IDENTIFIED BY 'aggregate';
+GRANT ALL ON aggregate.* TO odk@'%' IDENTIFIED BY 'aggregate';
 FLUSH PRIVILEGES;
 ```
 
@@ -74,9 +74,9 @@ FLUSH PRIVILEGES;
 ```sql
 USE master;
 go
-CREATE DATABASE odk;
+CREATE DATABASE aggregate;
 go
-USE odk;
+USE aggregate;
 go
 CREATE SCHEMA aggregate;
 go
