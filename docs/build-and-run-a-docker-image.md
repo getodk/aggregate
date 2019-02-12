@@ -25,6 +25,7 @@ This Aggregate Docker image works by using an external running PostgreSQL 9.6 da
   GRANT ALL PRIVILEGES ON DATABASE aggregate TO aggregate;
   \connect odk;
   CREATE SCHEMA aggregate;
+  ALTER SCHEMA aggregate OWNER TO aggregate;  
   GRANT ALL PRIVILEGES ON SCHEMA aggregate TO aggregate;
   ```
   
