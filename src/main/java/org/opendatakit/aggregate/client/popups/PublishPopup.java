@@ -204,12 +204,14 @@ public final class PublishPopup extends AbstractPopupBase {
     public void onClick(ClickEvent event) {
 
       String externalServiceTypeString = serviceType.getSelectedValue();
-      ExternalServiceType type = (externalServiceTypeString == null) ? null :
-          ExternalServiceType.valueOf(externalServiceTypeString);
+      ExternalServiceType type = (externalServiceTypeString == null)
+          ? null
+          : ExternalServiceType.valueOf(externalServiceTypeString);
 
       String serviceOpString = esOptions.getSelectedValue();
-      ExternalServicePublicationOption serviceOp = (serviceOpString == null) ? null :
-          ExternalServicePublicationOption.valueOf(serviceOpString);
+      ExternalServicePublicationOption serviceOp = (serviceOpString == null)
+          ? null
+          : ExternalServicePublicationOption.valueOf(serviceOpString);
 
       UserSecurityInfo info = AggregateUI.getUI().getUserInfo();
       String ownerEmail = getOwnerEmail(info);
