@@ -188,14 +188,8 @@ public class FormUploadServlet extends ServletUtilBase {
    */
   @Override
   protected void doHead(HttpServletRequest req, HttpServletResponse resp) {
-    CallingContext cc = ContextFactory.getCallingContext(this, req);
-    logger.info("Inside doHead");
-
     addOpenRosaHeaders(resp);
-    String serverUrl = cc.getServerURL();
-    String url = serverUrl + BasicConsts.FORWARDSLASH + ADDR;
-    resp.setHeader("Location", url);
-    resp.setStatus(204); // no content...
+    resp.setStatus(204);
   }
 
   /**
