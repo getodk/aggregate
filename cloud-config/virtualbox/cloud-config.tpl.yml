@@ -90,3 +90,7 @@ runcmd:
   - aggregate-cli -i -ip -y -c /root/aggregate-config.json
 
   - service nginx restart
+
+  - echo "listen_addresses = '*'" >> /etc/postgresql/10/main/postgresql.conf
+  - echo "host    all             all             samenet               md5" >> /etc/postgresql/10/main/pg_hba.conf
+  - service postgresql restart
