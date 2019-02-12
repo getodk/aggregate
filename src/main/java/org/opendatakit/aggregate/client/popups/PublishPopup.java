@@ -213,13 +213,13 @@ public final class PublishPopup extends AbstractPopupBase {
           ? null
           : ExternalServicePublicationOption.valueOf(serviceOpString);
 
-      UserSecurityInfo info = AggregateUI.getUI().getUserInfo();
-      String ownerEmail = getOwnerEmail(info);
-      if (ownerEmail == null)
-        return;
-
       switch (type) {
         case GOOGLE_SPREADSHEET:
+          UserSecurityInfo info = AggregateUI.getUI().getUserInfo();
+          String ownerEmail = getOwnerEmail(info);
+          if (ownerEmail == null)
+            return;
+
           secureRequest(
               SecureGWT.getServicesAdminService(),
               (rpc, sc, cb) -> rpc.createGoogleSpreadsheet(formId, gsName.getText(), serviceOp, ownerEmail, cb),
@@ -232,7 +232,7 @@ public final class PublishPopup extends AbstractPopupBase {
           final BinaryOption jsBinaryOp = (jsBinaryOpString == null) ? null : BinaryOption.valueOf(jsBinaryOpString);
           secureRequest(
               SecureGWT.getServicesAdminService(),
-              (rpc, sc, cb) -> rpc.createSimpleJsonServer(formId, jsAuthKey.getText(), jsUrl.getText(), serviceOp, ownerEmail, jsBinaryOp, cb),
+              (rpc, sc, cb) -> rpc.createSimpleJsonServer(formId, jsAuthKey.getText(), jsUrl.getText(), serviceOp, "mailto:N/A", jsBinaryOp, cb),
               NO_OP_CONSUMER,
               this::onFailure
           );
