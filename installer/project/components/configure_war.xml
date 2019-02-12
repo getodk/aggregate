@@ -254,6 +254,11 @@
         </actionGroup>
         <propertiesFileSet>
           <file>${temp_dir}/conf/common/security.properties</file>
+          <key>security.server.forceHttpsLinks</key>
+          <value>false</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${temp_dir}/conf/common/security.properties</file>
           <key>security.server.port</key>
           <value>${http_port}</value>
         </propertiesFileSet>
@@ -269,11 +274,6 @@
         </propertiesFileSet>
         <propertiesFileSet>
           <file>${temp_dir}/conf/common/security.properties</file>
-          <key>security.server.superUser</key>
-          <value></value>
-        </propertiesFileSet>
-        <propertiesFileSet>
-          <file>${temp_dir}/conf/common/security.properties</file>
           <key>security.server.superUserUsername</key>
           <value>${username}</value>
         </propertiesFileSet>
@@ -284,9 +284,8 @@
         </propertiesFileSet>
         <propertiesFileSet>
           <file>${temp_dir}/conf/common/security.properties</file>
-          <key>security.help.about</key>
-          <value>
-            <![CDATA[auto-generated on ${creation.timestamp} for ${instance_display_name} ${product_fullname} ${product_version}]]></value>
+          <key>security.server.checkHostnames</key>
+          <value>true</value>
         </propertiesFileSet>
       </actionList>
     </actionGroup>
