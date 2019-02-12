@@ -23,6 +23,7 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -202,27 +203,41 @@ public final class PublishPopup extends AbstractPopupBase {
 
     @Override
     public void onClick(ClickEvent event) {
+      // Validate common required fields
+      if (serviceType.getSelectedValue() == null || serviceType.getSelectedValue().isEmpty()) {
+        Window.alert("You need to select a publisher type from the dropdown");
+        return;
+      }
 
-      String externalServiceTypeString = serviceType.getSelectedValue();
-      ExternalServiceType type = (externalServiceTypeString == null)
-          ? null
-          : ExternalServiceType.valueOf(externalServiceTypeString);
+      if (esOptions.getSelectedValue() == null || esOptions.getSelectedValue().isEmpty()) {
+        Window.alert("You need to select which submissions to publish");
+        return;
+      }
 
-      String serviceOpString = esOptions.getSelectedValue();
-      ExternalServicePublicationOption serviceOp = (serviceOpString == null)
-          ? null
-          : ExternalServicePublicationOption.valueOf(serviceOpString);
+      ExternalServiceType type = ExternalServiceType.valueOf(serviceType.getSelectedValue());
+      ExternalServicePublicationOption serviceOp = ExternalServicePublicationOption.valueOf(esOptions.getSelectedValue());
 
       switch (type) {
         case GOOGLE_SPREADSHEET:
+          // Validate the workbook name
+          String workbookName = gsName.getText();
+          if (workbookName == null || workbookName.isEmpty()) {
+            Window.alert("You must provide a workbook name");
+            return;
+          }
+
+          // Ask for the owner's email
           UserSecurityInfo info = AggregateUI.getUI().getUserInfo();
           String ownerEmail = getOwnerEmail(info);
-          if (ownerEmail == null)
+          if (ownerEmail == null) {
+            hide();
+            Window.alert("You must provide the owner's email");
             return;
+          }
 
           secureRequest(
               SecureGWT.getServicesAdminService(),
-              (rpc, sc, cb) -> rpc.createGoogleSpreadsheet(formId, gsName.getText(), serviceOp, ownerEmail, cb),
+              (rpc, sc, cb) -> rpc.createGoogleSpreadsheet(formId, workbookName, serviceOp, ownerEmail, cb),
               NO_OP_CONSUMER,
               this::onFailure
           );
