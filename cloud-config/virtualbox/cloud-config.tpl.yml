@@ -74,6 +74,8 @@ runcmd:
   - download-aggregate-cli
 
   - apt-get -y remove openjdk-11-jre-headless
+  - unattended-upgrades
+  - apt-get -y autoremove
 
   - rm /etc/nginx/sites-enabled/default
   - mv /tmp/nginx-aggregate /etc/nginx/sites-enabled/aggregate
