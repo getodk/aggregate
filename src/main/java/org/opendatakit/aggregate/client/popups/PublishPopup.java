@@ -67,6 +67,7 @@ public final class PublishPopup extends AbstractPopupBase {
   // to hold the google spreadsheet only options
   private final FlexTable gsBar;
   private final TextBox gsName;
+  private final TextBox gsOwnerEmail;
 
   // to hold the jsonServer only options
   private final FlexTable jsBar;
@@ -121,6 +122,13 @@ public final class PublishPopup extends AbstractPopupBase {
     gsName.setText(EMPTY_STRING);
     gsName.setVisibleLength(35);
     gsBar.setWidget(1, 1, gsName);
+    gsBar.setWidget(2, 0, new HTML("<h3>Owner's email:</h3>"));
+    gsOwnerEmail = new TextBox();
+    gsOwnerEmail.setText(EMPTY_STRING);
+    gsOwnerEmail.setVisibleLength(35);
+    gsOwnerEmail.getElement().setAttribute("type", "email");
+    gsBar.setWidget(2, 1, gsOwnerEmail);
+
 
     // this is only for simple json server
     jsBar = new FlexTable();
@@ -226,12 +234,16 @@ public final class PublishPopup extends AbstractPopupBase {
             return;
           }
 
-          // Ask for the owner's email
-          UserSecurityInfo info = AggregateUI.getUI().getUserInfo();
-          String ownerEmail = getOwnerEmail(info);
-          if (ownerEmail == null) {
-            hide();
+          // Validate the owner's email
+          String ownerEmail = gsOwnerEmail.getText();
+          if (ownerEmail == null || ownerEmail.isEmpty()) {
             Window.alert("You must provide the owner's email");
+            return;
+          } else if (!validateEmail(ownerEmail)) {
+            Window.alert("Invalid owner's email");
+            return;
+          } else if (!Window.confirm("Please, confirm that the owner's email you've introduced is correct: " + ownerEmail)) {
+            gsOwnerEmail.setTitle("");
             return;
           }
 
@@ -263,18 +275,6 @@ public final class PublishPopup extends AbstractPopupBase {
     private void onFailure(Throwable cause) {
       AggregateUI.getUI().reportError(cause);
     }
-
-    private String getOwnerEmail(UserSecurityInfo info) {
-      String ownerEmail = info.getEmail();
-      if (ownerEmail == null || ownerEmail.length() == 0) {
-        try {
-          ownerEmail = UIUtils.promptForEmailAddress();
-        } catch (Exception e) {
-          ownerEmail = null; // user pressed cancel
-        }
-      }
-      return ownerEmail;
-    }
   }
 
   private class ExternalServiceTypeChangeHandler implements ChangeHandler {
@@ -283,5 +283,10 @@ public final class PublishPopup extends AbstractPopupBase {
       updateUIOptions();
     }
   }
+
+  public native static boolean validateEmail(String email) /*-{
+    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+  }-*/;
 
 }
