@@ -85,6 +85,7 @@ runcmd:
   - su postgres -c "psql -c \"CREATE DATABASE aggregate WITH OWNER aggregate\""
   - su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE aggregate TO aggregate\""
   - su postgres -c "psql -c \"CREATE SCHEMA aggregate\" aggregate"
+  - su postgres -c "psql -c \"ALTER SCHEMA aggregate OWNER TO aggregate\" aggregate"
   - su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON SCHEMA aggregate TO aggregate\" aggregate"
 
   - aggregate-cli -i -ip -y -c /root/aggregate-config.json
