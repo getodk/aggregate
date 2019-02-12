@@ -63,11 +63,11 @@ public class ClearSessionThenLoginServlet extends ServletUtilBase {
     String newUrl;
     if (isAnon) {
       // anonymous user -- go to the login page...
-      newUrl = "/multimode_login.html";
+      newUrl = cc.getWebApplicationURL("multimode_login.html");
     } else {
       // we are logged in via token-based or basic or digest auth.
       // redirect to Spring's logout url...
-      newUrl = "/" + cc.getUserService().createLogoutURL();
+      newUrl = cc.getWebApplicationURL("/" + cc.getUserService().createLogoutURL());
     }
     // preserve the query string (helps with GWT debugging)
     String query = req.getQueryString();
