@@ -31,14 +31,12 @@ import com.google.gwt.user.client.ui.TextBox;
 import java.util.function.Consumer;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.UIUtils;
 import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.aggregate.client.widgets.EnumListBox;
 import org.opendatakit.aggregate.constants.common.BinaryOption;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
-import org.opendatakit.common.security.client.UserSecurityInfo;
 
 public final class PublishPopup extends AbstractPopupBase {
 
@@ -255,11 +253,18 @@ public final class PublishPopup extends AbstractPopupBase {
           );
           break;
         case JSON_SERVER: {
+          // Validate the URL to publish to
+          String url = jsUrl.getText();
+          if (url == null || url.isEmpty()) {
+            Window.alert("You must provide a URL to publish to");
+            return;
+          }
+
           final String jsBinaryOpString = jsBinaryOptions.getSelectedValue();
           final BinaryOption jsBinaryOp = (jsBinaryOpString == null) ? null : BinaryOption.valueOf(jsBinaryOpString);
           secureRequest(
               SecureGWT.getServicesAdminService(),
-              (rpc, sc, cb) -> rpc.createSimpleJsonServer(formId, jsAuthKey.getText(), jsUrl.getText(), serviceOp, "mailto:N/A", jsBinaryOp, cb),
+              (rpc, sc, cb) -> rpc.createSimpleJsonServer(formId, jsAuthKey.getText(), url, serviceOp, "mailto:N/A", jsBinaryOp, cb),
               NO_OP_CONSUMER,
               this::onFailure
           );
