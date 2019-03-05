@@ -249,7 +249,7 @@ public final class PublishPopup extends AbstractPopupBase {
 
           secureRequest(
               SecureGWT.getServicesAdminService(),
-              (rpc, sc, cb) -> rpc.createGoogleSpreadsheet(formId, workbookName, serviceOp, ownerEmail, cb),
+              (rpc, sc, cb) -> rpc.createGoogleSpreadsheet(formId, workbookName, serviceOp, "mailto:" + ownerEmail, cb),
               NO_OP_CONSUMER,
               this::onFailure
           );
