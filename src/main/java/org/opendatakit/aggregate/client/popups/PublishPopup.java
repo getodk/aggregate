@@ -23,6 +23,7 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -30,14 +31,12 @@ import com.google.gwt.user.client.ui.TextBox;
 import java.util.function.Consumer;
 import org.opendatakit.aggregate.client.AggregateUI;
 import org.opendatakit.aggregate.client.SecureGWT;
-import org.opendatakit.aggregate.client.UIUtils;
 import org.opendatakit.aggregate.client.widgets.AggregateButton;
 import org.opendatakit.aggregate.client.widgets.ClosePopupButton;
 import org.opendatakit.aggregate.client.widgets.EnumListBox;
 import org.opendatakit.aggregate.constants.common.BinaryOption;
 import org.opendatakit.aggregate.constants.common.ExternalServicePublicationOption;
 import org.opendatakit.aggregate.constants.common.ExternalServiceType;
-import org.opendatakit.common.security.client.UserSecurityInfo;
 
 public final class PublishPopup extends AbstractPopupBase {
 
@@ -66,6 +65,7 @@ public final class PublishPopup extends AbstractPopupBase {
   // to hold the google spreadsheet only options
   private final FlexTable gsBar;
   private final TextBox gsName;
+  private final TextBox gsOwnerEmail;
 
   // to hold the jsonServer only options
   private final FlexTable jsBar;
@@ -120,6 +120,13 @@ public final class PublishPopup extends AbstractPopupBase {
     gsName.setText(EMPTY_STRING);
     gsName.setVisibleLength(35);
     gsBar.setWidget(1, 1, gsName);
+    gsBar.setWidget(2, 0, new HTML("<h3>Owner's email:</h3>"));
+    gsOwnerEmail = new TextBox();
+    gsOwnerEmail.setText(EMPTY_STRING);
+    gsOwnerEmail.setVisibleLength(35);
+    gsOwnerEmail.getElement().setAttribute("type", "email");
+    gsBar.setWidget(2, 1, gsOwnerEmail);
+
 
     // this is only for simple json server
     jsBar = new FlexTable();
@@ -202,35 +209,62 @@ public final class PublishPopup extends AbstractPopupBase {
 
     @Override
     public void onClick(ClickEvent event) {
-
-      String externalServiceTypeString = serviceType.getSelectedValue();
-      ExternalServiceType type = (externalServiceTypeString == null) ? null :
-          ExternalServiceType.valueOf(externalServiceTypeString);
-
-      String serviceOpString = esOptions.getSelectedValue();
-      ExternalServicePublicationOption serviceOp = (serviceOpString == null) ? null :
-          ExternalServicePublicationOption.valueOf(serviceOpString);
-
-      UserSecurityInfo info = AggregateUI.getUI().getUserInfo();
-      String ownerEmail = getOwnerEmail(info);
-      if (ownerEmail == null)
+      // Validate common required fields
+      if (serviceType.getSelectedValue() == null || serviceType.getSelectedValue().isEmpty()) {
+        Window.alert("You need to select a publisher type from the dropdown");
         return;
+      }
+
+      if (esOptions.getSelectedValue() == null || esOptions.getSelectedValue().isEmpty()) {
+        Window.alert("You need to select which submissions to publish");
+        return;
+      }
+
+      ExternalServiceType type = ExternalServiceType.valueOf(serviceType.getSelectedValue());
+      ExternalServicePublicationOption serviceOp = ExternalServicePublicationOption.valueOf(esOptions.getSelectedValue());
 
       switch (type) {
         case GOOGLE_SPREADSHEET:
+          // Validate the workbook name
+          String workbookName = gsName.getText();
+          if (workbookName == null || workbookName.isEmpty()) {
+            Window.alert("You must provide a workbook name");
+            return;
+          }
+
+          // Validate the owner's email
+          String ownerEmail = gsOwnerEmail.getText();
+          if (ownerEmail == null || ownerEmail.isEmpty()) {
+            Window.alert("You must provide the owner's email");
+            return;
+          } else if (!validateEmail(ownerEmail)) {
+            Window.alert("Invalid owner's email");
+            return;
+          } else if (!Window.confirm("Please, confirm that the owner's email you've introduced is correct: " + ownerEmail)) {
+            gsOwnerEmail.setTitle("");
+            return;
+          }
+
           secureRequest(
               SecureGWT.getServicesAdminService(),
-              (rpc, sc, cb) -> rpc.createGoogleSpreadsheet(formId, gsName.getText(), serviceOp, ownerEmail, cb),
+              (rpc, sc, cb) -> rpc.createGoogleSpreadsheet(formId, workbookName, serviceOp, "mailto:" + ownerEmail, cb),
               NO_OP_CONSUMER,
               this::onFailure
           );
           break;
         case JSON_SERVER: {
+          // Validate the URL to publish to
+          String url = jsUrl.getText();
+          if (url == null || url.isEmpty()) {
+            Window.alert("You must provide a URL to publish to");
+            return;
+          }
+
           final String jsBinaryOpString = jsBinaryOptions.getSelectedValue();
           final BinaryOption jsBinaryOp = (jsBinaryOpString == null) ? null : BinaryOption.valueOf(jsBinaryOpString);
           secureRequest(
               SecureGWT.getServicesAdminService(),
-              (rpc, sc, cb) -> rpc.createSimpleJsonServer(formId, jsAuthKey.getText(), jsUrl.getText(), serviceOp, ownerEmail, jsBinaryOp, cb),
+              (rpc, sc, cb) -> rpc.createSimpleJsonServer(formId, jsAuthKey.getText(), url, serviceOp, "mailto:N/A", jsBinaryOp, cb),
               NO_OP_CONSUMER,
               this::onFailure
           );
@@ -246,18 +280,6 @@ public final class PublishPopup extends AbstractPopupBase {
     private void onFailure(Throwable cause) {
       AggregateUI.getUI().reportError(cause);
     }
-
-    private String getOwnerEmail(UserSecurityInfo info) {
-      String ownerEmail = info.getEmail();
-      if (ownerEmail == null || ownerEmail.length() == 0) {
-        try {
-          ownerEmail = UIUtils.promptForEmailAddress();
-        } catch (Exception e) {
-          ownerEmail = null; // user pressed cancel
-        }
-      }
-      return ownerEmail;
-    }
   }
 
   private class ExternalServiceTypeChangeHandler implements ChangeHandler {
@@ -266,5 +288,10 @@ public final class PublishPopup extends AbstractPopupBase {
       updateUIOptions();
     }
   }
+
+  public native static boolean validateEmail(String email) /*-{
+    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+  }-*/;
 
 }
