@@ -554,7 +554,7 @@ The installer will generate a script that can be run on the database server to e
           <description>Database username:</description>
           <explanation></explanation>
           <value></value>
-          <default>odk_user</default>
+          <default>aggregate</default>
           <allowEmptyValue>0</allowEmptyValue>
           <width>30</width>
         </stringParameter>
@@ -602,7 +602,7 @@ The installer will generate a script that can be run on the database server to c
           <description>Database Name:</description>
           <explanation></explanation>
           <value></value>
-          <default>odk_prod</default>
+          <default>aggregate</default>
           <allowEmptyValue>0</allowEmptyValue>
           <width>30</width>
         </stringParameter>
@@ -611,7 +611,7 @@ The installer will generate a script that can be run on the database server to c
           <description>Database Schema Name:</description>
           <explanation></explanation>
           <value></value>
-          <default>odk_prod</default>
+          <default>aggregate</default>
           <allowEmptyValue>0</allowEmptyValue>
           <width>30</width>
           <ruleList>
@@ -656,7 +656,7 @@ The Windows user or group will be granted the permissions to manage and write in
           <description>Database Name:</description>
           <explanation></explanation>
           <value></value>
-          <default>odk_prod</default>
+          <default>aggregate</default>
           <allowEmptyValue>0</allowEmptyValue>
           <width>30</width>
         </stringParameter>
@@ -665,7 +665,7 @@ The Windows user or group will be granted the permissions to manage and write in
           <description>Database Schema Name:</description>
           <explanation></explanation>
           <value></value>
-          <default>odk_prod</default>
+          <default>aggregate</default>
           <allowEmptyValue>0</allowEmptyValue>
           <width>30</width>
         </stringParameter>
@@ -675,7 +675,7 @@ The Windows user or group will be granted the permissions to manage and write in
           <explanation>
             <![CDATA[Enter the Domain\Username or group that the Tomcat 8 server will run as and use to access the database.]]></explanation>
           <value></value>
-          <default>odk_prod</default>
+          <default>aggregate</default>
           <allowEmptyValue>0</allowEmptyValue>
           <width>30</width>
         </stringParameter>

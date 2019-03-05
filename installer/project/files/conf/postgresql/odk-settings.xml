@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:task="http://www.springframework.org/schema/task"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
            http://www.springframework.org/schema/task
            http://www.springframework.org/schema/task/spring-task-4.1.xsd">
 
-  <bean
-      class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+  <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
     <property name="locations">
       <list>
         <value>classpath:jdbc.properties</value>
@@ -34,10 +33,8 @@
     <property name="testOnBorrow" value="true"/>
   </bean>
 
-  <bean id="datastore"
-        class="org.opendatakit.common.persistence.engine.pgres.DatastoreImpl">
+  <bean id="datastore" class="org.opendatakit.common.persistence.engine.pgres.DatastoreImpl">
     <property name="dataSource" ref="dataSource"/>
-    <!--		schemaName defaults to the database name.  Override this with: -->
     <property name="schemaName" value="${jdbc.schema}"/>
   </bean>
 
@@ -57,7 +54,7 @@
   <bean id="user_service" class="org.opendatakit.common.security.spring.UserServiceImpl">
     <property name="datastore" ref="datastore"/>
     <property name="realm" ref="realm"/>
-    <property name="superUserEmail" value="${security.server.superUser}"/>
+    <property name="superUserEmail" value=""/>
     <property name="superUserUsername" value="${security.server.superUserUsername}"/>
   </bean>
 
@@ -70,12 +67,10 @@
   <!--  change the background scheduler to only have three worker threads. Tasks will be queued. -->
   <task:scheduler id="task_scheduler" pool-size="3"/>
 
-  <bean id="worksheet_creator"
-        class="org.opendatakit.aggregate.task.WorksheetCreator"/>
+  <bean id="worksheet_creator" class="org.opendatakit.aggregate.task.WorksheetCreator"/>
   <bean id="form_delete" class="org.opendatakit.aggregate.task.FormDelete"/>
   <bean id="purge_submissions" class="org.opendatakit.aggregate.task.PurgeOlderSubmissions"/>
-  <bean id="upload_task"
-        class="org.opendatakit.aggregate.task.UploadSubmissions"/>
+  <bean id="upload_task" class="org.opendatakit.aggregate.task.UploadSubmissions"/>
   <bean id="kml_task" class="org.opendatakit.aggregate.task.KmlGenerator"/>
   <bean id="csv_task" class="org.opendatakit.aggregate.task.CsvGenerator"/>
   <bean id="json_file_task" class="org.opendatakit.aggregate.task.JsonFileGenerator"/>

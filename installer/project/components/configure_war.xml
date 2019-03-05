@@ -101,67 +101,121 @@
       <actionList>
         <propertiesFileSet>
           <file>${temp_dir}/conf/${platform}/jdbc.properties</file>
-          <key>jdbc.help.about</key>
-          <value>Generated on ${creation.timestamp} for ${instance_display_name} ${product_fullname} ${product_version}</value>
+          <key>installer</key>
+          <value>Dummy key created by the installer</value>
         </propertiesFileSet>
       </actionList>
     </actionGroup>
     <actionGroup>
-      <!-- Sets the JDBC properties in jdbc.properties for MySQL and PostgreSQL -->
-      <explanation>Set jdbc properties</explanation>
-      <progressText>Setting jdbc properties</progressText>
+      <!-- Set PostgreSQL JDBC configuration -->
+      <explanation>Set PostgreSQL jdbc properties</explanation>
+      <progressText>Setting PostgreSQL jdbc properties</progressText>
       <actionList>
         <propertiesFileSet>
-          <file>${temp_dir}/conf/${platform}/jdbc.properties</file>
-          <key>jdbc.url</key>
-          <value>jdbc:${platform}://${database_host_port}/${jdbc_database}?autoDeserialize=true</value>
+          <file>${temp_dir}/conf/postgresql/jdbc.properties</file>
+          <key>jdbc.driverClassName</key>
+          <value>org.postgresql.Driver</value>
         </propertiesFileSet>
         <propertiesFileSet>
-          <file>${temp_dir}/conf/${platform}/jdbc.properties</file>
+          <file>${temp_dir}/conf/postgresql/jdbc.properties</file>
+          <key>jdbc.resourceName</key>
+          <value>jdbc/aggregate</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${temp_dir}/conf/postgresql/jdbc.properties</file>
+          <key>jdbc.url</key>
+          <value>jdbc:postgresql://${database_host_port}/${jdbc_database}?autoDeserialize=true</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${temp_dir}/conf/postgresql/jdbc.properties</file>
           <key>jdbc.username</key>
           <value>${jdbc_username}</value>
         </propertiesFileSet>
         <propertiesFileSet>
-          <file>${temp_dir}/conf/${platform}/jdbc.properties</file>
+          <file>${temp_dir}/conf/postgresql/jdbc.properties</file>
           <key>jdbc.password</key>
           <value>${jdbc_password}</value>
         </propertiesFileSet>
         <propertiesFileSet>
-          <file>${temp_dir}/conf/${platform}/jdbc.properties</file>
+          <file>${temp_dir}/conf/postgresql/jdbc.properties</file>
           <key>jdbc.schema</key>
           <value>${jdbc_schema}</value>
         </propertiesFileSet>
       </actionList>
       <ruleList>
-        <ruleGroup>
-          <ruleEvaluationLogic>or</ruleEvaluationLogic>
-          <ruleList>
-            <compareText>
-              <logic>equals</logic>
-              <text>${platform}</text>
-              <value>mysql</value>
-            </compareText>
-            <compareText>
-              <logic>equals</logic>
-              <text>${platform}</text>
-              <value>postgresql</value>
-            </compareText>
-          </ruleList>
-        </ruleGroup>
+        <compareText>
+          <logic>equals</logic>
+          <text>${platform}</text>
+          <value>postgresql</value>
+        </compareText>
       </ruleList>
     </actionGroup>
     <actionGroup>
-      <!-- Sets the JDBC properties in jdbc.properties for SQLServer -->
+      <!-- Set MySQL JDBC configuration -->
       <explanation>Set jdbc properties</explanation>
       <progressText>Setting jdbc properties</progressText>
       <actionList>
         <propertiesFileSet>
-          <file>${temp_dir}/conf/${platform}/jdbc.properties</file>
+          <file>${temp_dir}/conf/mysql/jdbc.properties</file>
+          <key>jdbc.driverClassName</key>
+          <value>com.mysql.jdbc.Driver</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${temp_dir}/conf/mysql/jdbc.properties</file>
+          <key>jdbc.resourceName</key>
+          <value>jdbc/aggregate</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${temp_dir}/conf/mysql/jdbc.properties</file>
+          <key>jdbc.url</key>
+          <value>jdbc:mysql://${database_host_port}/${jdbc_database}?autoDeserialize=true</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${temp_dir}/conf/mysql/jdbc.properties</file>
+          <key>jdbc.username</key>
+          <value>${jdbc_username}</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${temp_dir}/conf/mysql/jdbc.properties</file>
+          <key>jdbc.password</key>
+          <value>${jdbc_password}</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${temp_dir}/conf/mysql/jdbc.properties</file>
+          <key>jdbc.schema</key>
+          <value>${jdbc_schema}</value>
+        </propertiesFileSet>
+      </actionList>
+      <ruleList>
+        <compareText>
+          <logic>equals</logic>
+          <text>${platform}</text>
+          <value>mysql</value>
+        </compareText>
+      </ruleList>
+    </actionGroup>
+    <actionGroup>
+      <!-- Set SQLServer JDBC configuration -->
+      <explanation>Set jdbc properties</explanation>
+      <progressText>Setting jdbc properties</progressText>
+      <actionList>
+        <propertiesFileSet>
+          <file>${temp_dir}/conf/sqlserver/jdbc.properties</file>
+          <key>jdbc.driverClassName</key>
+          <value>com.microsoft.sqlserver.jdbc.SQLServerDriver</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${temp_dir}/conf/sqlserver/jdbc.properties</file>
+          <key>jdbc.resourceName</key>
+          <value>jdbc/aggregate</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${temp_dir}/conf/sqlserver/jdbc.properties</file>
           <key>jdbc.url</key>
           <value>${jdbc_url}</value>
         </propertiesFileSet>
         <propertiesFileSet>
-          <file>${temp_dir}/conf/${platform}/jdbc.properties</file>
+          <file>${temp_dir}/conf/sqlserver/jdbc.properties</file>
           <key>jdbc.schema</key>
           <value>${jdbc_schema}</value>
         </propertiesFileSet>
@@ -254,6 +308,11 @@
         </actionGroup>
         <propertiesFileSet>
           <file>${temp_dir}/conf/common/security.properties</file>
+          <key>security.server.forceHttpsLinks</key>
+          <value>false</value>
+        </propertiesFileSet>
+        <propertiesFileSet>
+          <file>${temp_dir}/conf/common/security.properties</file>
           <key>security.server.port</key>
           <value>${http_port}</value>
         </propertiesFileSet>
@@ -269,11 +328,6 @@
         </propertiesFileSet>
         <propertiesFileSet>
           <file>${temp_dir}/conf/common/security.properties</file>
-          <key>security.server.superUser</key>
-          <value></value>
-        </propertiesFileSet>
-        <propertiesFileSet>
-          <file>${temp_dir}/conf/common/security.properties</file>
           <key>security.server.superUserUsername</key>
           <value>${username}</value>
         </propertiesFileSet>
@@ -284,9 +338,8 @@
         </propertiesFileSet>
         <propertiesFileSet>
           <file>${temp_dir}/conf/common/security.properties</file>
-          <key>security.help.about</key>
-          <value>
-            <![CDATA[auto-generated on ${creation.timestamp} for ${instance_display_name} ${product_fullname} ${product_version}]]></value>
+          <key>security.server.checkHostnames</key>
+          <value>true</value>
         </propertiesFileSet>
       </actionList>
     </actionGroup>
