@@ -9,7 +9,7 @@
   - Only then clone your fork of Aggregate - included .jar files only download correctly with Git LFS. See [Getting the code](https://github.com/opendatakit/aggregate#getting-the-code).
   - Install IntelliJ IDEA and import project as instructed to let IDEA download, build, and configure sources. See [Running the project - Import](https://github.com/opendatakit/aggregate#import)
 
-  *Note*: this is a gentle reminder to follow the main [README](https://github.com/opendatakit/aggregate), not a comprehensive setup guide in itself. However, please note that is _not_ necessary to copy the `.example` configuration files - in fact, the build script overwrites any values set in `security.properties` and `jdbc.properties`, anyway. 
+  *Note*: this is a gentle reminder to follow the main [README](https://github.com/opendatakit/aggregate), not a comprehensive setup guide in itself. However, please note that it is _not_ necessary to copy the `.example` configuration files - in fact, the build script overwrites any values set in `security.properties` and `jdbc.properties`, anyway. 
   
   The current recommended way to configure ODK Aggregate database settings is through [environmental variables](#configuration-parameters).
 
