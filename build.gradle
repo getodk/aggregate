@@ -192,7 +192,9 @@ task("checkConf") {
         "odk-settings.xml"
     ].findAll({ filename -> !new File("${projectDir}/src/main/resources/${filename}").exists() })
     if (!missingFiles.isEmpty())
-      throw new GradleException("Missing configuration files at src/main/resources: ${missingFiles}")
+      if(!project.gradle.startParameter.taskRequests.args[0].any{it.contains("docker")}){
+        throw new GradleException("Missing configuration files at src/main/resources: ${missingFiles}")
+      }
   }
 }
 

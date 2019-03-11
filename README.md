@@ -76,7 +76,7 @@ Aggregate supports a variety of database engines, but we strongly recommend Post
 
 - Copy the `jdbc.properties.example`, `odk-settings.xml.example`, and `security.properties.example` files at `/src/main/resources` to the same location, removing the `.example` extension.
 
-  If you have followed the database configuration steps above, you don't need to make any change in these files. Otherwise, head to the [Aggregate configuration guide](docs/aggregate-config.md) and make the required changes for your environment.
+  If you have followed the database configuration steps above, you don't need to make any change in these files. Otherwise, head to the [Aggregate configuration guide](docs/aggregate-config.md) and make the required changes for your environment. Note that if you are running in Docker this step is not necessary as the build scripts copy those files for you and automatically override any values set in those files. See [here](docs/build-and-run-a-docker-image.md).
   
 - Start a local development Aggregate server with `./gradlew appRunWar`
 
