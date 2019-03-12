@@ -4,13 +4,16 @@ AGGREGATE_CONF_DIR=/usr/local/tomcat/webapps/ROOT/WEB-INF/classes
 SECURITY_PROPS=${AGGREGATE_CONF_DIR}/security.properties
 JDBC_PROPS=${AGGREGATE_CONF_DIR}/jdbc.properties
 TOMCAT_CONF=/usr/local/tomcat/conf/server.xml
-AGGREGATE_HOST=${AGGREGATE_HOST:-""}
-DB_HOST=${DB_HOST:-localhost}
-DB_PORT=${DB_PORT:-"5432"}
-DB_NAME=${DB_NAME:-"aggregate"}
-DB_SCHEMA=${DB_SCHEMA:-"aggregate"}
-DB_USERNAME=${DB_USERNAME:-"aggregate"}
-DB_PASSWORD=${DB_PASSWORD:-"aggregate"}
+
+if [ -f "/etc/config/jdbc.properties" ]; then 
+  rm  ${JDBC_PROPS}
+  ln -s /etc/config/jdbc.properties ${JDBC_PROPS}
+fi
+
+if [ -f "/etc/config/security.properties" ]; then 
+  rm  ${SECURITY_PROPS}
+  ln -s /etc/config/security.properties ${SECURITY_PROPS}
+fi
 
 replace() {
 	declare file="$1" s="$2" r="$3"
@@ -36,10 +39,21 @@ if [ ! -z ${DB_HOST} ] && [ ! -z ${DB_PORT} ]; then
   replace ${JDBC_PROPS} "^jdbc\.url=jdbc\\\:postgresql\\\:\/\/.+\/" "jdbc.url=jdbc\\\:postgresql\\\:\/\/${DB_HOST}\\\:${DB_PORT}\/"
 fi
 
-replace ${JDBC_PROPS} "^jdbc\.url=(.+)\/.+$" "jdbc.url=\1\/${DB_NAME}?autoDeserialize=true"
-replace ${JDBC_PROPS} "^jdbc\.schema=.*$" "jdbc.schema=${DB_SCHEMA}"
-replace ${JDBC_PROPS} "^jdbc\.username=.*$" "jdbc.username=${DB_USERNAME}"
-replace ${JDBC_PROPS} "^jdbc\.password=.*$" "jdbc.password=${DB_PASSWORD}"
+if [ ! -z ${DB_NAME} ]; then
+  replace ${JDBC_PROPS} "^jdbc\.url=(.+)\/.+$" "jdbc.url=\1\/${DB_NAME}?autoDeserialize=true"
+fi
+
+if [ ! -z ${DB_SCHEMA} ]; then
+  replace ${JDBC_PROPS} "^jdbc\.schema=.*$" "jdbc.schema=${DB_SCHEMA}"
+fi
+
+if [ ! -z ${DB_USERNAME} ]; then
+  replace ${JDBC_PROPS} "^jdbc\.username=.*$" "jdbc.username=${DB_USERNAME}"
+fi
+
+if [ ! -z ${DB_PASSWORD} ]; then
+  replace ${JDBC_PROPS} "^jdbc\.password=.*$" "jdbc.password=${DB_PASSWORD}"
+fi
 
 echo
 echo
@@ -48,11 +62,16 @@ echo
 echo
 echo "Running Aggregate with the following config parameters:"
 echo
-echo "Aggregate FQDN:           ${AGGREGATE_HOST}"
-echo "Database host:port:       ${DB_HOST}:${DB_PORT}"
-echo "Database name.schema:     ${DB_NAME}.${DB_SCHEMA}"
-echo "Database username:        ${DB_USERNAME} (password hidden)"
 echo
+echo "${AGGREGATE_CONF_DIR}/jdbc.properties:"
+echo "-----"
+cat ${JDBC_PROPS} # todo hide the password
+echo
+echo "${AGGREGATE_CONF_DIR}/security.properties:"
+echo "-----"
+cat ${SECURITY_PROPS}
+echo 
+echo 
 echo "Tomcat conf at:           ${TOMCAT_CONF}"
 echo "Aggregate conf files at:  ${AGGREGATE_CONF_DIR}"
 echo
@@ -62,4 +81,7 @@ echo
 echo
 echo
 echo
+
+exit 0
+
 catalina.sh run
