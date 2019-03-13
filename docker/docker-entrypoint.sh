@@ -1,9 +1,25 @@
 #!/usr/bin/env bash
 
 AGGREGATE_CONF_DIR=/usr/local/tomcat/webapps/ROOT/WEB-INF/classes
+ODK_SETTINGS=${AGGREGATE_CONF_DIR}/odk-settings.xml
 SECURITY_PROPS=${AGGREGATE_CONF_DIR}/security.properties
 JDBC_PROPS=${AGGREGATE_CONF_DIR}/jdbc.properties
 TOMCAT_CONF=/usr/local/tomcat/conf/server.xml
+
+if [ -f "/etc/config/server.xml" ]; then 
+  rm  ${TOMCAT_CONF}
+  ln -s /etc/config/server.xml ${TOMCAT_CONF}
+fi
+
+if [ -f "/etc/config/odk-settings.xml" ]; then 
+  rm  ${ODK_SETTINGS}
+  ln -s /etc/config/odk-settings.xml ${ODK_SETTINGS}
+fi
+
+if [ -f "/etc/config/security.properties" ]; then 
+  rm  ${SECURITY_PROPS}
+  ln -s /etc/config/security.properties ${SECURITY_PROPS}
+fi
 
 if [ -f "/etc/config/jdbc.properties" ]; then 
   rm  ${JDBC_PROPS}
