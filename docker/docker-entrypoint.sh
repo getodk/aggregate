@@ -65,7 +65,7 @@ echo
 echo
 echo "${AGGREGATE_CONF_DIR}/jdbc.properties:"
 echo "-----"
-cat ${JDBC_PROPS} # todo hide the password
+cat ${JDBC_PROPS} | sed -E -e "s/^jdbc\.password=.*$/jdbc.password=<hidden>/g"
 echo
 echo "${AGGREGATE_CONF_DIR}/security.properties:"
 echo "-----"
