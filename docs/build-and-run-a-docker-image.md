@@ -98,7 +98,7 @@ If you are using PostgreSQL (recommended), you can set the following environment
 
 ## Config Files
 
-For complete control of all of Aggregate's configuration values, you can also pass a copy of the `security.properties` and `jdbc.properties` files to Docker via a bind mount into the `/etc/config` directory in the Docker image. 
+For complete control of all of Aggregate's configuration values, you can also pass a copy of the `security.properties` and `jdbc.properties` files to Docker [via a bind mount](https://docs.docker.com/storage/bind-mounts/) into the `/etc/config` directory in the Docker image. 
 
 Follow the directions in the main `README` regarding copying the `/src/main/resources/jdbc.properties.example`, `odk-settings.xml.example` and `security.properties` files, and pass them to Docker kind of like so:
 
@@ -110,6 +110,6 @@ docker run -d -p 8080:8080 -it \
 --name=aggregate aggregate:latest
 ```
 
-Of course, you can place these files anywhere on your server that you wish, as long as you update the "source" directory above. You can also use this technique along with any Docker orchestration tool that supports mounting configuration values into files on the filesystem, [such as Kubernetes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#populate-a-volume-with-data-stored-in-a-configmap). Just make sure the files are always mounted into `/etc/config`, as the `docker-entrypoint.sh` script makes symlinks from those directories into proper directory for Aggregate. You can also pass a custom Tomcat `server.xml`, though you shouldn't need to do this. 
+Of course, you can place these files anywhere on your server that you wish, as long as you update the "source" path above. You can also use this technique along with any Docker orchestration tool that supports mounting configuration values into files on the filesystem, [such as Kubernetes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#populate-a-volume-with-data-stored-in-a-configmap). Just make sure the files are always mounted into `/etc/config`, as the `docker-entrypoint.sh` script makes symlinks from there into proper directory for Aggregate. You can also pass a custom Tomcat `server.xml`, though you shouldn't need to do this. 
 
-You can also continue to use the environmental variables technique above to override any values set in the files.
+Finally, you can also continue to use the environmental variables technique above to override any values set in the files.
