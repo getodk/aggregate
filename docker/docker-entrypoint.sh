@@ -82,6 +82,4 @@ echo
 echo
 echo
 
-exit 0
-
 catalina.sh run
