@@ -9,10 +9,10 @@
   - Only then clone your fork of Aggregate - included .jar files only download correctly with Git LFS. See [Getting the code](https://github.com/opendatakit/aggregate#getting-the-code).
   - Install IntelliJ IDEA and import project as instructed to let IDEA download, build, and configure sources. See [Running the project - Import](https://github.com/opendatakit/aggregate#import)
 
-  *Note*: this is a gentle reminder to follow the main [README](https://github.com/opendatakit/aggregate), not a comprehensive setup guide in itself. However, please note that it is _not_ necessary to copy the `.example` configuration files - in fact, the build script overwrites any values set in `security.properties` and `jdbc.properties`, anyway. 
+  *Note*: this is a gentle reminder to follow the main [README](https://github.com/opendatakit/aggregate), not a comprehensive setup guide in itself. 
   
-  The current recommended way to configure ODK Aggregate database settings is through [environmental variables](#configuration-parameters).
-
+  However, please note that if you are using [environmental variables](#Environmental-Variables) to configure Aggregate, it is _not_ necessary to copy the `.example` configuration files - in fact, the build script overwrites any values set in `security.properties` and `jdbc.properties`, anyway. If you would like to use these files instead of environmental variables to configure Aggregate, see the ["config files" section below](#config-files).  
+  
 ## Quick start
 
 This Aggregate Docker image works by using an external running PostgreSQL 9.6 database. The following quick start steps assume you have access to a PostgreSQL server and it's the first time you will be running Aggregate. 
@@ -107,9 +107,9 @@ docker run -d -p 8080:8080 -it \
 --mount type=bind,source="$(pwd)"/src/main/resources/odk-settings.xml,target=/etc/config/odk-settings.xml,readonly \
 --mount type=bind,source="$(pwd)"/src/main/resources/jdbc.properties,target=/etc/config/jdbc.properties,readonly \
 --mount type=bind,source="$(pwd)"/src/main/resources/security.properties,target=/etc/config/security.properties,readonly \
---name=aggregate aggregate:latest
+--name=aggregate aggregate:v2.0.1-10-g9c6afd90-dirty
 ```
 
-Of course, you can place these files anywhere on your server that you wish, as long as you update the "source" path above. You can also use this technique along with any Docker orchestration tool that supports mounting configuration values into files on the filesystem, [such as Kubernetes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#populate-a-volume-with-data-stored-in-a-configmap). Just make sure the files are always mounted into `/etc/config`, as the `docker-entrypoint.sh` script makes symlinks from there into proper directory for Aggregate. You can also pass a custom Tomcat `server.xml`, though you shouldn't need to do this. 
+Of course, you can place these files anywhere on your server that you wish, as long as you update the "source" path above. You can also use this technique along with any Docker orchestration tool that supports mounting configuration values into files on the filesystem, [such as Kubernetes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#populate-a-volume-with-data-stored-in-a-configmap). Just make sure the files are always mounted into `/etc/config`, as the `docker-entrypoint.sh` script makes symlinks from there into proper directory for Aggregate. You can also pass a custom Tomcat `server.xml`, though you shouldn't need to do this. Finally, you can also mount a Docker volume (not a bind )
 
-Finally, you can also continue to use the environmental variables technique above to override any values set in the files.
+You can also continue to use the environmental variables technique above to override any values set in the files.
