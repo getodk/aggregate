@@ -43,7 +43,7 @@ Aggregate supports a variety of database engines, but we strongly recommend Post
 
 3. Stop the server with `./gradlew postgresqlComposeDown`
 
-For more information see [here for Docker](docs/build-and-run-a-docker-image.md) and [here for Docker Compose]((docs/build-and-run-with-docker-compose.md)).
+For more information see [here for Docker](docs/build-and-run-a-docker-image.md) and [here for Docker Compose]((docs/build-and-run-with-docker-compose.md).
 
 ### Local PostgreSQL server
 
