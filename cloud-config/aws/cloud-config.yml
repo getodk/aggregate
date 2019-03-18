@@ -13,6 +13,7 @@ packages:
   - openjdk-8-jdk-headless
   - nginx
   - software-properties-common
+  - awscli
 
 write_files:
   - path: /root/aggregate-config.json
@@ -62,11 +63,16 @@ write_files:
 
       unzip /tmp/aggregate-cli.zip -d /usr/local/bin
       chmod +x /usr/local/bin/aggregate-cli
+  - path: /root/.aws/config
+    permissions: '0644'
+    content: |
+      [default]
+      region = foobar
+      output = text
 
 runcmd:
   - download-aggregate-cli
 
-  - apt-get -y remove openjdk-11-jre-headless
   - unattended-upgrades
   - apt-get -y autoremove
 
@@ -86,8 +92,10 @@ runcmd:
   - su postgres -c "psql -c \"ALTER SCHEMA aggregate OWNER TO aggregate\" aggregate"
   - su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON SCHEMA aggregate TO aggregate\" aggregate"
 
-  - sed -i -e 's/foo\.bar/'"$(curl -s http://169.254.169.254/metadata/v1/hostname)"'/' /root/aggregate-config.json
-  - sed -i -e 's/foo\.bar/'"$(curl -s http://169.254.169.254/metadata/v1/hostname)"'/' /etc/nginx/sites-enabled/aggregate
+  - sed -i -e 's/foobar/'"$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone/ | sed 's/.$//')"'/' /root/.aws/config
+  - aws ec2 describe-tags | grep "aggregate.hostname" | grep "$(curl -s http://169.254.169.254/latest/meta-data/instance-id)" | awk -F' ' '{print $5}' > /tmp/domain-name
+  - sed -i -e 's/foo\.bar/'"$(cat /tmp/domain-name)"'/' /root/aggregate-config.json
+  - sed -i -e 's/foo\.bar/'"$(cat /tmp/domain-name)"'/' /etc/nginx/sites-enabled/aggregate
 
   - aggregate-cli -i -y -c /root/aggregate-config.json
 
