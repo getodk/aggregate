@@ -32,7 +32,7 @@ ODK Aggregate can be deployed on an Apache Tomcat server, or any servlet 2.5-com
 ## Setting up the database
 
 Aggregate supports a variety of database engines, but we strongly recommend PostgreSQL. If you wish to use MySQL, see the [database configurations](docs/database-configurations.md) guide.
- 
+
 ### PostgreSQL with Docker
 
 1. Install [Docker](https://www.docker.com) and [Docker Compose](https://docs.docker.com/compose)
@@ -42,6 +42,8 @@ Aggregate supports a variety of database engines, but we strongly recommend Post
     Check that the port number **5432** is not used by any other service in your computer. You can change this editing the `ports` section of the `db/postgresql/docker-compose.yml` configuration file. Be sure to check the documentation: [Compose file version 3 reference - Ports section](https://docs.docker.com/compose/compose-file/#ports).
 
 3. Stop the server with `./gradlew postgresqlComposeDown`
+
+For more information see [here for Docker](docs/build-and-run-a-docker-image.md) and [here for Docker Compose]((docs/build-and-run-with-docker-compose.md).
 
 ### Local PostgreSQL server
 
@@ -76,7 +78,9 @@ Aggregate supports a variety of database engines, but we strongly recommend Post
 
 - Copy the `jdbc.properties.example`, `odk-settings.xml.example`, and `security.properties.example` files at `/src/main/resources` to the same location, removing the `.example` extension.
 
-  If you have followed the database configuration steps above, you don't need to make any change in these files. Otherwise, head to the [Aggregate configuration guide](docs/aggregate-config.md) and make the required changes for your environment. Note that if you are running in Docker this step is not necessary as the build scripts copy those files for you and automatically override any values set in those files. See [here](docs/build-and-run-a-docker-image.md).
+  If you have followed the database configuration steps above, you don't need to make any change in these files. Otherwise, head to the [Aggregate configuration guide](docs/aggregate-config.md) and make the required changes for your environment. 
+
+  If you are running the project in Docker, see [here](docs/build-and-run-a-docker-image.md) for the next steps.
   
 - Start a local development Aggregate server with `./gradlew appRunWar`
 
