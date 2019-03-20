@@ -8,27 +8,27 @@ TOMCAT_CONF=/usr/local/tomcat/conf/server.xml
 
 if [ -f "/etc/config/server.xml" ]; then 
   rm  ${TOMCAT_CONF}
-  ln -s /etc/config/server.xml ${TOMCAT_CONF}
+  cp /etc/config/server.xml ${TOMCAT_CONF}
 fi
 
 if [ -f "/etc/config/odk-settings.xml" ]; then 
   rm  ${ODK_SETTINGS}
-  ln -s /etc/config/odk-settings.xml ${ODK_SETTINGS}
+  cp /etc/config/odk-settings.xml ${ODK_SETTINGS}
 fi
 
 if [ -f "/etc/config/security.properties" ]; then 
   rm  ${SECURITY_PROPS}
-  ln -s /etc/config/security.properties ${SECURITY_PROPS}
+  cp /etc/config/security.properties ${SECURITY_PROPS}
 fi
 
 if [ -f "/etc/config/jdbc.properties" ]; then 
   rm  ${JDBC_PROPS}
-  ln -s /etc/config/jdbc.properties ${JDBC_PROPS}
+  cp /etc/config/jdbc.properties ${JDBC_PROPS}
 fi
 
 if [ -f "/etc/config/security.properties" ]; then 
   rm  ${SECURITY_PROPS}
-  ln -s /etc/config/security.properties ${SECURITY_PROPS}
+  cp /etc/config/security.properties ${SECURITY_PROPS}
 fi
 
 replace() {
