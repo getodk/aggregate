@@ -30,6 +30,8 @@ cat << EOF > /root/aggregate-config.json
 }
 EOF
 
+DEBIAN_FRONTEND=noninteractive
+
 add-apt-repository -y universe
 add-apt-repository -y ppa:certbot/certbot
 apt-get -y update

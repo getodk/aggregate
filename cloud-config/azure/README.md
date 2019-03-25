@@ -1,5 +1,3 @@
-https://portal.azure.com/#blade/HubsExtension/Resources/resourceType/Microsoft.Compute%2FVirtualMachines
-
 **To use this setup, you must able to link a domain name to EC2 machine's IP address. If you don't own a domain, services such as [FreeDNS](https://freedns.afraid.org) offer free sub-domains under a range of domains.**
 
 ## Prerequisites
@@ -20,11 +18,15 @@ https://portal.azure.com/#blade/HubsExtension/Resources/resourceType/Microsoft.C
 
   Give your VM a name in the `Virtual Machine name` field.
   
-  Select a region.
+  Select a region. 
+  
+  It's recommended to choose a region that's close to the location where data is going to be collected.
   
   Select `Ubuntu Server 18.04 LTS` from the `Image` dropdown.
   
-  Change the size of the Vm according to your Aggregate needs.
+  Change the size of the VM according to your Aggregate needs.
+  
+  A minimum setup would involve having 1 vCPU and 2GiB of RAM, although you should review your requirements and choose a bigger instance type according to your specific needs.
   
 - Review the Administrator Account section.
 
@@ -36,35 +38,41 @@ https://portal.azure.com/#blade/HubsExtension/Resources/resourceType/Microsoft.C
   
   Select `HTTP`, `HTTPS`, and `SSH` in the `Select inbound ports` field.
   
-- Review the Network configuration.
+- Review the Disks
 
-  Click on the `Networking` tab.
+  Click on `Next: Disks >`.
   
-  Click on the `Create new` link under the `Public IP` field dropdown, give it a name, and click `OK`.
-
-- Review the Guest Config settings.
-
-  Click on the `Guest Config` tab.
+  Click on the `Create and attach a new disk` link.
   
-  Copy the contents of [Aggregate Cloud Config stack for Azure](https://raw.githubusercontent.com/opendatakit/aggregate/master/cloud-config/azure/cloud-config.yml) into the `Ckoud init` text box.
+  Choose the disk type according to your budget and deployment requirements. Premium SSD disks are mor expensive than Standard HDDs.
+  
+  Choose a size for your data disk. 
+  
+  A minimum setup would involve having 30 GiB of storage, although you should review your requirements and adjust the value of the `Size (GiB)` field according to your specific needs.
+  
+- Review the advanced settings.
+
+  Click on the `Advanced` tab (at the top tabs row).
+  
+  Copy the contents of [Aggregate Cloud Config stack for Azure](https://raw.githubusercontent.com/opendatakit/aggregate/master/cloud-config/azure/cloud-config.yml) into the `Cloud init` text box.
   
 - Review the tags.
 
-  Click on the `Tags` tab.
+  Click on `Next: Tags >`.
   
   Add a tag with the `aggregate.hostname` name, and write the DNS domain name you want to use as the value.
   
 - Launch the VM
 
-  Click on the `Review + Launch` tab.
+  Click on `Next: Review + create >`.
   
-  Click on `Launch`.
+  Click on `Create`.
 
 ## Set up your domain
 
 1. Take note of the public IP address of your VM (e.g., 12.34.56.79) and set a *DNS A record* pointing to it.
 
-  You can get your instance's IP address on the [Azure Virtual Machines Dashboard](https://portal.azure.com/?l=en.en-us#blade/HubsExtension/Resources/resourceType/Microsoft.Compute%2FVirtualMachines). After clicking on the VM from the list, check the value of the `Public IP address` field.
+  You can get your instance's IP address on the [Azure Virtual Machines Dashboard](https://portal.azure.com/?l=en.en-us#blade/HubsExtension/Resources/resourceType/Microsoft.Compute%2FVirtualMachines). After clicking on the VM from the list, check the value of the `Public IP address` field in the overview section.
   
 	* If you own a domain, check your domain registrar's instructions.
 	* If you don't own a domain, we recommend using [FreeDNS](https://freedns.afraid.org) to get a free sub-domain.

@@ -1,10 +1,10 @@
-This Cloud-Config setup is intended to be used with the Ubuntu Server 18.04 LTS AMI in AWS. You can search for the latest AMI id for your AWS zone at https://cloud-images.ubuntu.com/locator/ec2. Search for `18.04 amd64 hvm:ebs-ssd`
+This Cloud-Config setup is intended to be used with the Ubuntu Server 18.04 LTS AMI in AWS. 
 
 **To use this setup, you must able to link a domain name to EC2 machine's IP address. If you don't own a domain, services such as [FreeDNS](https://freedns.afraid.org) offer free sub-domains under a range of domains.**
 
 ## Prerequisites
 
-**Warning**: Make sure at all time that you have selected the availability zone where you want to perform your actions. You can choose the availability zone using the dropdown menu at the top-right corner of the AWS console website.
+**Warning**: Make sure at all time that you have selected the availability zone where you want to perform your actions. You can choose the availability zone using the dropdown menu at the top-right corner of the AWS console website. It's recommended to choose a region that's close to the location where data is going to be collected.
 
 ### Create a VPC
 
@@ -16,7 +16,7 @@ This Cloud-Config setup is intended to be used with the Ubuntu Server 18.04 LTS 
 
   Follow the wizard for the `VPC with a Single Public Subnet` configuration.
   
-  Give your VPC a name setting a value in the `VPC Name` field.
+  Enter `Aggregate VPC` in the `VPC Name` field.
   
   All the defaults are OK. 
   
@@ -30,7 +30,7 @@ This Cloud-Config setup is intended to be used with the Ubuntu Server 18.04 LTS 
 
 - Create the new security group
 
-  Set a name and a description for your new security group.
+  Enter `Aggregate Security Group` as the name and description.
   
   Select the VPC you've created in the previous step.
   
@@ -53,8 +53,9 @@ This Cloud-Config setup is intended to be used with the Ubuntu Server 18.04 LTS 
 
 ## Create an IAM role
 
-- Go to the [IAM - Roles panel](https://console.aws.amazon.com/iam/home#/roles)
+The EC2 machine needs an IAM role to query its tags.
 
+- Go to the [IAM - Roles panel](https://console.aws.amazon.com/iam/home#/roles)
 
   Click on `Create role`.
 - Configure the new role
@@ -69,7 +70,7 @@ This Cloud-Config setup is intended to be used with the Ubuntu Server 18.04 LTS 
   Click on `Next: Tags`. (nothing to do here)
   
   Click on `Next: Review`.
-- Give the new IAM role a name
+- Enter `aggregate_role` as the new role's name.
 
   Click on `Create role`.
 
@@ -79,13 +80,13 @@ This Cloud-Config setup is intended to be used with the Ubuntu Server 18.04 LTS 
   
   Click on `Launch instance`
 - Search for the `Ubuntu Server 18.04` AMI
-
-  You should select the AMI showing `Ubuntu Server 18.04 LTS (HVM), SSD Volume Type` tag line.
   
   Make sure you select the `64-bit (x86)` option under the `Select` button.
   
   Click on `Select`.
 - Select the instance type you want to use.
+
+  A minimum setup would involve using a `t2.small` instance type (1 vCPU, 2GiB RAM), although you should review your requirements and choose a bigger instance type according to your specific needs.
 
   Click on `Next: Configure Instance Details`
 
@@ -104,7 +105,7 @@ This Cloud-Config setup is intended to be used with the Ubuntu Server 18.04 LTS 
   Click on `Next: Add Storage`.
 - Edit the storage settings. 
 
-  You might want to increase the value of the `Size (GiB)` field to give your Aggregate instance more storage space.
+  A minimum setup would involve having 30 GiB of storage, although you should review your requirements and adjust the value of the `Size (GiB)` field according to your specific needs.
  
   Click on `Next: Add Tags`.
 - Add a tag with the domain name you want to use for Aggregate:

@@ -9,14 +9,20 @@
 - Set a name.
   
 - Select the desired region and zone.
+
+  It's recommended to choose a region that's close to the location where data is going to be collected.
   
 - Select the desired machine type.
+
+  A minimum setup would involve having 1 vCPU and 2GiB of RAM, although you should review your requirements and choose a bigger instance type according to your specific needs.
   
 - Click on `Change` under the `Boot disk` section.
   
   - Select `Ubuntu 18.04 LTS`.
       
   - Set the desired storage size for your VM.
+  
+    A minimum setup would involve having 30 GiB of storage, although you should review your requirements and adjust the value of the `Size (GB)` field according to your specific needs.
   
   - Click on `Select`.
     
@@ -28,7 +34,7 @@
     
   - Click on the `Networking` tab, and set the `Hostname` field with the domain name you want to use for Aggregate.
   
-- Click on `Launch`.
+- Click on `Create`.
 
 ## Set up your domain
 
