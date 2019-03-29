@@ -24,7 +24,7 @@ DigitalOcean will give you $100 of credit to spend during the first 60 days so t
 1. Choose a datacenter region physically close to where data collection is going to happen.
   
 1. Under `Select additional options`, check the `User data` checkbox.
-	* Copy and paste the contents of the Cloud-Config script at [cloud-config/assets/cloud-config.yml](https://raw.githubusercontent.com/opendatakit/aggregate/master/cloud-config/assets/cloud-config.yml):
+	* Copy and paste the contents of the Cloud-Config script at [cloud-config/digital-ocean/cloud-config.yml](https://raw.githubusercontent.com/opendatakit/aggregate/master/cloud-config/digital-ocean/cloud-config.yml):
 	![Digital Ocean - Inserting Cloud-Config script under User Data section](assets/DO_user_data_and_cloud_config.png)
 
 1. In the `Choose a hostname` section, enter the domain name (e.g., aggregate.example.com).
