@@ -43,7 +43,6 @@ public final class PublishPopup extends AbstractPopupBase {
   public static final Consumer<String> NO_OP_CONSUMER = (String __) -> {
   };
   private static final String EMPTY_STRING = "";
-  private static final String HTTP_LOCALHOST = "http://localhost";
   private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Publish";
   private static final String TOOLTIP_TXT = "Publish the data";
   private static final String HELP_BALLOON_TXT = "This will publish the data to Google Spreadsheets or a server accepting JSON content.";
@@ -134,7 +133,6 @@ public final class PublishPopup extends AbstractPopupBase {
     // get the URL
     jsBar.setWidget(1, 0, new HTML("<h3>Url to publish to:</h3>"));
     jsUrl = new TextBox();
-    jsUrl.setText(HTTP_LOCALHOST);
     jsUrl.setVisibleLength(60);
     jsBar.setWidget(1, 1, jsUrl);
     // get token
@@ -255,7 +253,8 @@ public final class PublishPopup extends AbstractPopupBase {
         case JSON_SERVER: {
           // Validate the URL to publish to
           String url = jsUrl.getText();
-          if (url == null || url.isEmpty()) {
+          if (url == null || url.isEmpty() ||
+                  !url.matches("(http?|https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]")) {
             Window.alert("You must provide a URL to publish to");
             return;
           }
