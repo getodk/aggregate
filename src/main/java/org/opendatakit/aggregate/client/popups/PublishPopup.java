@@ -253,9 +253,11 @@ public final class PublishPopup extends AbstractPopupBase {
         case JSON_SERVER: {
           // Validate the URL to publish to
           String url = jsUrl.getText();
-          if (url == null || url.isEmpty() ||
-                  !url.matches("(http?|https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]")) {
+          if (url == null || url.isEmpty()) {
             Window.alert("You must provide a URL to publish to");
+            return;
+          } else if(!validateURL(url)){
+            Window.alert("You must provide a valid URL to publish to");
             return;
           }
 
@@ -292,5 +294,9 @@ public final class PublishPopup extends AbstractPopupBase {
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(String(email).toLowerCase());
   }-*/;
+
+  public boolean validateURL(String url){
+    return url.matches("(http?|https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
+  }
 
 }
