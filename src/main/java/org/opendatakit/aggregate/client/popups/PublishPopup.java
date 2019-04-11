@@ -257,7 +257,7 @@ public final class PublishPopup extends AbstractPopupBase {
             Window.alert("You must provide a URL to publish to");
             return;
           } else if(!validateURL(url)){
-            Window.alert("You must provide a valid URL to publish to");
+            Window.alert("Invalid URL: it must start with http:// or https://");
             return;
           }
 
@@ -296,7 +296,7 @@ public final class PublishPopup extends AbstractPopupBase {
   }-*/;
 
   public boolean validateURL(String url){
-    return url.matches("(http?|https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
+    return url.startsWith("http://") || url.startsWith("https://");
   }
 
 }
