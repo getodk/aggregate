@@ -43,7 +43,6 @@ public final class PublishPopup extends AbstractPopupBase {
   public static final Consumer<String> NO_OP_CONSUMER = (String __) -> {
   };
   private static final String EMPTY_STRING = "";
-  private static final String HTTP_LOCALHOST = "http://localhost";
   private static final String BUTTON_TXT = "<img src=\"images/green_right_arrow.png\" /> Publish";
   private static final String TOOLTIP_TXT = "Publish the data";
   private static final String HELP_BALLOON_TXT = "This will publish the data to Google Spreadsheets or a server accepting JSON content.";
@@ -134,7 +133,6 @@ public final class PublishPopup extends AbstractPopupBase {
     // get the URL
     jsBar.setWidget(1, 0, new HTML("<h3>Url to publish to:</h3>"));
     jsUrl = new TextBox();
-    jsUrl.setText(HTTP_LOCALHOST);
     jsUrl.setVisibleLength(60);
     jsBar.setWidget(1, 1, jsUrl);
     // get token
@@ -258,6 +256,9 @@ public final class PublishPopup extends AbstractPopupBase {
           if (url == null || url.isEmpty()) {
             Window.alert("You must provide a URL to publish to");
             return;
+          } else if(!validateURL(url)){
+            Window.alert("You must provide a valid URL to publish to");
+            return;
           }
 
           final String jsBinaryOpString = jsBinaryOptions.getSelectedValue();
@@ -293,5 +294,9 @@ public final class PublishPopup extends AbstractPopupBase {
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(String(email).toLowerCase());
   }-*/;
+
+  public boolean validateURL(String url){
+    return url.matches("(http?|https?)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]");
+  }
 
 }
