@@ -137,11 +137,11 @@ public class GetUsersAndPermissionsServlet extends ServletUtilBase {
     }
     writer.close();
     // do not cache...
-    resp.setHeader("Cache-Control:", "no-cache, no-store, must-revalidate");
-    resp.setHeader("Pragma:", "no-cache");
-    resp.setHeader("Expires:", "0");
+    resp.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    resp.setHeader("Pragma", "no-cache");
+    resp.setHeader("Expires", "0");
 
-    resp.setHeader("Last-Modified:",
+    resp.setHeader("Last-Modified",
         WebUtils.rfc1123Date(new Date()));
     resp.setContentType(HtmlConsts.RESP_TYPE_CSV);
     resp.addHeader(HtmlConsts.CONTENT_DISPOSITION, "attachment; filename=\"UsersAndCapabilities.csv\"");

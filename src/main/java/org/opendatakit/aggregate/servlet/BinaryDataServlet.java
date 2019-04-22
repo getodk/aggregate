@@ -212,9 +212,9 @@ public class BinaryDataServlet extends ServletUtilBase {
 
       if (previewSize) {
         // cache for 1 hour...
-        resp.setHeader("Expires:", 
+        resp.setHeader("Expires",
               WebUtils.rfc1123Date(new Date(System.currentTimeMillis() + 3600000L)));
-        resp.setHeader("Last-Modified:",
+        resp.setHeader("Last-Modified",
               WebUtils.rfc1123Date(lastUpdateDate));
         resp.setContentType(HtmlConsts.RESP_TYPE_IMAGE_JPEG);
         if (contentType.equals(HtmlConsts.RESP_TYPE_IMAGE_JPEG)) {
@@ -227,7 +227,7 @@ public class BinaryDataServlet extends ServletUtilBase {
         }
         resp.setContentLength(imageBlob.length);
       } else {
-        resp.setHeader("Last-Modified:",
+        resp.setHeader("Last-Modified",
             WebUtils.rfc1123Date(lastUpdateDate));
         resp.setContentType(contentType);
         if (contentLength != null) {
