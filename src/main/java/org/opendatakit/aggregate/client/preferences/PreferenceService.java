@@ -33,4 +33,6 @@ public interface PreferenceService extends RemoteService {
 
   @XsrfProtect
   void setSkipMalformedSubmissions(Boolean skipMalformedSubmissions) throws RequestFailureException;
+
+  String getVersioNote();
 }
