@@ -67,7 +67,7 @@ def versions = [
     gson          : '2.8.0',
     kxml2         : '2.3.0',
     odk           : [
-        javarosa: '2.13.0'
+        javarosa: '2.14.0'
     ],
     jdbc          : [
         mysql     : '5.1.44',
