@@ -65,7 +65,7 @@ public class AggregateHtmlServlet extends ServletUtilBase {
       + "   <script type=\"text/javascript\" language=\"javascript\" src=\"javascript/main.js\"></script>"
       + "    <script type=\"text/javascript\" language=\"javascript\" src=\"aggregateui/aggregateui.nocache.js\"></script>"
       + "    <script type=\"text/javascript\" language=\"javascript\" src=\"https://maps.googleapis.com/maps/api/js?";
-  public static final String PAGE_CONTENTS_SECOND = "sensor=false\"></script>"
+  public static final String PAGE_CONTENTS_SECOND = "sensor=false\" async></script>"
       + "    <link type=\"text/css\" rel=\"stylesheet\" href=\"AggregateUI.css\">"
       + "    <link type=\"text/css\" rel=\"stylesheet\" href=\"stylesheets/button.css\">"
       + "    <link type=\"text/css\" rel=\"stylesheet\" href=\"stylesheets/table.css\">"
