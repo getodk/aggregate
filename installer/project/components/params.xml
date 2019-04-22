@@ -21,17 +21,6 @@
       <cliOptionText>Output a .options file that contains the configuration from running the installer.</cliOptionText>
     </booleanParameter>
     <stringParameter>
-      <name>hostname</name>
-      <description>Hidden value used to hold resolved fully-qualfied hostname.</description>
-      <explanation></explanation>
-      <value></value>
-      <default></default>
-      <allowEmptyValue>1</allowEmptyValue>
-      <ask>0</ask>
-      <insertBefore>${parent_installdir}</insertBefore>
-      <width>40</width>
-    </stringParameter>
-    <stringParameter>
       <name>http_port</name>
       <description>Hidden value used to hold resolved http_port</description>
       <explanation></explanation>
@@ -301,14 +290,38 @@ Follow the ODK Aggregate Tomcat Install instructions (link below) to make your c
           </ruleList>
         </stringParameter>
         <stringParameter>
-          <name>raw_hostname</name>
+          <name>hostname</name>
           <description>Internet-visible IP address or DNS name:</description>
           <explanation></explanation>
           <value></value>
-          <default>localhost</default>
-          <allowEmptyValue>0</allowEmptyValue>
+          <default></default>
+          <allowEmptyValue>1</allowEmptyValue>
           <width>50</width>
         </stringParameter>
+        <labelParameter>
+          <name>hostname_label_optional</name>
+          <explanation>ODK Aggregate will try to resolve an IP address or DNS name for you if you leave this field empty.</explanation>
+          <ruleList>
+            <compareText>
+              <logic>equals</logic>
+              <text>${tomcat_authentication_should_configure}</text>
+              <value>0</value>
+            </compareText>
+          </ruleList>
+        </labelParameter>
+        <labelParameter>
+          <name>hostname_label_warning</name>
+          <explanation><![CDATA[Make sure you provide an IP address or DNS name matching your SSL certificate.
+
+ODK Aggregate will try to resolve an IP address or DNS name for you if you leave this field empty, but this can be unreliable in SSL configurations.]]></explanation>
+          <ruleList>
+            <compareText>
+              <logic>equals</logic>
+              <text>${tomcat_authentication_should_configure}</text>
+              <value>1</value>
+            </compareText>
+          </ruleList>
+        </labelParameter>
       </parameterList>
       <validationActionList>
         <throwError text="The HTTP/1.1 Connector Port is invalid">
