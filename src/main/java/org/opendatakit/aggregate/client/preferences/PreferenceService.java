@@ -44,4 +44,6 @@ public interface PreferenceService extends RemoteService {
 
   @XsrfProtect
   void setOdkAppName(String appName) throws AccessDeniedException, RequestFailureException, DatastoreFailureException;
+
+  String getVersioNote();
 }

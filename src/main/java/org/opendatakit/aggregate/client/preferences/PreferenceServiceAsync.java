@@ -30,4 +30,6 @@ public interface PreferenceServiceAsync {
 
   void setSkipMalformedSubmissions(Boolean skipMalformedSubmissions, AsyncCallback<Void> callback);
 
+  void getVersioNote(AsyncCallback<String> callback);
+
 }
