@@ -19,13 +19,14 @@ jdbc.password=aggregate
 jdbc.schema=aggregate
 ```
 
-Driver class names are:
+Driver class names and URLs are:
+ |
+| Database   | Driver class name                              | URL               |
+| ---------- | ---------------------------------------------- | ----------------- |
+| PostgreSQL | `org.postgresql.Driver`                        | `jdbc:postgresql` |
+| MySQL      | `com.mysql.jdbc.Driver`                        | `jdbc:mysql`      |
+| SQLServer  | `com.microsoft.sqlserver.jdbc.SQLServerDriver` | `jdbc:sqlserver`  |
 
-| Database   | Driver class name                              |
-| ---------- | ---------------------------------------------- |
-| PostgreSQL | `org.postgresql.Driver`                        |
-| MySQL      | `com.mysql.jdbc.Driver`                        |
-| SQLServer  | `com.microsoft.sqlserver.jdbc.SQLServerDriver` |
 
 ## `odk-settings.xml`
 
@@ -66,7 +67,7 @@ GRANT ALL PRIVILEGES ON SCHEMA aggregate TO aggregate;
 ```sql
 CREATE DATABASE aggregate;
 CREATE USER aggregate@'%' IDENTIFIED BY 'aggregate';
-GRANT ALL ON aggregate.* TO odk@'%' IDENTIFIED BY 'aggregate';
+GRANT ALL ON aggregate.* TO aggregate@'%' IDENTIFIED BY 'aggregate';
 FLUSH PRIVILEGES;
 ```
 
@@ -82,4 +83,3 @@ go
 CREATE SCHEMA aggregate;
 go
 ```
-
