@@ -1,10 +1,10 @@
 version: 2
 jobs:
-  build:
+  postgresql:
     working_directory: ~/work
     docker:
       - image: circleci/openjdk:8-jdk
-      - image: circleci/postgres:9.6
+      - image: circleci/postgres:9.4
         environment:
         - POSTGRES_USER=circleci
         - POSTGRES_DB=circleci
@@ -25,14 +25,11 @@ jobs:
           name: Setup database
           command: psql --host localhost --file db/test/postgresql/init.sql
       - run:
-          name: Configure build - jdbc conf file
-          command: cp src/main/resources/jdbc.properties.example src/main/resources/jdbc.properties
-      - run:
-          name: Configure build - security conf file
-          command: cp src/main/resources/security.properties.example src/main/resources/security.properties
-      - run:
-          name: Configure build - odk-settings conf file
-          command: cp src/main/resources/odk-settings.xml.example src/main/resources/odk-settings.xml
+          name: Configure build
+          command: |
+            cp src/main/resources/jdbc.properties.example src/main/resources/jdbc.properties
+            cp src/main/resources/security.properties.example src/main/resources/security.properties
+            cp src/main/resources/odk-settings.xml.example src/main/resources/odk-settings.xml
       # breaking up the commands prevents out of memory errors on CircleCI
       - run: ./gradlew check
       - run: ./gradlew war
@@ -49,3 +46,57 @@ jobs:
           destination: libs
       - store_test_results:
           path: build/test-results
+  mysql:
+    working_directory: ~/work
+    docker:
+      - image: circleci/openjdk:8-jdk
+      - image: circleci/mysql:5.7
+        environment:
+        - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+    steps:
+      - checkout
+      - run:
+          name: Install requirements
+          command: |
+            curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+            sudo apt-get install mysql-client git-lfs
+            git lfs install
+      - run:
+          name: Checkout binaries
+          command: git lfs pull
+      - restore_cache:
+          key: jars-{{ checksum "build.gradle" }}
+      - run:
+          name: Setup database
+          command: mysql --host 127.0.0.1 --user root < db/test/mysql/init.sql
+      - run:
+          name: Configure build
+          command: |
+            cp src/main/resources/jdbc.properties.example src/main/resources/jdbc.properties
+            cp src/main/resources/security.properties.example src/main/resources/security.properties
+            cp src/main/resources/odk-settings.xml.example src/main/resources/odk-settings.xml
+            sed -i -e 's/org.postgresql.Driver/com.mysql.jdbc.Driver/' -e 's/jdbc:postgresql/jdbc:mysql/' src/main/resources/jdbc.properties
+            sed -i -e 's/engine.pgres.DatastoreImpl/engine.mysql.DatastoreImpl/' src/main/resources/odk-settings.xml
+      # breaking up the commands prevents out of memory errors on CircleCI
+      - run: ./gradlew check
+      - run: ./gradlew war
+      - save_cache:
+          paths:
+            - ~/.gradle
+            - ~/work/.gradle
+          key: jars-{{ checksum "build.gradle" }}
+      - store_artifacts:
+          path: build/reports
+          destination: reports
+      - store_artifacts:
+          path: build/libs
+          destination: libs
+      - store_test_results:
+          path: build/test-results
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - postgresql
+      - mysql
