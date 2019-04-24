@@ -2,8 +2,8 @@
 
 ## Supported providers
 
-- [Digital Ocean](digital-ocean)
 - [VirtualBox](virtualbox) (for local development and testing)
+- [Cloud providers](https://docs.opendatakit.org/aggregate-install/)
 
 ## What's included in the stack
 
@@ -28,7 +28,7 @@ This Cloud-Config stack should be used with Ubuntu 18.04. It includes the follow
 - You will need to provide a domain name for your machine in order to access ODK Aggregate using secure HTTPS connections. 
 - You can access ODK Aggregate by going to http://your.domain or https://your.domain.
 
-There could be some differences with the provider you use. Check the specific README file for more information. 
+There could be some differences with the provider you use. Check the [install documentation](https://docs.opendatakit.org/aggregate-install/) file for more information.
 
 ## Updates
 
