@@ -189,6 +189,8 @@ public class FormUploadServlet extends ServletUtilBase {
   @Override
   protected void doHead(HttpServletRequest req, HttpServletResponse resp) {
     addOpenRosaHeaders(resp);
+    // TODO Remove this header when no client relies on it to identify legacy Aggregate servers (v0.9 or older)
+    resp.setHeader("Location", String.format("%s/%s", ContextFactory.getCallingContext(this, req).getServerURL(), ADDR));
     resp.setStatus(204);
   }
 
