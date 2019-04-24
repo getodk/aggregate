@@ -25,14 +25,11 @@ jobs:
           name: Setup database
           command: psql --host localhost --file db/test/postgresql/init.sql
       - run:
-          name: Configure build - jdbc conf file
-          command: cp src/main/resources/jdbc.properties.example src/main/resources/jdbc.properties
-      - run:
-          name: Configure build - security conf file
-          command: cp src/main/resources/security.properties.example src/main/resources/security.properties
-      - run:
-          name: Configure build - odk-settings conf file
-          command: cp src/main/resources/odk-settings.xml.example src/main/resources/odk-settings.xml
+          name: Configure build
+          command: |
+            cp src/main/resources/jdbc.properties.example src/main/resources/jdbc.properties
+            cp src/main/resources/security.properties.example src/main/resources/security.properties
+            cp src/main/resources/odk-settings.xml.example src/main/resources/odk-settings.xml
       # breaking up the commands prevents out of memory errors on CircleCI
       - run: ./gradlew check
       - run: ./gradlew war
@@ -49,7 +46,6 @@ jobs:
           destination: libs
       - store_test_results:
           path: build/test-results
-
   mysql:
     working_directory: ~/work
     docker:
@@ -74,20 +70,13 @@ jobs:
           name: Setup database
           command: mysql --host 127.0.0.1 --user root < db/test/mysql/init.sql
       - run:
-          name: Configure build - jdbc conf file
-          command: cp src/main/resources/jdbc.properties.example src/main/resources/jdbc.properties
-      - run:
-          name: Configure build - security conf file
-          command: cp src/main/resources/security.properties.example src/main/resources/security.properties
-      - run:
-          name: Configure build - odk-settings conf file
-          command: cp src/main/resources/odk-settings.xml.example src/main/resources/odk-settings.xml
-      - run:
-          name: Find and replace in place
+          name: Configure build
           command: |
+            cp src/main/resources/jdbc.properties.example src/main/resources/jdbc.properties
+            cp src/main/resources/security.properties.example src/main/resources/security.properties
+            cp src/main/resources/odk-settings.xml.example src/main/resources/odk-settings.xml
             sed -i -e 's/org.postgresql.Driver/com.mysql.jdbc.Driver/' -e 's/jdbc:postgresql/jdbc:mysql/' src/main/resources/jdbc.properties
             sed -i -e 's/engine.pgres.DatastoreImpl/engine.mysql.DatastoreImpl/' src/main/resources/odk-settings.xml
-
       # breaking up the commands prevents out of memory errors on CircleCI
       - run: ./gradlew check
       - run: ./gradlew war
