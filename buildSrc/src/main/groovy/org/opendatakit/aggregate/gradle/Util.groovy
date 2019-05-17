@@ -47,8 +47,8 @@ class Util {
     return defaultValue
   }
 
-  static void run(command) {
-    def proc = command.toString().execute()
+  static void run(String... command) {
+    def proc = command.execute()
     def b = new StringBuffer()
     proc.consumeProcessErrorStream(b)
 
@@ -56,8 +56,8 @@ class Util {
     println b.toString()
   }
 
-  static void run(command, wd) {
-    def proc = command.toString().execute(null, new File(wd.toString()))
+  static void runInWorkingDir(wd, String... command) {
+    def proc = command.execute(null, new File(wd.toString()))
     def b = new StringBuffer()
     proc.consumeProcessErrorStream(b)
 

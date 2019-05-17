@@ -1,5 +1,4 @@
-import static org.opendatakit.aggregate.gradle.Util.run
-import static org.opendatakit.aggregate.gradle.Util.setXmlValue
+import static org.opendatakit.aggregate.gradle.Util.*
 
 task installerClean() {
   delete 'build/installer'
@@ -28,18 +27,18 @@ task installerBuild(dependsOn: [installerClean], type: Copy) {
     file("${buildDir}/installer/files/${archivesBaseName}-${version}.war").renameTo(file("build/installer/files/ODKAggregate.war"))
 
     if (installBuilderHome != null) {
-      run("mkdir ${buildDir}/installers")
+      run("mkdir", "${buildDir}/installers")
       setXmlValue("${buildDir}/installer/buildWar.xml", "outputDirectory", "${buildDir}/installers")
 
       [["linux-x64", "Linux-x64.run"],
        ["linux", "Linux.run"],
        ["windows", "Windows.exe"],
-       ["osx", "macOs.app"]
+       ["osx", "macOS.app"]
       ].forEach({ pair ->
         setXmlValue("${buildDir}/installer/buildWar.xml", "installerFilename", "ODK-Aggregate-${version}-${pair[1]}")
-        run("${installBuilderHome}/bin/builder build ${buildDir}/installer/buildWar.xml ${pair[0]}")
-        run("zip ODK-Aggregate-${version}-${pair[1]}.zip ODK-Aggregate-${version}-${pair[1]}", "${buildDir}/installers")
-        run("rm -r ODK-Aggregate-${version}-${pair[1]}", "${buildDir}/installers")
+        run("${installBuilderHome}/bin/builder", "build", "${buildDir}/installer/buildWar.xml", "${pair[0]}")
+        runInWorkingDir("${buildDir}/installers", "zip", "-r", "ODK-Aggregate-${version}-${pair[1]}.zip", "ODK-Aggregate-${version}-${pair[1]}")
+        runInWorkingDir("${buildDir}/installers", "rm", "-r", "ODK-Aggregate-${version}-${pair[1]}")
       })
     }
   }
