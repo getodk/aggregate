@@ -46,4 +46,22 @@ class Util {
       return obj.getProperty(key)
     return defaultValue
   }
+
+  static void run(String... command) {
+    def proc = command.execute()
+    def b = new StringBuffer()
+    proc.consumeProcessErrorStream(b)
+
+    println proc.text
+    println b.toString()
+  }
+
+  static void runInWorkingDir(wd, String... command) {
+    def proc = command.execute(null, new File(wd.toString()))
+    def b = new StringBuffer()
+    proc.consumeProcessErrorStream(b)
+
+    println proc.text
+    println b.toString()
+  }
 }

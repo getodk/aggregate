@@ -34,5 +34,7 @@
   </customLanguageFileList>
   <finalPageActionList>
   </finalPageActionList>
+  <installerFilename>${product_shortname}-${product_version}-${platform_name}-installer.${platform_exec_suffix}</installerFilename>
+  <outputDirectory>/tmp</outputDirectory>
 </project>
 
