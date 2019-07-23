@@ -10,6 +10,13 @@
 - Build the setup with `./gradlew clean dockerComposeBuild -xtest -PwarMode=complete`.
 - Copy the setup at `build/docker-compose` to some other location in your system. 
 
+If you get the error below when running `./gradlew clean dockerComposeBuild -xtest -PwarMode=complete`
+
+    Error: Could not find or load main class org.gradle.wrapper.GradleWrapperMain
+    Caused by: java.lang.ClassNotFoundException: org.gradle.wrapper.GradleWrapperMain
+    
+First run `gradle wrapper`
+
 Run the following commands where you have copied your built setup. **Don't run them directly in `build/docker-compose` because it will compromise Aggregate's build tasks**.
     
 - Before running Aggregate for the first time, prepare the database container with `docker-compose run --rm db`
