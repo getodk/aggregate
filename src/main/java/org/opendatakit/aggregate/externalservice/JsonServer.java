@@ -139,7 +139,7 @@ public class JsonServer extends AbstractExternalService implements ExternalServi
       }
       if (statusCode == HttpServletResponse.SC_UNAUTHORIZED) {
         throw new ODKExternalServiceCredentialsException(reason + " (" + statusCode + ")");
-      } else if (statusCode != HttpServletResponse.SC_OK) {
+      } else if (statusCode < HttpServletResponse.SC_OK || statusCode >= 300) {
         throw new ODKExternalServiceException(reason + " (" + statusCode + ")");
       }
     } catch (ODKExternalServiceException e) {
