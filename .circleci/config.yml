@@ -14,7 +14,7 @@ jobs:
           name: Install requirements
           command: |
             curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
-            sudo apt-get install postgresql-client git-lfs
+            sudo apt-get install default-postgresql-client git-lfs
             git lfs install
       - run:
           name: Checkout binaries
@@ -59,7 +59,7 @@ jobs:
           name: Install requirements
           command: |
             curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
-            sudo apt-get install mysql-client git-lfs
+            sudo apt-get install default-mysql-client git-lfs
             git lfs install
       - run:
           name: Checkout binaries
