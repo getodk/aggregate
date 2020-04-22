@@ -1,7 +1,7 @@
 # ODK Aggregate
 ![Platform](https://img.shields.io/badge/platform-Java-blue.svg)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Build status](https://circleci.com/gh/opendatakit/aggregate.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/opendatakit/aggregate)
+[![Build status](https://circleci.com/gh/getodk/aggregate.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/getodk/aggregate)
 [![Slack status](http://slack.opendatakit.org/badge.svg)](http://slack.opendatakit.org)
  
 ODK Aggregate provides a ready-to-deploy server and database to:
