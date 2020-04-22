@@ -61,7 +61,7 @@ write_files:
     permissions: '0755'
     content: |
       #!/bin/sh
-      curl -sS https://api.github.com/repos/opendatakit/aggregate-cli/releases/latest \
+      curl -sSL https://api.github.com/repos/opendatakit/aggregate-cli/releases/latest \
       | grep "aggregate-cli.zip" \
       | cut -d: -f 2,3 \
       | tr -d \" \
