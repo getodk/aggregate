@@ -8,13 +8,14 @@ jobs:
         environment:
         - POSTGRES_USER=circleci
         - POSTGRES_DB=circleci
+        - POSTGRES_HOST_AUTH_METHOD=trust
     steps:
       - checkout
       - run:
           name: Install requirements
           command: |
             curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
-            sudo apt-get install default-postgresql-client git-lfs
+            sudo apt-get install postgresql-client git-lfs
             git lfs install
       - run:
           name: Checkout binaries
