@@ -22,7 +22,7 @@ This package contains the EAR structure of the AppEngine app.
 
 This package contains various tools used to deploy to Google AppEngine.
 
-This package includes the ODK Aggregate AppEngine updater application's JAR file, which is maintained in the [Aggregate Components repo](https://github.com/opendatakit/aggregate-components).
+This package includes the ODK Aggregate AppEngine updater application's JAR file, which is maintained in the [Aggregate Components repo](https://github.com/getodk/aggregate-components).
 
 ## legaremoval.zip
 
@@ -34,4 +34,4 @@ This package contains other required tools and conf files for the installer proj
 
 ## sqljdbc_6.0.zip
 
-This package contains the Microsoft SQLServer JDBC driver the installer uses when deploying on Tomcat and SQLServer. 
+This package contains the Microsoft SQLServer JDBC driver the installer uses when deploying on Tomcat and SQLServer.

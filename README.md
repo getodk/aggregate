@@ -2,8 +2,8 @@
 ![Platform](https://img.shields.io/badge/platform-Java-blue.svg)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Build status](https://circleci.com/gh/getodk/aggregate.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/getodk/aggregate)
-[![Slack status](http://slack.opendatakit.org/badge.svg)](http://slack.opendatakit.org)
- 
+[![Slack status](http://slack.getodk.org/badge.svg)](http://slack.getodk.org)
+
 ODK Aggregate provides a ready-to-deploy server and database to:
 
 - provide blank forms to ODK Collect (or other OpenRosa clients)
@@ -14,10 +14,10 @@ ODK Aggregate provides a ready-to-deploy server and database to:
 
 ODK Aggregate can be deployed on an Apache Tomcat server, or any servlet 2.5-compatible (or higher) web container, backed with a PostgreSQL or a MySQL database server.
 
-* ODK website: [https://opendatakit.org](https://opendatakit.org)
-* ODK Aggregate usage instructions: [https://docs.opendatakit.org/aggregate-intro/](https://docs.opendatakit.org/aggregate-intro/)
-* ODK forum: [https://forum.opendatakit.org](https://forum.opendatakit.org)
-* ODK developer Slack chat: [http://slack.opendatakit.org](http://slack.opendatakit.org) 
+* ODK website: [https://getodk.org](https://getodk.org)
+* ODK Aggregate usage instructions: [https://docs.getodk.org/aggregate-intro/](https://docs.getodk.org/aggregate-intro/)
+* ODK forum: [https://forum.getodk.org](https://forum.getodk.org)
+* ODK developer Slack chat: [http://slack.getodk.org](http://slack.getodk.org)
 
 ## Getting the code
 
@@ -63,7 +63,7 @@ For more information see [here for Docker](docs/build-and-run-a-docker-image.md)
     sudo su postgres -c "psql -c \"ALTER SCHEMA aggregate OWNER TO aggregate\" aggregate"
     sudo su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON SCHEMA aggregate TO aggregate\" aggregate"
     ```
-    
+
     (Windows)
     ```powershell
     psql.exe -c "CREATE ROLE aggregate WITH LOGIN PASSWORD 'aggregate'"
@@ -78,14 +78,14 @@ For more information see [here for Docker](docs/build-and-run-a-docker-image.md)
 
 - Copy the `jdbc.properties.example`, `odk-settings.xml.example`, and `security.properties.example` files at `/src/main/resources` to the same location, removing the `.example` extension.
 
-  If you have followed the database configuration steps above, you don't need to make any change in these files. Otherwise, head to the [Aggregate configuration guide](docs/aggregate-config.md) and make the required changes for your environment. 
+  If you have followed the database configuration steps above, you don't need to make any change in these files. Otherwise, head to the [Aggregate configuration guide](docs/aggregate-config.md) and make the required changes for your environment.
 
   If you are running the project in Docker, see [here](docs/build-and-run-a-docker-image.md) for the next steps.
-  
+
 - Start a local development Aggregate server with `./gradlew appRunWar`
 
   Gradle will compile the project and start the server, which can take some time.
-  
+
   Eventually, you will see a "Press any key to stop the server" message. At this point, you can browse http://localhost:8080 to use Aggregate.
 
 - Stop the server pressing any key in the terminal where you started the server
@@ -103,32 +103,32 @@ By default, Gretty will launch a server using a `localhost` address which will n
 
 These instructions are for [IntelliJ IDEA Community edition](https://www.jetbrains.com/idea/), which is the (free) Java IDE we use for all the ODK toolsuite, but you don't really need any specific IDE to work with this codebase. Any Java IDE will support any of the steps we will be describing.
 
-### Import 
+### Import
 
-- On the welcome screen, click `Import Project`, navigate to your aggregate folder, and select the `build.gradle` file. 
+- On the welcome screen, click `Import Project`, navigate to your aggregate folder, and select the `build.gradle` file.
 
-  Make sure you check `Use auto-import` option in the `Import Project from Gradle` dialog. 
+  Make sure you check `Use auto-import` option in the `Import Project from Gradle` dialog.
 
   Ignore any message about any detected GWT, Spring or web facets.
 
 - Make sure you set Java 8 as the project's selected SDK
-    
+
 ### Run
 
 1. Show the Gradle tool window by selecting the menu option at **View** > **Tool Windows** > **Gradle**
 
     You will see a new panel on the right side with all the Gradle task groups
-  
+
 2. Double click the `appRunWar` Gradle task under the `gretty` task group
 
     A new `Run` bottom panel will pop up.
-  
+
     Gradle will compile the project and start the server, which can take some time.
-    
+
     Eventually, you will see a "Press any key to stop the server" message. At this point, you can browse http://localhost:8080 to use Aggregate.
-  
+
 You can stop the server by pressing any key in the `Run` panel.
-       
+
 ### Debug
 
 1. In the `Run` menu, select `Edit Configurations...`
@@ -152,7 +152,7 @@ To stop the debugging session, press any key in the `Run` bottom panel. This wil
 
 ## Extended topics
 
-There is a [`/docs`](https://github.com/opendatakit/aggregate/tree/master/docs) directory in the repo with more documentation files that expand on certain topics:
+There is a [`/docs`](https://github.com/getodk/aggregate/tree/master/docs) directory in the repo with more documentation files that expand on certain topics:
 
 - [Configuration files](./docs/aggregate-config.md)
 - [Supported database configurations](./docs/database-configurations.md)
@@ -175,6 +175,6 @@ The best way to help us test is to build from source! We are currently focusing 
 
 * If you get an **Invalid Gradle JDK configuration found** error importing the code, you might not have set the `JAVA_HOME` environment variable. Try [these solutions](https://stackoverflow.com/questions/32654016/).
 
-* If you are having problems with hung Tomcat/Jetty processes, try running the `appStop` Gradle task to stop running all instances. 
+* If you are having problems with hung Tomcat/Jetty processes, try running the `appStop` Gradle task to stop running all instances.
 
 * If you're using Chrome and are seeing blank pages or refreshing not working, connect to Aggregate with the dev tools window open. Then in the `Network` tab, check `Disable cache`.

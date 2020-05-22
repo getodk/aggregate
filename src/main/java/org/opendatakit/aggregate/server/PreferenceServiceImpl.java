@@ -112,14 +112,14 @@ public class PreferenceServiceImpl extends RemoteServiceServlet implements
         ? shortVersion + " - Version check failed"
         : shortVersion.equals(latestAvailableVersion)
         ? shortVersion + " - You're up to date!"
-        : shortVersion + " - <a href=\"https://github.com/opendatakit/aggregate/releases/latest\" target=\"_blank\">Update available</a>";
+        : shortVersion + " - <a href=\"https://github.com/getodk/aggregate/releases/latest\" target=\"_blank\">Update available</a>";
   }
 
   synchronized private static String getLatestAvailableVersion() {
     if (latestAvailableVersionRefreshRequired()) {
       try {
         log.warn("Getting latest available version");
-        URL url = new URL("https://api.github.com/repos/opendatakit/aggregate/releases/latest");
+        URL url = new URL("https://api.github.com/repos/getodk/aggregate/releases/latest");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
         if (con.getResponseCode() == 200)

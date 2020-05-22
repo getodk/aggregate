@@ -25,7 +25,7 @@ package org.opendatakit.aggregate.constants;
  */
 public final class ErrorConsts {
 
-  public static final String POSSIBLE_CORRUPTION = "Encountered an unknown problem while reading the database. This often is a sign of database corruption. Please get the server logs and file an issue at https://github.com/opendatakit/aggregate/issues";
+  public static final String POSSIBLE_CORRUPTION = "Encountered an unknown problem while reading the database. This often is a sign of database corruption. Please get the server logs and file an issue at https://github.com/getodk/aggregate/issues";
   /**
    * Error message if the form with FORM ID is not found
    */
@@ -58,7 +58,7 @@ public final class ErrorConsts {
   /**
    * Error message if form ID was not specified
    */
-  public static final String MISSING_FORM_ID = "Form did not specify a Form ID. For information on Form ID please check the Open Data Kit FAQ";
+  public static final String MISSING_FORM_ID = "Form did not specify a Form ID. For information on Form ID please check the ODK FAQ";
 
   /**
    * Error message if request is not multi-part

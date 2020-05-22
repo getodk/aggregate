@@ -15,7 +15,7 @@ else
   echo "> 2. Go to http://${hostname}:${httpPort}"
 fi
 echo "> 3. Sign in with the Aggregate password"
-echo "> Need help? Go to https://docs.opendatakit.org/aggregate-vm"
+echo "> Need help? Go to https://docs.getodk.org/aggregate-vm"
 echo ""
 
 if [ ! -z ${ips} ]; then

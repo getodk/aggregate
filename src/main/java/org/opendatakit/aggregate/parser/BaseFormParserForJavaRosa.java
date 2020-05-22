@@ -309,7 +309,7 @@ public class BaseFormParserForJavaRosa {
       //
       // To address this, we will use the form defined in ENCRYPTED_FORM_DEFINITION instead
       // which follows the structure described above.
-      // This is discussed in https://github.com/opendatakit/aggregate/issues/294
+      // This is discussed in https://github.com/getodk/aggregate/issues/294
       XFormParser exfp = parseFormDefinition(ENCRYPTED_FORM_DEFINITION);
       // Reset bind element and string length maps since we won't be using the original
       // form parsed and processed at the beginning of this constructor.

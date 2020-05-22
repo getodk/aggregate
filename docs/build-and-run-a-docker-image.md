@@ -4,20 +4,20 @@
 
 - Install [Docker](https://www.docker.com)
 - Already have a PostgreSQL 9.6 database running
-- Follow the instructions of the main [README](https://github.com/opendatakit/aggregate), including:
+- Follow the instructions of the main [README](https://github.com/getodk/aggregate), including:
   - Install Git LFS, as well as its git hooks, and enable the git hooks for Git LFS.
-  - Only then clone your fork of Aggregate - included .jar files only download correctly with Git LFS. See [Getting the code](https://github.com/opendatakit/aggregate#getting-the-code).
-  - Install IntelliJ IDEA and import project as instructed to let IDEA download, build, and configure sources. See [Running the project - Import](https://github.com/opendatakit/aggregate#import)
+  - Only then clone your fork of Aggregate - included .jar files only download correctly with Git LFS. See [Getting the code](https://github.com/getodk/aggregate#getting-the-code).
+  - Install IntelliJ IDEA and import project as instructed to let IDEA download, build, and configure sources. See [Running the project - Import](https://github.com/getodk/aggregate#import)
 
-  *Note*: this is a gentle reminder to follow the main [README](https://github.com/opendatakit/aggregate), not a comprehensive setup guide in itself. 
-  
-  However, please note that if you are using [environmental variables](#Environmental-Variables) to configure Aggregate, it is _not_ necessary to copy the `.example` configuration files - in fact, the build script overwrites any values set in `security.properties` and `jdbc.properties`, anyway. If you would like to use these files instead of environmental variables to configure Aggregate, see the ["config files" section below](#config-files).  
-  
+  *Note*: this is a gentle reminder to follow the main [README](https://github.com/getodk/aggregate), not a comprehensive setup guide in itself.
+
+  However, please note that if you are using [environmental variables](#Environmental-Variables) to configure Aggregate, it is _not_ necessary to copy the `.example` configuration files - in fact, the build script overwrites any values set in `security.properties` and `jdbc.properties`, anyway. If you would like to use these files instead of environmental variables to configure Aggregate, see the ["config files" section below](#config-files).
+
 ## Quick start
 
-This Aggregate Docker image works by using an external running PostgreSQL 9.6 database. The following quick start steps assume you have access to a PostgreSQL server and it's the first time you will be running Aggregate. 
+This Aggregate Docker image works by using an external running PostgreSQL 9.6 database. The following quick start steps assume you have access to a PostgreSQL server and it's the first time you will be running Aggregate.
 
-- Connect to your database server using `psql` or any other PostgreSQL client program. 
+- Connect to your database server using `psql` or any other PostgreSQL client program.
 
 - Create a database and a schema by running this SQL script:
 
@@ -27,18 +27,18 @@ This Aggregate Docker image works by using an external running PostgreSQL 9.6 da
   GRANT ALL PRIVILEGES ON DATABASE aggregate TO aggregate;
   \connect odk;
   CREATE SCHEMA aggregate;
-  ALTER SCHEMA aggregate OWNER TO aggregate;  
+  ALTER SCHEMA aggregate OWNER TO aggregate;
   GRANT ALL PRIVILEGES ON SCHEMA aggregate TO aggregate;
   ```
-  
+
   **We strongly advise you use a stronger password on the first line of the script.**
-  
+
 - Take note of the database connection parameters: host, port, database name, username and password.
-  
+
 - Build the Docker image with `./gradlew clean dockerBuild -xtest -PwarMode=complete`.
 
   Take note of the tag of the created image. It will appear in a message like this one:
-  
+
   ```
   ...
   Successfully built bf09fb92a6e9
@@ -46,11 +46,11 @@ This Aggregate Docker image works by using an external running PostgreSQL 9.6 da
   ```
 
 - Launch Aggregate with `docker run -d -p 8080:8080 -it --name=aggregate aggregate:v1.6.0-beta.0-dirty`
- 
+
   Replace the version with the one you got when building the image and the database params accordingly.
-  
+
   If you set another password, add a `-e DB_PASSWORD="%THE PASSWORD%` to the launch command before the `aggregate:v1.6.0-beta.0-dirty` part. [More info here](#configuration-parameters)
-  
+
   Access Aggregate at [http://localhost:8080](http://localhost:8080)
 
 - You can get the logs with `docker logs aggregate`
@@ -68,7 +68,7 @@ This Aggregate Docker image works by using an external running PostgreSQL 9.6 da
 
 ## Configuration
 
-You have two options for passing configuration to ODK. 
+You have two options for passing configuration to ODK.
 
 ### Environmental Variables
 If you are using PostgreSQL (recommended), you can set the following environment variables when running the Aggregate Docker image:
@@ -84,10 +84,10 @@ If you are using PostgreSQL (recommended), you can set the following environment
 | DB_NAME | aggregate | Value used to build the `jdbc.url` conf parameter |
 
   These variables can be set by adding `--env VARIABLE_NAME=VALUE` arguments when running the Aggregate Docker image ([more info in the docs](https://docs.docker.com/docker-cloud/getting-started/deploy-app/6_define_environment_variables/#python-quickstart)). Example:
-  
-  ```shell 
+
+  ```shell
   docker run -d -p 8080:8080 -it \
-  --env AGGREGATE_HOST="odk.somedomain.com" \ 
+  --env AGGREGATE_HOST="odk.somedomain.com" \
   --name=aggregate aggregate:v1.6.0-beta.0-dirty
   ```
 
@@ -98,11 +98,11 @@ If you are using PostgreSQL (recommended), you can set the following environment
 
 ## Config Files
 
-For complete control of all of Aggregate's configuration values, you can also pass a copy of the `security.properties` and `jdbc.properties` files to Docker [via a bind mount](https://docs.docker.com/storage/bind-mounts/) into the `/etc/config` directory in the Docker image. 
+For complete control of all of Aggregate's configuration values, you can also pass a copy of the `security.properties` and `jdbc.properties` files to Docker [via a bind mount](https://docs.docker.com/storage/bind-mounts/) into the `/etc/config` directory in the Docker image.
 
 Follow the directions in the main `README` regarding copying the `/src/main/resources/jdbc.properties.example`, `odk-settings.xml.example` and `security.properties` files, and pass them to Docker kind of like so:
 
-```shell 
+```shell
 docker run -d -p 8080:8080 -it \
 --mount type=bind,source="$(pwd)"/src/main/resources/odk-settings.xml,target=/etc/config/odk-settings.xml,readonly \
 --mount type=bind,source="$(pwd)"/src/main/resources/jdbc.properties,target=/etc/config/jdbc.properties,readonly \

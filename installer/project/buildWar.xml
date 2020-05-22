@@ -22,7 +22,7 @@
   <productUrlInfoAbout>http://www.opendatakit.org</productUrlInfoAbout>
   <requestedExecutionLevel>asInvoker</requestedExecutionLevel>
   <saveRelativePaths>1</saveRelativePaths>
-  <vendor>Open Data Kit</vendor>
+  <vendor>ODK</vendor>
   <width>700</width>
   <windowsExecutableIcon>files/opendatakit.ico</windowsExecutableIcon>
   <windowsUninstallerExecutableIcon>files/opendatakit.ico</windowsUninstallerExecutableIcon>

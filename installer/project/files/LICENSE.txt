@@ -68,14 +68,14 @@ https://github.com/google/guava                           /Apache 2.0/
     guava-20.0.jar         (for Google AppEngine deployments)
     guava-22.0-android.jar (for Google AppEngine deployments)
 http://code.google.com/p/gwt-google-maps-v3/              /Apache 2.0/
-now at: https://github.com/opendatakit/aggregate-components
+now at: https://github.com/getodk/aggregate-components
     gwt-google-maps-v3-1.0.1.jar
     See the ODK Aggregate (Components) README.txt
     for how this is built.
 http://www.gwtproject.org/                                /Apache 2.0/
     gwt-servlet-2.7.0.jar
 http://code.google.com/p/gwt-google-apis/                 /Apache 2.0/
-now at: https://github.com/opendatakit/aggregate-components
+now at: https://github.com/getodk/aggregate-components
     gwt-visualization-1.1.2.jar
     See the ODK Aggregate (Components) README.txt
     for how this is built.
@@ -117,10 +117,10 @@ http://kxml.sourceforge.net/kxml2/                      /BSD license/
     kxml2-2.3.0.jar
 https://bitbucket.org/connect2id/nimbus-language-tags    /Apache 2.0/
 	lang-tag-1.4.3.jar
-??                                                       /CDDL 1.1/	
+??                                                       /CDDL 1.1/
 http://www.oracle.com/technetwork/middleware/oedq/help/edq11help-2152391.pdf
 	mail-1.4.7.jar
-https://github.com/Microsoft/mssql-jdbc                  /MIT license/	
+https://github.com/Microsoft/mssql-jdbc                  /MIT license/
 	mssql-jdbc-6.1.5.jre8-preview.jar
 https://github.com/GoogleCloudPlatform/cloud-sql-mysql-socket-factory    /Apache 2.0/
     mysql-socket-factory-1.0.2.jar
@@ -128,12 +128,12 @@ https://github.com/GoogleCloudPlatform/cloud-sql-mysql-socket-factory    /Apache
 https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions /Apache 2.0/
 	oauth2-oidc-sdk-5.18.1.jar
 https://opendatakit.org/                                 /Apache 2.0/
-at: https://github.com/opendatakit/aggregate-components
+at: https://github.com/getodk/aggregate-components
     odk-httpclient-gae-4.5.2-1.jar
     odk-tomcatutil-1.0.1.jar
     See the ODK Aggregate (Components) README.txt
     for how these are built.
-https://github.com/opendatakit/javarosa                  /Apache 2.0/
+https://github.com/getodk/javarosa                  /Apache 2.0/
 modified from https://bitbucket.org/javarosa/javarosa/wiki/Home
 formerly at: https://bitbucket.org/m.sundt/javarosa/src/
     opendatakit-javarosa.2.3.0.jar

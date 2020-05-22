@@ -31,6 +31,6 @@ task dockerComposeBuild(dependsOn: [build, dockerComposeClean], type: Copy) {
     setPropertiesValue("${buildTarget}/webapps/ROOT/WEB-INF/classes/security.properties", "security.help.about", "auto-generated on 1970-01-01T00:00:00+0000 for ODK Aggregate")
     println ""
     println "Your Docker Compose build for Aggregate is in build/docker-compose."
-    println "Please, refer to https://github.com/opendatakit/aggregate/tree/master/docs/build-and-run-with-docker-compose.md for instructions."
+    println "Please, refer to https://github.com/getodk/aggregate/tree/master/docs/build-and-run-with-docker-compose.md for instructions."
   }
 }
