@@ -127,7 +127,7 @@ https://github.com/GoogleCloudPlatform/cloud-sql-mysql-socket-factory    /Apache
 	mysql-socket-factory-core-1.0.2.jar
 https://bitbucket.org/connect2id/oauth-2.0-sdk-with-openid-connect-extensions /Apache 2.0/
 	oauth2-oidc-sdk-5.18.1.jar
-https://opendatakit.org/                                 /Apache 2.0/
+https://getodk.org/                                 /Apache 2.0/
 at: https://github.com/getodk/aggregate-components
     odk-httpclient-gae-4.5.2-1.jar
     odk-tomcatutil-1.0.1.jar

@@ -19,10 +19,10 @@
   <enableRollback>0</enableRollback>
   <enableTimestamp>1</enableTimestamp>
   <height>500</height>
-  <productUrlInfoAbout>http://www.opendatakit.org</productUrlInfoAbout>
+  <productUrlInfoAbout>https://getodk.org</productUrlInfoAbout>
   <requestedExecutionLevel>asInvoker</requestedExecutionLevel>
   <saveRelativePaths>1</saveRelativePaths>
-  <vendor>ODK</vendor>
+  <vendor>Get ODK</vendor>
   <width>700</width>
   <windowsExecutableIcon>files/opendatakit.ico</windowsExecutableIcon>
   <windowsUninstallerExecutableIcon>files/opendatakit.ico</windowsUninstallerExecutableIcon>

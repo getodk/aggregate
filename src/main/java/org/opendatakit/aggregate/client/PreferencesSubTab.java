@@ -42,7 +42,7 @@ public class PreferencesSubTab extends AggregateSubTabBase {
   private static final String VERSION_STRING_STYLE = "app_version_string";
 
   private static final String GOOGLE_API_CREDENTIALS_LABEL = "<h2>Google API Credentials</h2>";
-  private static final String GOOGLE_API_CREDENTIALS_INFO = "<p>See <a href=\"http://opendatakit.org/use/aggregate/oauth2-service-account/\" target=\"_blank\">http://opendatakit.org/use/aggregate/oauth2-service-account/</a> for instructions on obtaining and supplying these values.</p>";
+  private static final String GOOGLE_API_CREDENTIALS_INFO = "<p>See <a href=\"https://docs.getodk.org/oauth2-service/\" target=\"_blank\">https://docs.getodk.org/oauth2-service/</a> for instructions on obtaining and supplying these values.</p>";
   private static final String GOOGLE_API_KEY_LABEL = "<h3>Simple API Access Key</h3>";
   private static final String GOOGLE_API_KEY_INFO = "<p>Recommended for accessing Google Maps.</p>";
   private static final String GOOGLE_API_CLIENT_ID_LABEL = "<h3>Google OAuth2 Credentials</h3>";

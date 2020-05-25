@@ -256,11 +256,11 @@ Follow the ODK Aggregate Tomcat Install instructions (link below) to make your c
       <parameterList>
         <linkParameter>
           <name>hostname_how_to</name>
-          <description>http://docs.getodk.org/aggregate-tomcat/#Configure_for_Network_Access</description>
+          <description>https://getodk.org/use/aggregate/tomcat-install/#Configure_for_Network_Access</description>
           <explanation></explanation>
           <clickedActionList>
             <launchBrowser>
-              <url>http://docs.getodk.org/aggregate-tomcat/#Configure_for_Network_Access</url>
+              <url>https://getodk.org/use/aggregate/tomcat-install/#Configure_for_Network_Access</url>
             </launchBrowser>
           </clickedActionList>
         </linkParameter>
