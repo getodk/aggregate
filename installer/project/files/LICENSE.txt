@@ -136,7 +136,7 @@ at: https://github.com/getodk/aggregate-components
 https://github.com/getodk/javarosa                  /Apache 2.0/
 modified from https://bitbucket.org/javarosa/javarosa/wiki/Home
 formerly at: https://bitbucket.org/m.sundt/javarosa/src/
-    opendatakit-javarosa.2.3.0.jar
+    javarosa.jar
 http://www.postgresql.org/   /Modified BSD / MIT Open Source License/
     postgresql-9.4.1211.jre7.jar
 http://www.slf4j.org/                                   /MIT License/
