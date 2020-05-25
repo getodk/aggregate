@@ -75,7 +75,7 @@ curl -H"Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata
 sed -i -e 's/foo\.bar/'"$(cat /tmp/domain-name)"'/' /root/aggregate-config.json
 sed -i -e 's/foo\.bar/'"$(cat /tmp/domain-name)"'/' /etc/nginx/sites-enabled/aggregate
 
-curl -sSL https://api.github.com/repos/opendatakit/aggregate-cli/releases/latest \
+curl -sSL https://api.github.com/repos/getodk/aggregate-cli/releases/latest \
 | grep "aggregate-cli.zip" \
 | cut -d: -f 2,3 \
 | tr -d \" \

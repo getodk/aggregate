@@ -71,7 +71,7 @@ public class ServiceAccountPrivateKeyUploadServlet extends ServletUtilBase {
           + " action=\"";// emit the ADDR
   private static final String UPLOAD_PAGE_BODY_MIDDLE_B4_API_KEY = "\" >"
       + "<div style=\"overflow: auto;\"><h2>Google API Credentials</h2>"
-      + "<p>Please refer to the documentation at <a href=\"http://opendatakit.org/use/aggregate/oauth2-service-account/\" target=\"_blank\">Service Account Configuration</a>.</p>"
+      + "<p>Please refer to the documentation at <a href=\"http://docs.getodk.org/oauth2-service/\" target=\"_blank\">Service Account Configuration</a>.</p>"
       + "<h2>Google Simple API Key</h2>"
       + "<p>Specifying a Simple API Key is recommended but not required for Google Maps visualizations.</p>"
       + "     <table id=\"uploadTable\">"

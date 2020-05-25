@@ -8,4 +8,4 @@ Closes #
 
 #### Do we need any specific form for testing your changes? If so, please attach one
 
-#### Does this change require updates to documentation? If so, please file an issue at https://github.com/opendatakit/docs/issues/new and include the link below.
+#### Does this change require updates to documentation? If so, please file an issue at https://github.com/getodk/docs/issues/new and include the link below.
