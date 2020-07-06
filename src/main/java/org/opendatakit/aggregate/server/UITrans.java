@@ -52,7 +52,7 @@ public final class UITrans {
 
   public static final Query.FilterOperation convertFilterOperation(FilterOperation op,
                                                                    Visibility visibility) {
-    return toPersistenceDisplay.get(op);
+    return visibility.equals(Visibility.DISPLAY) ? toPersistenceDisplay.get(op) : toPersistenceHide.get(op);
   }
 
 }
