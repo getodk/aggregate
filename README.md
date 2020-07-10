@@ -56,12 +56,12 @@ For more information see [here for Docker](docs/build-and-run-a-docker-image.md)
 
     (Linux and macOS)
     ```bash
-    sudo su postgres -c "psql -c \"CREATE ROLE aggregate WITH LOGIN PASSWORD 'aggregate'\""
-    sudo su postgres -c "psql -c \"CREATE DATABASE aggregate WITH OWNER aggregate\""
-    sudo su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE aggregate TO aggregate\""
-    sudo su postgres -c "psql -c \"CREATE SCHEMA aggregate\" aggregate"
-    sudo su postgres -c "psql -c \"ALTER SCHEMA aggregate OWNER TO aggregate\" aggregate"
-    sudo su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON SCHEMA aggregate TO aggregate\" aggregate"
+    sudo su - postgres -c "psql -c \"CREATE ROLE aggregate WITH LOGIN PASSWORD 'aggregate'\""
+    sudo su - postgres -c "psql -c \"CREATE DATABASE aggregate WITH OWNER aggregate\""
+    sudo su - postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE aggregate TO aggregate\""
+    sudo su - postgres -c "psql -c \"CREATE SCHEMA aggregate\" aggregate"
+    sudo su - postgres -c "psql -c \"ALTER SCHEMA aggregate OWNER TO aggregate\" aggregate"
+    sudo su - postgres -c "psql -c \"GRANT ALL PRIVILEGES ON SCHEMA aggregate TO aggregate\" aggregate"
     ```
 
     (Windows)

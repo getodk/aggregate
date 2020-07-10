@@ -49,15 +49,14 @@ apt-get -y install \
 
 apt-get -y remove openjdk-11-jre-headless
 
-unattended-upgrades
 apt-get -y autoremove
 
-su postgres -c "psql -c \"CREATE ROLE aggregate WITH LOGIN PASSWORD 'aggregate'\""
-su postgres -c "psql -c \"CREATE DATABASE aggregate WITH OWNER aggregate\""
-su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE aggregate TO aggregate\""
-su postgres -c "psql -c \"CREATE SCHEMA aggregate\" aggregate"
-su postgres -c "psql -c \"ALTER SCHEMA aggregate OWNER TO aggregate\" aggregate"
-su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON SCHEMA aggregate TO aggregate\" aggregate"
+su - postgres -c "psql -c \"CREATE ROLE aggregate WITH LOGIN PASSWORD 'aggregate'\""
+su - postgres -c "psql -c \"CREATE DATABASE aggregate WITH OWNER aggregate\""
+su - postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE aggregate TO aggregate\""
+su - postgres -c "psql -c \"CREATE SCHEMA aggregate\" aggregate"
+su - postgres -c "psql -c \"ALTER SCHEMA aggregate OWNER TO aggregate\" aggregate"
+su - postgres -c "psql -c \"GRANT ALL PRIVILEGES ON SCHEMA aggregate TO aggregate\" aggregate"
 
 rm /etc/nginx/sites-enabled/default
 cat << EOF > /etc/nginx/sites-enabled/aggregate
