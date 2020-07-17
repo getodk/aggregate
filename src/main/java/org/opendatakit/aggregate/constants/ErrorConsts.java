@@ -42,7 +42,11 @@ public final class ErrorConsts {
   /**
    * Error message if the FORM ID in the form already exists
    */
-  public static final String FORM_WITH_ODKID_EXISTS = "Form Already Exists for this Namespace/Id attribute";
+  public static final String FORM_WITH_ODKID_EXISTS = "Form versions are sorted alphabetically. For example, version 10 sorts before version 2 because the left-most character is used to sort.\n"
+          + "Please update the form version and resubmit.\n"
+          + "We recommend using 10-digit version numbers that use the current"
+          + " date and a count. For example, for the second form on May 5th, "
+          + "2024, use 2024050502\n";
 
   /**
    * Error message if responseURL returns null
