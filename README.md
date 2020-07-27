@@ -4,6 +4,9 @@
 [![Build status](https://circleci.com/gh/getodk/aggregate.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/getodk/aggregate)
 [![Slack status](http://slack.getodk.org/badge.svg)](http://slack.getodk.org)
 
+## ⚠️ Aggregate is no longer actively developed ⚠️
+The recommended ODK server is now [ODK Central](https://docs.getodk.org/central-intro/). Central is fast, actively-developed, and addresses many of the issues that users have had with Aggregate over the years. Fixes and small improvements to Aggregate are welcome, but please discuss in an issue or [on the forum](https://forum.getodk.org/c/development/5) first to make sure that a reviewer will be available.
+
 ODK Aggregate provides a ready-to-deploy server and database to:
 
 - provide blank forms to ODK Collect (or other OpenRosa clients)
