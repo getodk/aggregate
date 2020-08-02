@@ -67,7 +67,7 @@ def versions = [
     gson          : '2.8.0',
     kxml2         : '2.3.0',
     odk           : [
-        javarosa: '2.17.0'
+        javarosa: '2.17.2'
     ],
     jdbc          : [
         mysql     : '5.1.44',
@@ -126,7 +126,7 @@ dependencies {
   compile group: 'com.google.apis', name: 'google-api-services-drive', version: versions.googleApi.drive
   compile group: 'com.google.code.gson', name: 'gson', version: versions.gson
   compile group: 'net.sf.kxml', name: 'kxml2', version: versions.kxml2
-  compile group: 'org.opendatakit', name: 'opendatakit-javarosa', version: versions.odk.javarosa
+  compile group: 'org.getodk', name: 'javarosa', version: versions.odk.javarosa
   compile group: 'mysql', name: 'mysql-connector-java', version: versions.jdbc.mysql
   compile group: 'org.postgresql', name: 'postgresql', version: versions.jdbc.postgresql
   compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: versions.servletApi

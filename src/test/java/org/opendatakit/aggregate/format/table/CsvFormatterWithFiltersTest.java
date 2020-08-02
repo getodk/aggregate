@@ -49,7 +49,7 @@ public class CsvFormatterWithFiltersTest {
         (CallingContext)any())).thenReturn(row);
     subs.add(s);
 
-    csv = new CsvFormatterWithFilters(form, "http://opendatakit.org", pr, null);
+    csv = new CsvFormatterWithFilters(form, "https://getodk.org", pr, null);
   }
 
   @Test

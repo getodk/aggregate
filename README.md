@@ -2,7 +2,7 @@
 ![Platform](https://img.shields.io/badge/platform-Java-blue.svg)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Build status](https://circleci.com/gh/getodk/aggregate.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/getodk/aggregate)
-[![Slack status](http://slack.getodk.org/badge.svg)](http://slack.getodk.org)
+[![Slack](https://img.shields.io/badge/chat-on%20slack-brightgreen)](https://slack.getodk.org)
 
 ## ⚠️ Aggregate is no longer actively developed ⚠️
 The recommended ODK server is now [ODK Central](https://docs.getodk.org/central-intro/). Central is fast, actively-developed, and addresses many of the issues that users have had with Aggregate over the years. Fixes and small improvements to Aggregate are welcome, but please discuss in an issue or [on the forum](https://forum.getodk.org/c/development/5) first to make sure that a reviewer will be available.
@@ -20,7 +20,7 @@ ODK Aggregate can be deployed on an Apache Tomcat server, or any servlet 2.5-com
 * ODK website: [https://getodk.org](https://getodk.org)
 * ODK Aggregate usage instructions: [https://docs.getodk.org/aggregate-intro/](https://docs.getodk.org/aggregate-intro/)
 * ODK forum: [https://forum.getodk.org](https://forum.getodk.org)
-* ODK developer Slack chat: [http://slack.getodk.org](http://slack.getodk.org)
+* ODK developer Slack chat: [https://slack.getodk.org](https://slack.getodk.org) 
 
 ## Getting the code
 
