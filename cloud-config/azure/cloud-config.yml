@@ -66,7 +66,6 @@ write_files:
 runcmd:
   - download-aggregate-cli
 
-  - unattended-upgrades
   - apt-get -y autoremove
 
   - rm /etc/nginx/sites-enabled/default
@@ -78,12 +77,12 @@ runcmd:
   - apt-get -y install python-certbot-nginx
   - (crontab -l 2>/dev/null; echo "0 0 1 * * /usr/bin/certbot renew > /var/log/letsencrypt/letsencrypt.log") | crontab -
 
-  - su postgres -c "psql -c \"CREATE ROLE aggregate WITH LOGIN PASSWORD 'aggregate'\""
-  - su postgres -c "psql -c \"CREATE DATABASE aggregate WITH OWNER aggregate\""
-  - su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE aggregate TO aggregate\""
-  - su postgres -c "psql -c \"CREATE SCHEMA aggregate\" aggregate"
-  - su postgres -c "psql -c \"ALTER SCHEMA aggregate OWNER TO aggregate\" aggregate"
-  - su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON SCHEMA aggregate TO aggregate\" aggregate"
+  - su - postgres -c "psql -c \"CREATE ROLE aggregate WITH LOGIN PASSWORD 'aggregate'\""
+  - su - postgres -c "psql -c \"CREATE DATABASE aggregate WITH OWNER aggregate\""
+  - su - postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE aggregate TO aggregate\""
+  - su - postgres -c "psql -c \"CREATE SCHEMA aggregate\" aggregate"
+  - su - postgres -c "psql -c \"ALTER SCHEMA aggregate OWNER TO aggregate\" aggregate"
+  - su - postgres -c "psql -c \"GRANT ALL PRIVILEGES ON SCHEMA aggregate TO aggregate\" aggregate"
 
   - curl -H Metadata:true "http://169.254.169.254/metadata/instance/compute/tags?api-version=2017-08-01&format=text" | awk -F':' '{print $2}' > /tmp/domain-name
   - sed -i -e 's/foo\.bar/'"$(cat /tmp/domain-name)"'/' /root/aggregate-config.json

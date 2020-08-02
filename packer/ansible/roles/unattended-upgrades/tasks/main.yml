@@ -4,6 +4,3 @@
   apt:
     pkg: unattended-upgrades
     state: installed
-
-- name: run security-updates
-  command: unattended-upgrades -v

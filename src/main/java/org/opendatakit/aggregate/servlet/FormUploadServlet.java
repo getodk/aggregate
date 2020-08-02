@@ -325,8 +325,7 @@ public class FormUploadServlet extends ServletUtilBase {
 
       } catch (ODKFormAlreadyExistsException e) {
         logger.info("Form already exists: " + e.toString());
-        resp.sendError(HttpServletResponse.SC_CONFLICT, ErrorConsts.FORM_WITH_ODKID_EXISTS + "\n"
-            + e.toString());
+        resp.sendError(HttpServletResponse.SC_CONFLICT, ErrorConsts.FORM_WITH_ODKID_EXISTS + "\n");
       } catch (ODKIncompleteSubmissionData e) {
         logger.warn("Form upload parsing error: " + e.toString());
         switch (e.getReason()) {

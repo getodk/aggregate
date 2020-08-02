@@ -67,7 +67,6 @@ runcmd:
   - download-aggregate-cli
 
   - apt-get -y remove openjdk-11-jre-headless
-  - unattended-upgrades
   - apt-get -y autoremove
 
   - rm /etc/nginx/sites-enabled/default
@@ -79,12 +78,12 @@ runcmd:
   - apt-get -y install python-certbot-nginx
   - (crontab -l 2>/dev/null; echo "0 0 1 * * /usr/bin/certbot renew > /var/log/letsencrypt/letsencrypt.log") | crontab -
 
-  - su postgres -c "psql -c \"CREATE ROLE aggregate WITH LOGIN PASSWORD 'aggregate'\""
-  - su postgres -c "psql -c \"CREATE DATABASE aggregate WITH OWNER aggregate\""
-  - su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE aggregate TO aggregate\""
-  - su postgres -c "psql -c \"CREATE SCHEMA aggregate\" aggregate"
-  - su postgres -c "psql -c \"ALTER SCHEMA aggregate OWNER TO aggregate\" aggregate"
-  - su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON SCHEMA aggregate TO aggregate\" aggregate"
+  - su - postgres -c "psql -c \"CREATE ROLE aggregate WITH LOGIN PASSWORD 'aggregate'\""
+  - su - postgres -c "psql -c \"CREATE DATABASE aggregate WITH OWNER aggregate\""
+  - su - postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE aggregate TO aggregate\""
+  - su - postgres -c "psql -c \"CREATE SCHEMA aggregate\" aggregate"
+  - su - postgres -c "psql -c \"ALTER SCHEMA aggregate OWNER TO aggregate\" aggregate"
+  - su - postgres -c "psql -c \"GRANT ALL PRIVILEGES ON SCHEMA aggregate TO aggregate\" aggregate"
 
   - sed -i -e 's/foo\.bar/'"$(curl -s http://169.254.169.254/metadata/v1/hostname)"'/' /root/aggregate-config.json
   - sed -i -e 's/foo\.bar/'"$(curl -s http://169.254.169.254/metadata/v1/hostname)"'/' /etc/nginx/sites-enabled/aggregate

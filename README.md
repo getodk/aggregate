@@ -3,7 +3,10 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Build status](https://circleci.com/gh/getodk/aggregate.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/getodk/aggregate)
 [![Slack](https://img.shields.io/badge/chat-on%20slack-brightgreen)](https://slack.getodk.org)
- 
+
+## ⚠️ Aggregate is no longer actively developed ⚠️
+The recommended ODK server is now [ODK Central](https://docs.getodk.org/central-intro/). Central is fast, actively-developed, and addresses many of the issues that users have had with Aggregate over the years. Fixes and small improvements to Aggregate are welcome, but please discuss in an issue or [on the forum](https://forum.getodk.org/c/development/5) first to make sure that a reviewer will be available.
+
 ODK Aggregate provides a ready-to-deploy server and database to:
 
 - provide blank forms to ODK Collect (or other OpenRosa clients)
@@ -56,12 +59,12 @@ For more information see [here for Docker](docs/build-and-run-a-docker-image.md)
 
     (Linux and macOS)
     ```bash
-    sudo su postgres -c "psql -c \"CREATE ROLE aggregate WITH LOGIN PASSWORD 'aggregate'\""
-    sudo su postgres -c "psql -c \"CREATE DATABASE aggregate WITH OWNER aggregate\""
-    sudo su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE aggregate TO aggregate\""
-    sudo su postgres -c "psql -c \"CREATE SCHEMA aggregate\" aggregate"
-    sudo su postgres -c "psql -c \"ALTER SCHEMA aggregate OWNER TO aggregate\" aggregate"
-    sudo su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON SCHEMA aggregate TO aggregate\" aggregate"
+    sudo su - postgres -c "psql -c \"CREATE ROLE aggregate WITH LOGIN PASSWORD 'aggregate'\""
+    sudo su - postgres -c "psql -c \"CREATE DATABASE aggregate WITH OWNER aggregate\""
+    sudo su - postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE aggregate TO aggregate\""
+    sudo su - postgres -c "psql -c \"CREATE SCHEMA aggregate\" aggregate"
+    sudo su - postgres -c "psql -c \"ALTER SCHEMA aggregate OWNER TO aggregate\" aggregate"
+    sudo su - postgres -c "psql -c \"GRANT ALL PRIVILEGES ON SCHEMA aggregate TO aggregate\" aggregate"
     ```
 
     (Windows)
