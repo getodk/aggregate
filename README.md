@@ -1,6 +1,4 @@
-# ⚠️ ODK Aggregate is not actively maintained ⚠️
-
-We are no longer doing active maintenance on ODK Aggregate. The recommended replacement is [ODK Central](https://github.com/getodk/central). Central is fast, actively-developed, and addresses many of the issues that users have had with Aggregate over the years. Fixes and small improvements to Aggregate are welcome, but please discuss in an issue or [on the forum](https://forum.getodk.org/c/development/5) first to make sure that a reviewer will be available.
+## ⚠️ ODK Aggregate is no longer being updated. Please use [ODK Central](https://github.com/getodk/central) instead. ⚠️
 
 ## Overview
 ![Platform](https://img.shields.io/badge/platform-Java-blue.svg)
